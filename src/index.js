@@ -1,4 +1,4 @@
-onst MAX_BODY_BYTES = 12 * 1024 * 1024;
+const MAX_BODY_BYTES = 12 * 1024 * 1024;
 const MAX_TEXT = 12_000;
 const JWKS_CACHE = new Map();
 const DEFAULT_LIMIT = 40;
