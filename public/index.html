@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#101114"><title>Nyx — Personal AI</title>
+<style>
+:root{color-scheme:dark;--bg:#101114;--panel:#191a20;--panel2:#22232b;--line:#30313b;--text:#f1f1f5;--muted:#a7a8b5;--accent:#b7a5ff;--accent2:#8c77e8;--good:#8bd6b0;--bad:#ff9eaa}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 system-ui,-apple-system,Segoe UI,sans-serif}button,input,textarea,select{font:inherit}button{cursor:pointer;border:1px solid var(--line);border-radius:12px;background:var(--panel2);color:var(--text);padding:10px 14px}button:hover{border-color:var(--accent)}button.primary{background:var(--accent2);border-color:var(--accent2);color:#fff}button:disabled{opacity:.5;cursor:wait}.app{display:grid;grid-template-columns:260px 1fr;min-height:100vh}.sidebar{border-right:1px solid var(--line);padding:18px 14px;background:#14151a;display:flex;flex-direction:column;gap:12px}.brand{display:flex;align-items:center;gap:10px;padding:8px 10px 16px;font-weight:750;font-size:20px}.orb{width:30px;height:30px;border-radius:10px;background:linear-gradient(135deg,#d5c7ff,#6c5acb);box-shadow:0 0 24px #8c77e855}.nav{display:grid;gap:6px}.nav button{text-align:left;background:transparent;border-color:transparent;color:var(--muted)}.nav button.active,.nav button:hover{background:var(--panel2);color:var(--text)}.side-note{margin-top:auto;color:var(--muted);font-size:12px;padding:12px;border:1px solid var(--line);border-radius:12px}.main{min-width:0;display:flex;flex-direction:column;min-height:100vh}.top{height:64px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 22px;gap:10px}.top small{color:var(--muted)}.content{width:min(920px,100%);margin:0 auto;padding:24px 22px 150px;flex:1}.hero{padding:28px 0 18px}.hero h1{font-size:clamp(26px,4vw,38px);letter-spacing:-1px;margin:0 0 8px}.hero p{color:var(--muted);margin:0}.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:20px 0}.card{border:1px solid var(--line);border-radius:16px;padding:16px;background:var(--panel)}.card h3{margin:0 0 6px;font-size:16px}.card p{margin:0;color:var(--muted);font-size:13px}.chat{display:grid;gap:18px}.msg{display:grid;grid-template-columns:34px 1fr;gap:12px;align-items:start}.avatar{width:32px;height:32px;border-radius:11px;display:grid;place-items:center;background:var(--panel2);font-weight:700}.msg.user .avatar{background:#3b355b}.bubble{white-space:pre-wrap;overflow-wrap:anywhere;padding:3px 0}.bubble img{max-width:min(100%,560px);display:block;border-radius:14px;margin:12px 0}.bubble a{color:var(--accent)}.composer-wrap{position:fixed;bottom:0;left:260px;right:0;padding:18px 22px 12px;background:linear-gradient(transparent,var(--bg) 20%);z-index:5}.composer{width:min(920px,100%);margin:auto;background:var(--panel);border:1px solid #454653;border-radius:18px;padding:10px;box-shadow:0 12px 45px #0005}.composer textarea{width:100%;resize:vertical;min-height:52px;max-height:180px;border:0;outline:0;background:transparent;color:var(--text);padding:8px}.composer-foot{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}.muted{color:var(--muted);font-size:12px}.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;margin:14px 0}.field{display:grid;gap:7px;margin:12px 0}.field label{font-size:13px;color:var(--muted)}input,textarea,select{background:#101116;color:var(--text);border:1px solid var(--line);border-radius:10px;padding:10px;width:100%;outline-color:var(--accent)}.list{display:grid;gap:8px}.item{padding:12px;border:1px solid var(--line);border-radius:12px;display:flex;gap:10px;align-items:flex-start;justify-content:space-between}.item small{display:block;color:var(--muted)}.item .body{min-width:0;flex:1;overflow-wrap:anywhere}.status{font-size:12px;color:var(--muted)}.status.ok{color:var(--good)}.status.bad{color:var(--bad)}.hidden{display:none!important}.attachment{font-size:12px;color:var(--accent);padding:4px 0}.pill{border:1px solid var(--line);border-radius:999px;padding:4px 9px;color:var(--muted);font-size:11px}.toast{position:fixed;top:76px;right:18px;background:var(--panel2);border:1px solid var(--line);padding:12px 16px;border-radius:12px;z-index:20;max-width:320px}.hamb{display:none}
+@media(max-width:760px){.app{grid-template-columns:1fr}.sidebar{display:none;position:fixed;z-index:10;inset:0 auto 0 0;width:260px;box-shadow:20px 0 50px #0008}.sidebar.open{display:flex}.hamb{display:inline-block}.top{padding:0 14px}.content{padding:16px 14px 150px}.composer-wrap{left:0;padding:12px 10px 9px}.cards{grid-template-columns:1fr}.hero{padding-top:16px}.top small{display:none}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar" id="sidebar">
+<div class="brand"><span class="orb"></span> Nyx <span class="pill">Personal AI</span></div>
+<div class="nav">
+<button class="active" data-page="chat">✦ New chat</button>
+<button data-page="memory">◈ Memory</button>
+<button data-page="tasks">☷ Tasks</button>
+<button data-page="studio">✧ Image Studio</button>
+<button data-page="documents">▤ Documents</button>
+<button data-page="settings">⚙ Settings</button>
+</div>
+<div class="side-note"><b>Nyx Brain</b><br>Reasoning protocols · Memory context · Tool-assisted workflows<br><br><span id="apiStatus" class="status">Checking AI configuration…</span></div>
+</aside>
+<main class="main">
+<header class="top"><div class="row"><button class="hamb" id="menuBtn">☰</button><b id="pageTitle">New chat</b></div><div class="row"><small id="provider">Cloudflare · Gemini API</small><button id="newChatBtn">＋ New</button></div></header>
+<section class="content">
+<div id="page-chat">
+<div class="hero" id="hero"><h1>What are we solving today?</h1><p>Think clearly. Build carefully. Verify what matters.</p></div>
+<div class="cards" id="suggestions">
+<button class="card" data-prompt="Help me solve a complex problem. Break it into steps, compare options, and check your answer."><h3>🧠 Think deeply</h3><p>Plan, analyze, and double-check a difficult problem.</p></button>
+<button class="card" data-prompt="Help me create an image. Ask only if a key visual detail is missing."><h3>🎨 Create an image</h3><p>Generate artwork from a description.</p></button>
+<button class="card" data-prompt="Help me organize my tasks into priorities and practical next steps."><h3>☷ Organize my work</h3><p>Turn goals into actionable steps.</p></button>
+<button class="card" data-prompt="Explain this topic carefully, separating established facts from uncertainty."><h3>✦ Learn something</h3><p>Clear explanations without pretending to know everything.</p></button>
+</div>
+<div class="panel" id="historyPanel"><h3>Recent chats</h3><div class="list" id="historyList"></div></div><div id="chat" class="chat"></div>
+</div>
+<div id="page-memory" class="hidden">
+<div class="hero"><h1>Memory</h1><p>Useful details Nyx can use in future chats, saved to your secured account.</p></div>
+<div class="panel"><div class="field"><label>Save a memory</label><textarea id="memoryText" rows="3" placeholder="A stable preference, project detail, or decision…"></textarea></div><button class="primary" id="saveMemory">Save memory</button><p class="muted">Memories are stored in the secured D1 database and scoped to your verified Cloudflare Access identity.</p></div>
+<div class="list" id="memoryList"></div>
+</div>
+<div id="page-tasks" class="hidden">
+<div class="hero"><h1>Tasks</h1><p>Track work across sessions with account-scoped storage.</p></div>
+<div class="panel"><div class="field"><label>Task</label><input id="taskText" placeholder="What needs to get done?"></div><div class="row"><button class="primary" id="addTask">Add task</button><button id="askPriorities">Ask Nyx to prioritize</button></div></div>
+<div class="list" id="taskList"></div>
+</div>
+<div id="page-studio" class="hidden">
+<div class="hero"><h1>Image Studio</h1><p>Real image generation through the configured Gemini image model, if your API key has access.</p></div>
+<div class="panel"><div class="field"><label>Describe your image</label><textarea id="imagePrompt" rows="4" placeholder="A cinematic 3D scene… Include subject, style, composition, lighting, and aspect ratio."></textarea></div><div class="field"><label>Style (optional)</label><input id="imageStyle" placeholder="Photorealistic, cinematic 3D, watercolor…"></div><button class="primary" id="generateImage">Generate image</button><div id="imageResult"></div><p class="muted">Generation can fail if the model is unavailable to your API key or your quota is exhausted.</p></div>
+</div>
+<div id="page-documents" class="hidden">
+<div class="hero"><h1>Images & documents</h1><p>Analyze an image or extract text from a PDF for AI analysis.</p></div>
+<div class="panel"><h3>Analyze an image</h3><div class="field"><label>Choose image</label><input type="file" id="analysisImage" accept="image/png,image/jpeg,image/webp"></div><div class="field"><label>Question</label><textarea id="imageQuestion" rows="2" placeholder="What should Nyx inspect or explain?"></textarea></div><button class="primary" id="analyzeImage">Analyze image</button><div id="analysisImageResult"></div></div>
+<div class="panel"><h3>Analyze a PDF</h3><div class="field"><label>Choose PDF</label><input type="file" id="pdfFile" accept="application/pdf,.pdf"></div><div class="field"><label>What do you want to know?</label><textarea id="pdfQuestion" rows="2" placeholder="Summarize it, find key terms, answer questions…"></textarea></div><button class="primary" id="analyzePdf">Extract and analyze PDF</button><div id="pdfResult"></div><p class="muted">This uses PDF.js in the browser to extract text. Scanned/image-only PDFs use Gemini-assisted OCR on the first five pages.</p></div>
+<div class="panel"><h3>Create a simple text PDF</h3><div class="field"><label>Document title</label><input id="pdfTitle" placeholder="My document"></div><div class="field"><label>Content</label><textarea id="pdfContent" rows="5" placeholder="Write or paste the content to export…"></textarea></div><button id="makeTextFile">Export as text file</button><p class="muted">Creates a basic downloadable PDF. Text outside standard ASCII is simplified in this first version.</p></div>
+</div>
+<div id="page-settings" class="hidden">
+<div class="hero"><h1>Settings</h1><p>Configure how Nyx responds. Settings are stored in your secured account.</p></div>
+<div class="panel"><div class="field"><label>Custom instructions</label><textarea id="customInstructions" rows="6" placeholder="How should Nyx work with you? What preferences or constraints should it follow?"></textarea></div><div class="field"><label>Reasoning mode</label><select id="thinkingMode"><option value="normal">Balanced</option><option value="deep">Deep problem-solving</option></select></div><div class="row"><button class="primary" id="saveSettings">Save settings</button><button id="exportData">Export Nyx data</button><button id="importData">Import Nyx data</button><input id="importFile" class="hidden" type="file" accept="application/json,.json"><button id="clearData">Clear data</button></div><div class="status" id="settingsStatus"></div></div>
+<div class="panel"><h3>Capabilities status</h3><div id="capabilityStatus" class="list"></div></div>
+<div class="panel"><h3>Honest limitations</h3><p class="muted">Nyx's reasoning quality depends on the selected model and supplied context. Live web search and external app connectors are not enabled in this candidate. Cloud state requires Cloudflare Access and a configured D1 database. Never put your Gemini API key in this website's code.</p></div>
+</div>
+</section>
+<div class="composer-wrap" id="composerWrap">
+<div class="composer"><div class="attachment" id="attachmentLabel"></div><textarea id="message" rows="2" placeholder="Message Nyx… (Enter to send, Shift+Enter for new line)"></textarea><div class="composer-foot"><div class="row"><button id="attachBtn">＋ Attach image</button><input class="hidden" type="file" id="chatImage" accept="image/png,image/jpeg,image/webp"><button id="deepBtn">◎ Deep mode: Off</button><button id="voiceBtn" title="Dictate a message">🎙 Voice</button><button id="speakBtn" title="Read the last answer aloud">🔊 Read aloud</button><span class="muted">Memories included when relevant</span></div><button class="primary" id="sendBtn">Send ↑</button></div></div><div class="muted" style="text-align:center;padding-top:7px">Nyx can make mistakes. Verify important information.</div>
+</div>
+</main>
+</div>
+<div id="toast" class="toast hidden"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="/app.js" defer></script>
+</body></html>
