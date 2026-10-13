@@ -1,0 +1,16 @@
+{
+  "name": "chatgpt-nyx-cloudflare-candidate",
+  "version": "3.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "node --check src/index.js && node --check public/app.js && node --check tests/run.mjs",
+    "test": "node tests/run.mjs",
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "db:local": "wrangler d1 migrations apply chatgpt-nyx-test-db --local"
+  },
+  "devDependencies": {
+    "wrangler": "4.40.0"
+  }
+}

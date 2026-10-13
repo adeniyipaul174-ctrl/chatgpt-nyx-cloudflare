@@ -1,0 +1,27 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "chatgpt-nyx-v3-test",
+  "main": "src/index.js",
+  "compatibility_date": "2026-09-01",
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api/*", "/health"]
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "chatgpt-nyx-v3-test-db",
+      "database_id": "45d9f7c9-91f2-4767-990e-4bb49395a8f4",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "vars": {
+    "NYX_TEXT_MODEL": "gemini-3.8-flash",
+    "NYX_IMAGE_MODEL": "gemini-3.1-flash-image",
+    "NYX_ALLOWED_ORIGINS": "",
+    "NYX_DAILY_REQUEST_LIMIT": "100",
+    "NYX_PER_MINUTE_REQUEST_LIMIT": "10",
+    "LOG_ERRORS": "false"
+  }
+}
