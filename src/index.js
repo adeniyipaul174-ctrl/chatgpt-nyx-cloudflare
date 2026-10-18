@@ -205,7 +205,7 @@ async function chat(body, env, user) {
   const query = String(messages.at(-1).content).slice(0,MAX_TEXT);
   const context = await loadContext(env,user.userId,query);
   const route = body.webSearch === true || (body.webSearch !== false && requiresLiveSearch(query)) ? "live_research" : routeTask(query);
-  const research = route === "live_research" ? await searchLiveWeb(query) : null;
+  const research = route === "live_research" ? await searchLiveWeb(query,{searxngBaseUrl:env.NYX_SEARXNG_BASE_URL}) : null;
   const sources = research?.results || [];
   const pages = sources.length ? await readSearchPages(sources) : [];
   const researched = research ? (sources.length
