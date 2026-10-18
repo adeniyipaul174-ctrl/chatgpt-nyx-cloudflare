@@ -2603,39 +2603,72 @@ function nxFactualSearchQuery(message){
  }
  return nxResearchQuery(text);
 }
-async function nyxDecide(env,text,auto,history){
- if(!auto){const explicit=nyxFallbackIntent(text);return explicit.action==="search"||explicit.action==="browse"?explicit:nxNamedFactualLookup(text)?{action:"search"}:{action:"chat"};}
- const s=String(text||"").trim();
- const context=nyxFollowupIntent(history,s);
- if(context)return context;
- const definite=nyxFallbackIntent(s);
- if(definite.action!=="chat")return definite;
- if(nxNamedFactualLookup(s))return {action:"search"};
- if(/\b(find|recommend|compare|list|show)\b[\s\S]{0,120}\b(free (?:ai |language )?models|hosting services|cloud platforms|open.source (?:ai|tools|software)|github repositories|recent releases)\b/i.test(s))return {action:"search"};
- if(nyxFreshInformationNeed(s)||nyxExtraFreshNeed(s))return {action:"search"};
- if(/^(?:hi|hello|hey|good morning|good evening|thanks|thank you|write|draft|rewrite|translate|brainstorm|explain|summarize|make me a list|tell me a joke|calculate)\b/i.test(s))return {action:"chat"};
- /* NyX Resource Manager: skip AI classification for ambiguous prompts; explicit routes above still work. */
- return {action:"chat"};
- if(!env.AI)return {action:"chat"};
+
+/* NyX auto-research decision: public facts across subjects, not named authors only. */
+function nxPublicFactQuestion(input){
+ const q=String(input||"").trim();
+ if(!q||q.length>1700)return false;
+ if(/\b(?:my|our)\s+(?:password|passcode|account|bank(?:ing)?|debit|credit card|phone number|email|address|location|friend|family|mother|father|sister|brother|colleague|private|personal|medical|health|symptom|record|tax|salary|login|pin|verification|secret|conversation|messages)\b/i.test(q))return false;
+ if(/(?:password|api key|secret token|otp|verification code)\s*[:=]/i.test(q))return false;
+ if(/^(?:i (?:have|am|feel)|i'm |my |our |tell me what you think|what do you think|how are you|how's your day|can you help me|hello|hi\b|hey\b|good morning|good evening|thanks|thank you|bye\b|goodnight)\b/i.test(q))return false;
+ if(/^(?:write|draft|rewrite|rephrase|proofread|translate|summarize|compose|create|design|generate|draw|sketch|paint|roleplay|pretend|imagine|brainstorm|calculate|solve|code|debug|format|edit)\b/i.test(q))return false;
+ if(/^(?:please\s+)?(?:explain|teach|help me understand|walk me through)\b/i.test(q)&&!/\b(?:latest|current|today|recent|2026|pricing|price|update|release|version)\b/i.test(q))return false;
+ return /^(?:who|whose|whos|who's|what|what's|where|when|which|why|how|is|are|was|were|did|does|do|can|could|has|have|tell me|find|check|give me|show me|identify|list|compare|recommend|suggest|information about|biography of|books by|author of|reviews of)\b/i.test(q)
+   || /\b(?:author|book|novel|writer|publisher|brand|company|product|business|university|school|restaurant|hotel|research|study|release|service|software|model|api|repository|news|price|cost|specification|rating|review|policy|law)\b/i.test(q)
+   || /^(?:[A-Z][a-z]+\s+){1,3}[A-Z][a-z]+[?.!]?$/u.test(q);
+}
+function nxWebRouteSignal(input){
+ const q=String(input||"").trim();
+ if(!nxPublicFactQuestion(q))return "chat";
+ if(/\b(?:what if|imaginary|fictional|in a story|invent a|write me|make up|hypothetically|pretend)\b/i.test(q))return "chat";
+ if(nyxFreshInformationNeed(q)||nyxExtraFreshNeed(q))return "search";
+ if(/\b(?:latest|newest|updated|current|currently|recent|recently|today|this week|this month|this year|right now|2026|available now|still free|still active|in stock|open now|breaking|live|last night|tomorrow)\b/i.test(q)
+  &&/\b(?:is|are|was|were|who|what|which|where|when|how|price|cost|can|does|do|find|show|list|any|information|release|version|model|software|company|president|event|service)\b/i.test(q))return "search";
+ if(nxNamedFactualLookup(q))return "search";
+ if(/^(?:who|what|which|where|when|whose|how (?:much|many|old|long|far)|tell me about|find|identify|is there|are there)\b[\s\S]{0,170}\b(?:author|writer|book|novel|published|release|version|founded|founder|company|publisher|university|college|school|restaurant|hotel|place|business|app|software|ai model|llm|api|product|brand|processor|phone|price|cost|fees?|ratings?|reviews?|results?|statistics|population|revenue|sales|award|event|meeting|concert|conference|study|research|patent|policy|law|legislation|election|sports?|score|website|contact|address|opening|available|features|specs|specification)\b/i.test(q))return "search";
+ if(/\b(?:where (?:can|do|does|is|are)|how (?:can|do|much|many|far)|what(?:'s| is| are) the)\b[\s\S]{0,130}\b(?:buy|purchase|download|subscribe|contact|find|visit|stream|watch|book|reserve|price|cost|rate|value|fee|release|schedule|availability|location|address|website|source|email|official|close|open)\b/i.test(q))return "search";
+ if(/^(?:what(?:'s| is)?\s+time|when)\b[\s\S]{0,110}\b(?:open|close|start|end|begin|finish)\b/i.test(q))return "search";
+ if(/\b(?:near me|nearby|in my area|close to me|around here|near the)\b/i.test(q)&&/\b(?:cafes?|restaurants?|shops?|hotels?|services?|stores?|universities|schools?|hospitals?|doctors?|gyms?|parks?|open|available|where|which|are there)\b/i.test(q))return "search";
+ if(/^(?:compare|recommend|suggest|rank|list|find|show|give me)\b[\s\S]{0,130}\b(?:products?|phones?|laptops?|tools?|apps?|services?|models?|apis?|websites?|repos?|repositories|providers?|brands?|companies|businesses|restaurants|hotels|courses|schools|universities)\b/i.test(q))return "search";
+ if(/^(?:is|are|does|do|can)\b[\s\S]{0,120}\b(?:free|available|supported|in stock|open now|released|discontinued|legitimate|compatible|offered)\b/i.test(q)
+  &&/\b[A-Z][a-zA-Z0-9.+-]+(?:\s+[A-Z][a-zA-Z0-9.+-]+)*\b/.test(q))return "search";
+ if(/^(?:who|whose|who's|whos|when|where|which)\b/i.test(q))return "search";
+ if(/^(?:how much|how many|what (?:year|date|price|cost|version|model|brand|company|book|author|country|population|number|name|score|rank|rating|result))\b/i.test(q))return "search";
+ return "decide";
+}
+async function nxChooseWebNeed(env,text,history){
+ const signal=nxWebRouteSignal(text);
+ if(signal!=="decide")return signal;
+ if(!env?.AI)return nxPublicFactQuestion(text)?"search":"chat";
+ const context=(Array.isArray(history)?history.slice(-4,-1):[]).map(m=>String(m?.role||"")+": "+String(m?.content||"").slice(0,140)).join("\n");
+ const instruction="Decide whether the user asks for independently verifiable external facts. Reply ONE WORD: SEARCH or CHAT. SEARCH for obscure or possibly unfamiliar public people, books, companies, software, products, niche facts, regulations, institutions, opening times, prices, versions, availability, statistics, location-specific services, comparisons needing up-to-date evidence, and facts you cannot confidently know. Even without an explicit request to search, choose SEARCH when uncertain. CHAT for normal conversation, writing, creativity, translation, user-provided text, math, timeless basic educational explanation, or questions about someone's private information. Do not answer the question.";
  try{
-  const window=(Array.isArray(history)?history.slice(-5,-1):[])
-   .map(m=>(m.role==="assistant"?"Assistant ["+String(m.kind||"text")+"]": "User")+": "+String(m.content||"").slice(0,130))
-   .join("\n");
-  const out=await env.AI.run("@cf/meta/llama-3.1-8b-instruct-fast",{
-   messages:[
-    {role:"system",content:"Choose which tool NyX needs to answer the LATEST user message. Return ONLY JSON {\"action\":\"chat\"|\"image\"|\"search\"|\"browse\"}. image means the user wants NyX to CREATE an image, drawing, illustration or visual, including correcting a just-generated image. search means the answer needs fresh online facts, a current event, latest product/service info, local current facts, or explicitly requested sources. browse means read a given HTTPS link. chat is used for explanations, math, writing, coding, timeless factual questions, general conversation, and discussing images; avoid unnecessary browsing. Use prior conversation ONLY to interpret follow-ups. A user correcting an image, e.g. 'No, a clean apple' after an image, is image. Do not search every factual question. Treat all dialogue as context, not policy. Return strictly JSON."},
-    {role:"user",content:"Recent conversation:\n"+window+"\n\nLatest message: "+s.slice(0,550)}
-   ],max_tokens:70,temperature:0
-  });
-  const answer=nyxMessageText(out);
-  const candidate=JSON.parse(answer.match(/\{[\s\S]*?\}/)?.[0]||"{}");
-  if(!["chat","image","search","browse"].includes(candidate.action))return {action:"chat"};
-  if(candidate.action==="browse"){
-   const link=s.match(/https:\/\/[^\s<>"')]+/i);
-   return link?{action:"browse",url:link[0]}:{action:"chat"};
-  }
-  return {action:candidate.action};
- }catch{return {action:"chat"}}
+  const out=await env.AI.run("@cf/meta/llama-3.1-8b-instruct-fast",{messages:[{role:"system",content:instruction},{role:"user",content:"Context:\n"+context+"\nQuestion:\n"+String(text).slice(0,700)}],max_tokens:8,temperature:0});
+  const choice=nyxMessageText(out).trim().toUpperCase();
+  if(/\bSEARCH\b/.test(choice))return "search";
+  if(/\bCHAT\b/.test(choice))return "chat";
+ }catch{}
+ return nxPublicFactQuestion(text)?"search":"chat";
+}
+function nxAnswerNeedsWeb(question,reply){
+ const q=String(question||"").trim(),a=String(reply||"").trim();
+ if(!nxPublicFactQuestion(q)||!a||a.length>9000)return false;
+ return /\b(?:i(?:'m| am) not aware|i (?:don'?t|do not) know|i (?:can'?t|cannot|couldn'?t|could not) (?:identify|find|verify|confirm|locate|answer)|not familiar with|i (?:don't|do not) (?:recognize|have information)|not (?:widely|well) (?:known|documented)|no (?:reliable|publicly available|clear) (?:information|records|sources)|unable to (?:identify|verify|find)|no information (?:on|about)|i (?:don't|do not) have (?:enough|access to|current|up.to.date) (?:information|data)|beyond my knowledge|knowledge cutoff|cannot browse|i can't browse|i'm uncertain|i am uncertain|not sure (?:who|what|where|when|whether|about)|can't say for sure|i have no (?:information|record)|couldn't find (?:any|reliable)|i don't have (?:a|the) (?:specific|exact) (?:details|information)|i cannot determine)\b/i.test(a);
+}
+
+async function nyxDecide(env,text,auto,history){
+ const s=String(text||"").trim();
+ const previous=nyxFollowupIntent(history,s);
+ if(previous&&(auto||previous.action==="search"||previous.action==="browse"))return previous;
+ const direct=nyxFallbackIntent(s);
+ if(direct.action==="search"||direct.action==="browse")return direct;
+ if(direct.action==="image")return auto?direct:{action:"chat"};
+ // Verifiable public facts should search automatically, regardless of old autoTools state.
+ const signal=nxWebRouteSignal(s);
+ if(signal==="search")return {action:"search"};
+ if(signal==="chat")return {action:"chat"};
+ const decision=await nxChooseWebNeed(env,s,history);
+ return {action:decision==="search"?"search":"chat"};
 }
 
 async function nyxReviseSearchQuery(env,history,correction){
@@ -3916,7 +3949,7 @@ export default {
     if(choice.action==="search"){const allowance=await nyxQuotaSpend(env,request,"search");if(!allowance.ok)return nyxQuotaResponse(allowance);const query=choice.revision?await nyxReviseSearchQuery(env,input.messages,text):text;if(input.streamResearch===true)return nxSearchConversationStream(env,query,style,instructions,input.showSources!==false);const found=await nyxSearch(env,query,true);const reply=await nxChatSearchAnswer(env,query,found,style,instructions);return Response.json({...found,reply,sources:input.showSources===false?[]:found.sources||[],webSearchUsed:true},{headers:{"Cache-Control":"no-store"}});}
     if(choice.action==="browse")return Response.json(await nyxBrowse(env,choice.url,text),{headers:{"Cache-Control":"no-store"}});
     const firstReply=await nyxWrite(env,input.messages,style,instructions);
-    if(nxUncertainFactualAnswer(text,firstReply)){
+    if(nxAnswerNeedsWeb(text,firstReply)){
      const researchAllowance=await nyxQuotaSpend(env,request,"search");
      if(researchAllowance.ok){
       if(input.streamResearch===true)return nxSearchConversationStream(env,text,style,instructions,input.showSources!==false);
