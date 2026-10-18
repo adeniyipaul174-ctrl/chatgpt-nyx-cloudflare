@@ -1,0 +1,6 @@
+{
+  "name": "nyx-nextgen-candidate",
+  "private": true,
+  "type": "module",
+  "scripts": {"test":"node --test tests/*.test.mjs", "check":"node --check worker.mjs && node --check runtime.mjs && node --check research.mjs && node --check client.mjs && node --check pwa.mjs && node --check data.mjs"}
+}
