@@ -38,6 +38,10 @@ try {
     if(u.includes("wikipedia.org/?curid="))return new Response("<html><body><main>Wikipedia contents verified.</main></body></html>",{headers:{"content-type":"text/html"}});
     throw Error("Unexpected fetch "+u);
   };
+  assert.equal(requiresLiveSearch("Read https://example.org/news"),true);
+  const direct=await searchLiveWeb("Read https://example.org/news");
+  assert.equal(direct.provider,"Direct URL");
+  assert.equal(direct.results[0].url,"https://example.org/news");
   const results=await searchLiveWeb("mock live research test 8");
   assert.ok(results.results.length>=1);
   assert.equal(results.results[0].url,"https://example.org/news");
