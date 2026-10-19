@@ -3,7 +3,7 @@
 function nxIntentIsAssistantFeedback(text){
  const q=String(text||"").trim();
  const self=/\b(?:nyx|assistant|chatbot|you|your|you're|u|this app|the app|this ai|your ai|your search|your answer|your results|your sources|your response)\b/i.test(q);
- const problem=/\b(?:why|can't|cannot|couldn't|won't|doesn't|don't|unable|wrong|irrelevant|unrelated|mistake|error|problem|issue|broken|fix|failed|failing|keep|instead|confused|misunderstood|not working|not searching|misread)\b/i.test(q);
+ const problem=/\b(?:why|can't|cannot|couldn't|won't|doesn't|don't|unable|wrong|irrelevant|unrelated|mistake|error|problem|issue|broken|fix|failed|failing|keep|instead|confused|misunderstood|not working|not searching|misread|improve|better|quality)\b/i.test(q);
  const tool=/\b(?:search|searched|searching|browsing|browse|results?|sources?|citations?|respond|responses?|answer|reply|understand|understanding|working|function|feature|tool)\b/i.test(q);
  return /\b(?:that(?:'s| is) not what i asked|not what i asked|i (?:didn't|did not) ask you to|not what i wanted)\b[\s\S]{0,100}\b(?:search|answer|browse|look up|source)\b/i.test(q)
  || (self&&problem&&tool)
@@ -16,6 +16,7 @@ function nxIntentExplicitSearch(text){
  || /\b(?:search (?:online|the web|the internet) for|look it up online|(?:please\s+)?find (?:me\s+)?(?:credible\s+|reliable\s+|primary\s+|official\s+|academic\s+)?(?:sources|links|citations) (?:on|for|about)|find (?:me\s+)?(?:sources|links) (?:for|about)|check (?:the\s+)?(?:latest|official) (?:sources|website)|find out (?:on|from) the (?:web|internet))\b/i.test(s);
 }
 function nxIntentNonSearchTask(text){
+ if(/^what(?:'s| is)\s*[0-9][0-9\s+*\/%().=-]*\??$/i.test(text))return true;
  return /^(?:what(?:\'s| is)\s+[0-9][0-9\s+*\/%().=-]*\??$|can (?:you )?(?:please )?explain how\b|what are the risks of\b|help me (?:diagnose|troubleshoot|fix)\b|write|draft|rewrite|rephrase|translate|compose|proofread|summarize\s+(?:this|the following)|fix\s+(?:my|the|this)\s+(?:code|text|paragraph)|calculate|solve|brainstorm|imagine|pretend|roleplay|give me a (?:story|poem|caption)|explain (?:the )?(?:difference|meaning|concept)|teach me (?:how|about))\b/i.test(text);
 }
 function nxIntentResearchCorrection(text,previous){
