@@ -7,7 +7,7 @@
     "check": "node --check src/index.js && node --check public/app.js && node --check tests/run.mjs",
     "test": "node tests/run.mjs",
     "dev": "wrangler dev",
-    "deploy": "wrangler deploy",
+    "deploy": "node scripts/guard-deploy.mjs",
     "db:local": "wrangler d1 migrations apply chatgpt-nyx-test-db --local"
   },
   "devDependencies": {
