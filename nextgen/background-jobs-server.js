@@ -95,7 +95,7 @@ async function nxBackgroundConsume(batch,env){
    }else if(choice.action==="browse"){answer=await nyxBrowse(env,choice.url,last)}
    else if(choice.action==="image"){answer={kind:"text",reply:"Image generation needs an open NyX tab for now. Return to your chat and request the image again.",sources:[]}}
    else answer={kind:"text",reply:await nyxWrite(env,input.messages,input.style,input.instructions),sources:[]};
-   await env.NYX_DB.prepare("UPDATE nyx_background_jobs SET status='done',result_json=?,error=NULL,completed_at=?,payload_json='{}' WHERE id=?").bind(JSON.stringify(answer).slice(0,45000),Date.now(),id).run();
+   await env.NYX_DB.prepare("UPDATE nyx_background_jobs SET status='done',result_json=?,error=NULL,completed_at=?,payload_json='{}' WHERE id=?").bind(JSON.stringify(answer),Date.now(),id).run();
    message.ack();
   }catch(e){
    const attempts=Number(row.attempts||0)+1;
