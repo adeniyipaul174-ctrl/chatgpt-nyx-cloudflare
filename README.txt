@@ -1,3 +1,20 @@
+CRITICAL CURRENT DEPLOYMENT SAFETY NOTICE (2026-10-19)
+================================================
+The code at repository root is an OLD CANDIDATE, NOT the latest live NyX.
+Live Worker: chatgpt-nyx-v3-test
+Live site: https://chatgpt-nyx-v3-test.adeniyipaul174.workers.dev/
+The live Worker includes significant newer features and an account-history
+endpoint absent from older candidates. DO NOT run "npx wrangler deploy" from
+this repository root or point this Wrangler file at any live NyX database.
+Doing so may overwrite the live app and remove functional features.
+
+The package.json "npm run deploy" command now includes an explicit safety
+gate (scripts/guard-deploy.mjs) to block protected production targets.
+This guard does NOT protect a direct Wrangler invocation. Reconcile a full
+live-source snapshot into an isolated preview Worker, use a separate D1
+database, test authenticated flows, and only then consider deployment.
+An uploaded Cloudflare Worker version is NOT a production deployment.
+
 CHATGPT NYX — V3 SECURITY / CLOUD-STATE CANDIDATE
 =================================================
 
