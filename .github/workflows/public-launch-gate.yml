@@ -24,4 +24,5 @@ jobs:
       - name: Test actual candidate functions and mocked routes
         run: npm test --prefix nextgen
       - name: Capacity simulations without provider calls
+        if: always()
         run: node --test qa/*.test.mjs
