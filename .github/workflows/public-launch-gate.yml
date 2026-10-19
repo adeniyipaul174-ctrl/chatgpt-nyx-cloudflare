@@ -1,0 +1,27 @@
+name: NyX prelaunch isolated QA
+on:
+  push:
+    branches:
+      - qa/public-launch-gate-20261019
+  pull_request:
+    paths:
+      - 'nextgen/**'
+      - 'qa/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  offline-launch-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify actual candidate syntax
+        run: npm run check --prefix nextgen
+      - name: Test actual candidate functions and mocked routes
+        run: npm test --prefix nextgen
+      - name: Capacity simulations without provider calls
+        run: node --test qa/*.test.mjs
