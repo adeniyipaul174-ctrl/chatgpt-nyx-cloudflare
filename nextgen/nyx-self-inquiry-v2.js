@@ -16,3 +16,10 @@ function nxIntentIsSelfInquiry(input) {
   const selfStatus = /\b(?:are\s+you|is\s+nyx|how\s+are\s+you|what\s+is\s+your)\b.{0,38}\b(?:working|failing|operating|functioning|status|limitations?|capabilities|doing\s+right\s+now|problems?|issues?)\b/i.test(text);
   return ownsProblem || troubleWithSelf || issuesThenSelf || selfThenIssues || repairInquiry || selfStatus;
 }
+
+
+function nxIntentExternalServiceStatus(input) {
+ const s=String(input||"").trim();
+ return /^(?:is|are|was|were)\s+(?:the\s+)?(?:[a-z0-9][a-z0-9 .'-]{1,64})\s+(?:website|site|servers?|app|platform|api|service)\s+(?:down|up|offline|online|unavailable|unreachable|experiencing outages?|having outages?|down for everyone)\b/i.test(s)
+ || /^(?:is|are|was|were)\s+(?:the\s+)?(?:[a-z0-9][a-z0-9 .'-]{1,64})\s+(?:down for everyone|experiencing an outage|currently down)\b/i.test(s);
+}
