@@ -1,0 +1,138 @@
+[
+  {
+    "prompt": "What's The issue why Can't you search?",
+    "expected": "chat"
+  },
+  {
+    "prompt": "Wtf I'm asking why can't you search how is it related to Microsoft?",
+    "expected": "chat"
+  },
+  {
+    "prompt": "You searched for Windows and that's unrelated to my question",
+    "expected": "chat"
+  },
+  {
+    "prompt": "Fix NyX search it keeps returning Microsoft results",
+    "expected": "chat"
+  },
+  {
+    "prompt": "How can I improve your search results?",
+    "expected": "chat"
+  },
+  {
+    "prompt": "Search online for OpenRouter free models",
+    "expected": "search"
+  },
+  {
+    "prompt": "Are OpenRouter free models still available in October 2026?",
+    "expected": "search"
+  },
+  {
+    "prompt": "What's the current price of Tecno Camon Slim in Nigeria?",
+    "expected": "search"
+  },
+  {
+    "prompt": "Who wrote The Mitford Trial?",
+    "expected": "search"
+  },
+  {
+    "prompt": "Can you explain how search indexing works?",
+    "expected": "chat"
+  },
+  {
+    "prompt": "Write a Reddit post about learning Reddit",
+    "expected": "chat"
+  },
+  {
+    "prompt": "Make an image of a black futuristic NyX logo",
+    "expected": "image"
+  },
+  {
+    "prompt": "Open https://example.com and summarize the page",
+    "expected": "browse"
+  },
+  {
+    "prompt": "What is 2+2?",
+    "expected": "chat"
+  },
+  {
+    "prompt": "Search for reasons Windows Search is broken",
+    "expected": "search"
+  },
+  {
+    "prompt": "Thanks",
+    "expected": "chat"
+  },
+  {
+    "prompt": "Who is the president of Ghana right now?",
+    "expected": "search"
+  },
+  {
+    "prompt": "Is NyX search broken?",
+    "expected": "chat"
+  },
+  {
+    "prompt": "Browse the web for latest Llama news",
+    "expected": "search"
+  },
+  {
+    "prompt": "No, not Microsoft. Why are you searching Windows troubleshooting?",
+    "expected": "chat"
+  },
+  {
+    "prompt": "No, search for the latest Llama free models",
+    "expected": "search"
+  },
+  {
+    "prompt": "No, the new version should be white",
+    "expected": "image"
+  },
+  {
+    "prompt": "Compare current AI API pricing for free tiers",
+    "expected": "search"
+  },
+  {
+    "prompt": "Explain the difference between a search engine and an LLM",
+    "expected": "chat"
+  },
+  {
+    "prompt": "How much does Spotify Premium cost today?",
+    "expected": "search"
+  },
+  {
+    "prompt": "What are the risks of trusting AI search?",
+    "expected": "chat"
+  },
+  {
+    "prompt": "Give me the current specifications of Samsung Galaxy S26",
+    "expected": "search"
+  },
+  {
+    "prompt": "Please create an image of a glowing black cube",
+    "expected": "image"
+  },
+  {
+    "prompt": "Search for open-source alternatives to Cloudflare Browser Rendering",
+    "expected": "search"
+  },
+  {
+    "prompt": "What do you think about my NyX startup idea?",
+    "expected": "chat"
+  },
+  {
+    "prompt": "No, that's not what I asked you to search for",
+    "expected": "chat"
+  },
+  {
+    "prompt": "Why doesn't NyX search the right websites?",
+    "expected": "chat"
+  },
+  {
+    "prompt": "Help me diagnose why my Google search doesn't work",
+    "expected": "chat"
+  },
+  {
+    "prompt": "Please find credible sources on model hallucinations",
+    "expected": "search"
+  }
+]
