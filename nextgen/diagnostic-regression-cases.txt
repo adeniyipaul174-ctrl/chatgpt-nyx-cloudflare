@@ -1,0 +1,4 @@
+What issues did you have right now? => chat
+What issues does Microsoft Search have right now? => search
+Are you having trouble searching? => chat
+Search online for Cloudflare outages => search
