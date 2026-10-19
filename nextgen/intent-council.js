@@ -5,7 +5,8 @@ function nxIntentIsAssistantFeedback(text){
  const self=/\b(?:nyx|assistant|chatbot|you|your|you're|u|this app|the app|this ai|your ai|your search|your answer|your results|your sources|your response)\b/i.test(q);
  const problem=/\b(?:why|can't|cannot|couldn't|won't|doesn't|don't|unable|wrong|irrelevant|unrelated|mistake|error|problem|issue|broken|fix|failed|failing|keep|instead|confused|misunderstood|not working|not searching|misread)\b/i.test(q);
  const tool=/\b(?:search|searched|searching|browsing|browse|results?|sources?|citations?|respond|responses?|answer|reply|understand|understanding|working|function|feature|tool)\b/i.test(q);
- return /\b(?:that(?:'s| is) not what i asked|not what i asked|i (?:didn't|did not) ask you to|not what i wanted)\b[\s\S]{0,100}\b(?:search|answer|browse|look up|source)\b/i.test(q)\n || (self&&problem&&tool)
+ return /\b(?:that(?:'s| is) not what i asked|not what i asked|i (?:didn't|did not) ask you to|not what i wanted)\b[\s\S]{0,100}\b(?:search|answer|browse|look up|source)\b/i.test(q)
+ || (self&&problem&&tool)
  || /\bwhy\s+(?:can['’]?t|cannot|won['’]?t|don['’]?t|doesn['’]?t)\s+(?:you|nyx|the assistant|the ai)\s+(?:search|browse|understand|answer)\b/i.test(q)
  || /\b(?:you|nyx)\s+(?:searched|searching)\s+(?:for\s+)?(?:the\s+)?wrong\b/i.test(q);
 }
