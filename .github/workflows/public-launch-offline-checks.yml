@@ -1,0 +1,24 @@
+name: NyX public-launch offline checks
+on:
+  push:
+    branches:
+      - audit/public-launch-capacity-2026-10-19
+  pull_request:
+    branches:
+      - nyx/next-generation-2026-10-18
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  capacity-and-qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check source syntax
+        run: npm run check --prefix nextgen
+      - name: Run deterministic mock-provider regression suite
+        run: npm test --prefix nextgen
