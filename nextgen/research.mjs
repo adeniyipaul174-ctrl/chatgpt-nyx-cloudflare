@@ -1,5 +1,27 @@
 import {parsePlan, groundedCitations} from './runtime.mjs';
 
+/**
+ * Reject obvious internal/private targets from untrusted search results.
+ * This is a defense-in-depth URL filter, not a DNS-rebinding solution.
+ * Fetchers must also reject redirects and protect internal network access.
+ */
+export function safeResearchUrl(value) {
+  if (typeof value !== 'string' || value.length > 2048) return null;
+  let u;
+  try { u = new URL(value); } catch { return null; }
+  const host = u.hostname.toLowerCase().replace(/\.$/, '');
+  if (u.protocol !== 'https:' || u.username || u.password || u.port || !host || host.length > 253) return null;
+  // Reject all IP literals, including public IPv4/IPv6, avoiding numeric-encoding ambiguity.
+  if (/^\[|:/.test(host) || /^[0-9.]+$/.test(host) || /^0x[0-9a-f.]+$/i.test(host)) return null;
+  if (!/^[a-z0-9.-]+$/.test(host) || !host.includes('.') || host.includes('..')) return null;
+  if (host.split('.').some(p => !p || p.startsWith('-') || p.endsWith('-'))) return null;
+  if (/(?:^|\.)(?:localhost|local|internal|test|invalid|onion|home|lan)$/i.test(host)) return null;
+  if (host === 'metadata.google.internal') return null;
+  u.hash = '';
+  return u.toString();
+}
+
+
 export async function deepResearch(question, {write,search,read}, emit, signal) {
   const check=()=>signal?.throwIfAborted();
   emit({event:'stage',stage:'planning',provider:'Research plan'});
@@ -12,9 +34,9 @@ export async function deepResearch(question, {write,search,read}, emit, signal) 
     try {
       const found=await search(query);check();
       for(const source of found.sources||[]) {
-        let url;try{url=new URL(source.url);}catch{continue;}
-        if(url.protocol!=='https:'||url.username||url.password||seen.has(url.href)||sources.length>=8)continue;
-        seen.add(url.href);sources.push({...source,url:url.href});
+        const url=safeResearchUrl(source.url);
+        if(!url||seen.has(url)||sources.length>=8)continue;
+        seen.add(url);sources.push({...source,url});
       }
       if(!found.sources?.length)gaps.push('No accessible search results: '+query);
     }catch(error){check();gaps.push('Search unavailable: '+query);}
