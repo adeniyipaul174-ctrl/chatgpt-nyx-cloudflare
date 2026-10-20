@@ -1,3 +1,26 @@
+function nxReplyQualityGate(history,rawReply){
+ const rows=Array.isArray(history)?history:[];
+ const q=String(rows.at(-1)?.content||"").trim();
+ const reply=String(rawReply||"").trim();
+ // The model cannot infer live system health from an absence of logs.
+ const statusQuestion=/\b(?:issues?|problems?|bugs?|errors?|failures?|wrong|working properly|status)\b/i.test(q)
+ && /\b(?:you|your|nyx|the app|this ai)\b/i.test(q);
+ if(statusQuestion&&/\b(?:no (?:prior )?(?:issues?|problems?|errors?)|everything (?:is|looks) fine|functioning properly|working perfectly|no (?:problems?|issues?) to report|conversation just started)\b/i.test(reply)){
+  const earlier=rows.slice(0,-1).map(m=>String(m.content||"")).join("\n").slice(-15000);
+  const findings=[];
+  if(/\b(?:irrelevant|wrong|unrelated|misunderstood|microsoft|windows).{0,80}\b(?:search|results?|answer)|\bsearch.{0,80}\b(?:wrong|irrelevant|microsoft|windows)\b/i.test(earlier))findings.push("irrelevant search results");
+  if(/\b(?:network error|connection error|timeout|request failed)\b/i.test(earlier))findings.push("failed or interrupted requests");
+  if(/\b(?:forgot|forget|didn'?t remember|lost.{0,30}context)\b/i.test(earlier))findings.push("lost conversation context");
+  if(findings.length)return "From this conversation, NyX has had problems with "+findings.join(", ")+". I cannot verify which issues are still occurring without live diagnostics, but those are real reported failures that need testing.";
+  return "I can't inspect NyX's live diagnostics from this chat, so I can't reliably say which issues are happening right now. I can investigate specific behavior you show me, but I shouldn't claim everything is working when I haven't checked.";
+ }
+ if(/\b(?:search|look up|browse|research)\b/i.test(q)
+ &&/\b(?:i (?:can'?t|cannot|am unable to) (?:search|browse|look up|research)|nyx (?:can'?t|cannot) (?:search|browse))\b/i.test(reply)){
+  return "NyX supports web research, but this particular text reply has not performed a live search. I can help research the request using its web-search feature; any factual findings still need relevant source evidence.";
+ }
+ return reply;
+}
+
 /* NyX quality-first text routing. Prefer stable, capable model over
    random free-model routing; bound context by turns and characters. */
 function nxModelConversationWindow(history) {
@@ -23,7 +46,7 @@ async function nyxWrite(env,history,style,instructions,extra){
   try{
    const out=await env.AI.run(model,{messages,max_tokens:model===models[0]?maxTokens:Math.min(maxTokens,1000),temperature:tone==="detailed"?.4:.3});
    const reply=nyxMessageText(out);
-   if(typeof reply==="string"&&reply.trim())return reply.trim();
+   if(typeof reply==="string"&&reply.trim())return nxReplyQualityGate(history,reply);
    lastError=new Error("The AI provider returned an empty answer");
   }catch(e){lastError=e}
  }
@@ -32,7 +55,7 @@ async function nyxWrite(env,history,style,instructions,extra){
  if(env.OPENROUTER_API_KEY){
   try{
    const result=await nyxFreeRouterText(env,messages,Math.min(maxTokens,1100));
-   if(typeof result==="string"&&result.trim())return result.trim();
+   if(typeof result==="string"&&result.trim())return nxReplyQualityGate(history,result);
   }catch(e){lastError=e}
  }
  throw lastError||new Error("No AI model could produce a response");
