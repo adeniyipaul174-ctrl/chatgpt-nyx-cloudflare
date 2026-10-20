@@ -16,6 +16,8 @@ function nxBgPublic(row){
  const out={id:row.id,chatId:row.chat_id,status:row.status,createdAt:row.created_at,completedAt:row.completed_at||null};
  if(row.status==="done"){try{out.result=JSON.parse(row.result_json)}catch{out.status="failed";out.error="The saved response was damaged."}}
  if(row.status==="failed")out.error=row.error||"This background response did not complete.";
+ if(row.progress_json&&["queued","running"].includes(row.status)){try{const p=JSON.parse(row.progress_json);out.progress={stage:String(p.stage||"").slice(0,25),provider:String(p.provider||"").slice(0,70),sources:Array.isArray(p.sources)?p.sources.slice(0,3).map(x=>({title:String(x.title||"").slice(0,120),url:String(x.url||"").slice(0,500)})):[]}}catch{}}
+
  return out;
 }
 async function nxBackgroundRoute(request,env,url){
@@ -24,7 +26,7 @@ async function nxBackgroundRoute(request,env,url){
  if(!user)return nxBgJSON({error:"Please sign in to use background replies."},401);
  if(request.method==="GET"){
    if(url.pathname==="/api/nyx/background"){
-     const rows=await env.NYX_DB.prepare("SELECT id,chat_id,status,result_json,error,created_at,completed_at FROM nyx_background_jobs WHERE account_id=? AND created_at>? ORDER BY created_at DESC LIMIT 60").bind(user.id,Date.now()-30*86400000).all();
+     const rows=await env.NYX_DB.prepare("SELECT id,chat_id,status,result_json,error,progress_json,created_at,completed_at FROM nyx_background_jobs WHERE account_id=? AND created_at>? ORDER BY created_at DESC LIMIT 60").bind(user.id,Date.now()-30*86400000).all();
      return nxBgJSON({jobs:(rows.results||[]).map(nxBgPublic)});
    }
    const id=url.pathname.slice("/api/nyx/background/".length);
@@ -81,6 +83,11 @@ async function nxBackgroundConsume(batch,env){
   if(!Number(claim.meta?.changes||0)){message.retry({delaySeconds:30});continue}
   try{
    const input=JSON.parse(row.payload_json),last=input.messages.at(-1)?.content||"";
+   let progressWrites=Promise.resolve();
+   const announce=(stage,provider="",sources=[])=>{
+     const details={stage,provider,sources:Array.isArray(sources)?sources.slice(0,3).map(item=>({title:String(item.title||"").slice(0,120),url:String(item.url||"").slice(0,500)})):[]};
+     progressWrites=progressWrites.then(()=>env.NYX_DB.prepare("UPDATE nyx_background_jobs SET progress_json=? WHERE id=?").bind(JSON.stringify(details),id).run()).catch(()=>{});
+   };
    const choice=await nyxDecide(env,last,input.autoTools!==false,input.messages);
    let answer;
    if(choice.action==="search"){
@@ -88,14 +95,17 @@ async function nxBackgroundConsume(batch,env){
     if(!available){answer={kind:"text",reply:"Your NyX search allowance has been reached today. Try again after the daily reset.",sources:[]}}
     else{
      const query=choice.revision?await nyxReviseSearchQuery(env,input.messages,last):last;
-     const research=await nyxSearch(env,query,true);
-     const reply=await nxChatSearchAnswer(env,query,research,input.style,input.instructions);
+     announce("starting");
+     const research=await nyxSearch(env,query,true,ev=>announce(ev.stage||"searching",ev.provider||""));
+     announce("reading",research.provider,research.sources||[]);
+     const reply=await nxChatSearchAnswer(env,query,research,input.style,input.instructions,ev=>announce(ev.stage||"answering",ev.provider||research.provider,research.sources||[]));
      answer={kind:"search",reply,sources:input.showSources===false?[]:research.sources||[],provider:research.provider,webSearchUsed:true};
     }
    }else if(choice.action==="browse"){answer=await nyxBrowse(env,choice.url,last)}
    else if(choice.action==="image"){answer={kind:"text",reply:"Image generation needs an open NyX tab for now. Return to your chat and request the image again.",sources:[]}}
    else answer={kind:"text",reply:await nyxWrite(env,input.messages,input.style,input.instructions),sources:[]};
-   await env.NYX_DB.prepare("UPDATE nyx_background_jobs SET status='done',result_json=?,error=NULL,completed_at=?,payload_json='{}' WHERE id=?").bind(JSON.stringify(answer),Date.now(),id).run();
+   await progressWrites;
+   await env.NYX_DB.prepare("UPDATE nyx_background_jobs SET status='done',result_json=?,error=NULL,completed_at=?,payload_json='{}',progress_json=NULL WHERE id=?").bind(JSON.stringify(answer),Date.now(),id).run();
    message.ack();
   }catch(e){
    const attempts=Number(row.attempts||0)+1;
