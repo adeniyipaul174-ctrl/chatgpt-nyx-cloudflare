@@ -17,13 +17,13 @@ function nxRecallAuthorNames(messages,provided){
  return names;
 }
 function nxHasPriorReference(text){
- return /\b(?:those|these|them|their|the ones|earlier|previously|above|last time|the list|those authors|authors? (?:you|we) (?:found|listed|scouted|searched)|the (?:results|people|books) (?:you|we))\b/i.test(String(text||""));
+ return /\b(?:those|these|them|their|the ones|all\s+(?:the\s+)?authors?|all\s+of\s+them|earlier|previously|above|last time|the list|those authors|authors? (?:you|we) (?:found|listed|scouted|searched)|the (?:results|people|books) (?:you|we))\b/i.test(String(text||""));
 }
 function nxIsAuthorContactRequest(text){
  const q=String(text||"");
  return /\b(?:authors?|writers?|books?|people|names|them|those|these)\b/i.test(q)
-   &&/\b(?:contact|email|e-mail|address|reach|website|websites)\b/i.test(q)
-   &&/\b(?:search|find|look|research|lookup|get|give|provide|check|contact)\b/i.test(q);
+   &&/\b(?:contacts?|emails?|e-mails?|addresses?|reach|websites?)\b/i.test(q)
+   &&/\b(?:search|find|look|research|lookup|get|give|provide|check|checking|continue|contact)\b/i.test(q);
 }
 function nxMissingContextReply(){
  return "I understand you mean the specific authors mentioned earlier, not every author in the world. I cannot identify their names from the available chat context. Please paste the earlier list or open the chat containing it. I will not search for the word 'all' or invent contact information.";
