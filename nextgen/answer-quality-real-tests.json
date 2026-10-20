@@ -1,0 +1,40 @@
+[
+  {
+    "case": "Identity",
+    "question": "Who are you?",
+    "result": "real model concise direct intro",
+    "passed": true
+  },
+  {
+    "case": "Self-diagnostic with prior failure",
+    "question": "What issues did you have right now?",
+    "context": "Earlier user reported Windows Search misrouting and a network error.",
+    "result": "real model acknowledged both errors without inventing live status",
+    "passed": true
+  },
+  {
+    "case": "Self-diagnostic without logs",
+    "question": "What issues did you have right now?",
+    "context": "No prior messages",
+    "result": "quality gate converts unsupported 'no issues' statement to uncertainty about live diagnostics",
+    "passed": true
+  },
+  {
+    "case": "Wrong tool denial",
+    "question": "Can you search for official author websites?",
+    "result": "quality gate corrects categorical false claims that NyX cannot research",
+    "passed": true
+  },
+  {
+    "case": "Normal knowledge",
+    "question": "Explain why the sky is blue",
+    "result": "real 70B answer explains Rayleigh scattering",
+    "passed": true
+  },
+  {
+    "case": "Missing signed-in live test",
+    "question": "Answer and search from real NyX account",
+    "result": "not available in a signed-in session",
+    "passed": false
+  }
+]

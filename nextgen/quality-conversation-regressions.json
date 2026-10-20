@@ -1,0 +1,53 @@
+[
+  {
+    "prompt": "Who are you?",
+    "expected": "chat; no web search"
+  },
+  {
+    "prompt": "Why can't you search properly?",
+    "expected": "explain NyX own issue, not Microsoft troubleshooting"
+  },
+  {
+    "prompt": "Those authors you helped me find earlier, find their public contact emails",
+    "expected": "use same-chat list and verify from official public sources"
+  },
+  {
+    "prompt": "What did we discuss about author scouting earlier?",
+    "history": "26 turns; mention author scouting in turn one",
+    "expected": "remember earlier topic"
+  },
+  {
+    "prompt": "What was the third author in the earlier list?",
+    "history": "first message lists >3 authors and 23 subsequent turns",
+    "expected": "recall previous named list or clarify"
+  },
+  {
+    "prompt": "How much is the Tecno Camon Slim today in Nigeria?",
+    "expected": "automatically search for current pricing"
+  },
+  {
+    "prompt": "Write me a professional author invitation",
+    "expected": "write without unrelated web search"
+  },
+  {
+    "prompt": "Create an image of a black NyX logo",
+    "expected": "invoke image path"
+  },
+  {
+    "prompt": "Open https://example.com and summarize",
+    "expected": "webpage browsing"
+  },
+  {
+    "prompt": "Explain Newton's second law",
+    "expected": "direct answer no unrelated sources"
+  },
+  {
+    "prompt": "Why is my recent image request still thinking?",
+    "expected": "explain current NyX task state; don't search"
+  },
+  {
+    "prompt": "Continue checking the remaining authors",
+    "history": "prior batch completed 6/40",
+    "expected": "continue same batch, no repeated names"
+  }
+]
