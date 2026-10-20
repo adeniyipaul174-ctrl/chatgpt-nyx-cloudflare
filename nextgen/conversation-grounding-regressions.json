@@ -1,0 +1,70 @@
+[
+  {
+    "question": "Who are you?",
+    "expectedAction": "chat",
+    "mustNotSearch": [
+      "Wikipedia",
+      "IMDb"
+    ]
+  },
+  {
+    "question": "What issues did you have right now?",
+    "expectedAction": "chat",
+    "mustNotSearch": [
+      "Microsoft Search",
+      "Windows Search"
+    ]
+  },
+  {
+    "question": "Search for all the authors contact email public one",
+    "expectedAction": "contextual_author_contacts",
+    "needsPriorList": true,
+    "mustNotSearch": [
+      "all definition",
+      "all dictionary"
+    ]
+  },
+  {
+    "question": "Those authors you help me search earlier find their contact email search it",
+    "expectedAction": "contextual_author_contacts",
+    "needsPriorList": true
+  },
+  {
+    "question": "Continue checking those authors' public emails",
+    "expectedAction": "continue_author_contacts",
+    "needsPriorList": true
+  },
+  {
+    "question": "Search for all the authors contact email",
+    "expectedAction": "request_missing_list",
+    "needsPriorList": false
+  },
+  {
+    "question": "What is the current price of Tecno Camon Slim in Nigeria?",
+    "expectedAction": "search",
+    "requiresVerifiableSources": true
+  },
+  {
+    "question": "Search online for OpenRouter free models",
+    "expectedAction": "search",
+    "requiresVerifiableSources": true
+  },
+  {
+    "question": "Write me a professional invitation email",
+    "expectedAction": "chat"
+  },
+  {
+    "question": "Make an image of a black NyX logo",
+    "expectedAction": "image"
+  },
+  {
+    "question": "Open https://example.com and summarize the page",
+    "expectedAction": "browse"
+  },
+  {
+    "question": "The books you mentioned earlier: which is newest?",
+    "expectedAction": "contextual_search",
+    "needsPriorList": true,
+    "requiresVerifiableSources": true
+  }
+]
