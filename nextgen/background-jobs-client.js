@@ -3,6 +3,7 @@
  "use strict";
  if(window.nyxBackgroundTasks)return;
  const active=new Set();
+ const progressSeen=new Map();
  let syncing=false,lastCheck=0;
  function sleep(ms){return new Promise(resolve=>setTimeout(resolve,ms))}
  function visible(){return document.visibilityState==="visible"}
@@ -67,7 +68,8 @@
   const data=await response.json(),id=data.id;
   if(!id)throw Error("NyX did not return a background job ID.");
   active.add(id);
-  mark("NyX is working in the background. You can switch apps or close this page.");
+  window.nyxSearchVisuals?.begin?.(id);
+  mark("NyX will keep working if you leave this page.");
   let consecutiveErrors=0;
   try{
    while(true){
@@ -80,6 +82,10 @@
      if(!r.ok)throw Error("Background status temporarily unavailable.");
      const job=await r.json();
      consecutiveErrors=0;
+     if(job.progress?.stage&&document.visibilityState==="visible"){
+       const now=JSON.stringify(job.progress);
+       if(progressSeen.get(id)!==now){progressSeen.set(id,now);window.nyxSearchVisuals?.update?.(job.progress)}
+     }
      if(job.status==="done"){
       mark("");
       return new Response(JSON.stringify({...job.result,backgroundJobId:id}),{headers:{"Content-Type":"application/json"}});
@@ -95,6 +101,8 @@
    }
   }finally{
    active.delete(id);
+   progressSeen.delete(id);
+   window.nyxSearchVisuals?.complete?.();
    if(!active.size)mark("");
   }
  }
