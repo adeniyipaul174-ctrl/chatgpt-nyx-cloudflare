@@ -9,7 +9,7 @@ function nxRecallAuthorNames(messages,provided){
  };
  for(const message of Array.isArray(messages)?messages:[]){
   if(!["user","assistant"].includes(message?.role))continue;
-  const body=String(message.content||"").slice(0,45000);
+  const body=String(message.content||"").slice(0,45000).replace(/\*\*/g,"");
   for(const m of body.matchAll(/(?:^|\n)\s*(?:[-*]\s*)?(?:\d{1,3}[.)]\s*)?(?:\*{1,2})?\s*Author\s*:\s*(?:\*{1,2})?\s*([A-Z][A-Za-z.'’-]+(?:\s+[A-Z][A-Za-z.'’-]+){1,4})(?=\s*(?:\n|$|\*|[|]|Reviews?\s*:|Profile\s*:))/gmi))add(m[1]);
   for(const m of body.matchAll(/goodreads\.com\/author\/show\/\d+\.([A-Za-z][A-Za-z0-9_]{3,110})/gi))add(m[1]);
  }
