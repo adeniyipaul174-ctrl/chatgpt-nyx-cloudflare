@@ -1,0 +1,85 @@
+[
+  {
+    "prompt": "Who are you?",
+    "intent": "chat",
+    "requiresSearch": false
+  },
+  {
+    "prompt": "What issues did you have right now?",
+    "intent": "chat",
+    "requiresSearch": false
+  },
+  {
+    "prompt": "Why are you searching Windows when I asked about NyX?",
+    "intent": "chat",
+    "requiresSearch": false
+  },
+  {
+    "prompt": "Search online for OpenRouter free models",
+    "intent": "search",
+    "requiredTerms": [
+      "OpenRouter",
+      "free"
+    ]
+  },
+  {
+    "prompt": "Find the latest Tecno Camon phone price in Nigeria",
+    "intent": "search",
+    "requiredTerms": [
+      "Tecno",
+      "Camon",
+      "price"
+    ]
+  },
+  {
+    "prompt": "Search for all those authors' contact emails",
+    "intent": "contextual_author_contact",
+    "priorContext": "1. Author: Emily R. King\n2. Author: Kristen Houghton",
+    "expectedQueries": [
+      "Emily R. King author official website contact email",
+      "Kristen Houghton author official website contact email"
+    ]
+  },
+  {
+    "prompt": "Those authors you helped me find earlier—search their contact emails",
+    "intent": "contextual_author_contact",
+    "priorContext": "**1. Author:** Sarah L. Thompson"
+  },
+  {
+    "prompt": "Search for all those authors' contact emails",
+    "intent": "clarify_missing_context",
+    "priorContext": ""
+  },
+  {
+    "prompt": "Explain how website search ranking works",
+    "intent": "chat",
+    "requiresSearch": false
+  },
+  {
+    "prompt": "Open https://example.com and summarize it",
+    "intent": "browse"
+  },
+  {
+    "prompt": "Create an image of a black NyX logo",
+    "intent": "image"
+  },
+  {
+    "prompt": "Is the NyX AI website down for everyone?",
+    "intent": "search"
+  },
+  {
+    "prompt": "Find free AI models",
+    "intent": "search",
+    "rejectResults": [
+      "Only paid model access"
+    ]
+  },
+  {
+    "prompt": "Continue checking the authors listed earlier",
+    "intent": "contextual_continuation"
+  },
+  {
+    "prompt": "What book did the author you mentioned write?",
+    "intent": "contextual_fact_or_clarification"
+  }
+]
