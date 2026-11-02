@@ -12,6 +12,6 @@
     "db:local": "wrangler d1 migrations apply chatgpt-nyx-test-db --local"
   },
   "devDependencies": {
-    "wrangler": "4.40.0"
+    "wrangler": "4.135.0"
   }
 }
