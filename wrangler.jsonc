@@ -23,5 +23,22 @@
     "NYX_DAILY_REQUEST_LIMIT": "100",
     "NYX_PER_MINUTE_REQUEST_LIMIT": "10",
     "LOG_ERRORS": "false"
+  },
+  "previews": {
+    "vars": {
+      "NYX_TEXT_MODEL": "gemini-3.8-flash",
+      "NYX_IMAGE_MODEL": "gemini-3.1-flash-image",
+      "NYX_ALLOWED_ORIGINS": "",
+      "NYX_DAILY_REQUEST_LIMIT": "100",
+      "NYX_PER_MINUTE_REQUEST_LIMIT": "10",
+      "LOG_ERRORS": "false"
+    },
+    "d1_databases": [
+      {
+        "binding": "DB",
+        "database_name": "chatgpt-nyx-preview-pr14",
+        "database_id": "37cb0977-90e1-4054-945c-cd74573a8cdc"
+      }
+    ]
   }
 }
