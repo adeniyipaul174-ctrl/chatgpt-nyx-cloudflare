@@ -39,8 +39,9 @@ Tests run locally
 Run:
   npm test
   npm run check
+  npm run preview:mock
 
-The test suite generates local RSA-signed JWTs, checks issuer/audience/expiry/signature/algorithm/email allowlist, tests origin/body/error/routing/retrieval helpers, and uses Python's built-in SQLite engine to execute the actual migration and exercise tenant-scoped SQL isolation and constraints.
+The test suite generates local RSA-signed JWTs, checks issuer/audience/expiry/signature/algorithm/email allowlist, tests origin/body/error/routing/retrieval and grounded-search flows, and uses Python's built-in SQLite engine to execute the actual migration and exercise tenant-scoped SQL isolation and constraints. The mock preview serves the UI on port 4173 with deterministic example citations; it does not call Gemini or Cloudflare or persist data.
 
 IMPORTANT LIMITATIONS / SETUP REQUIRED
 --------------------------------------
@@ -55,7 +56,7 @@ IMPORTANT LIMITATIONS / SETUP REQUIRED
 5. Set NYX_ALLOWED_ORIGINS only if the frontend is hosted on a different origin. Keep it empty for same-origin frontend hosting.
 6. Per-minute and daily request quotas are scoped to each authenticated user and enforced atomically in D1. Provider costs are per Gemini call; deep mode uses three calls per user request. Set NYX_DAILY_REQUEST_LIMIT and NYX_PER_MINUTE_REQUEST_LIMIT conservatively during tests.
 7. No Cloudflare rate-limiting rules have been provisioned by this source package. Add Cloudflare rate limiting for /api/* before any broader release. D1 daily quotas are not a substitute for edge rate limiting against bursts.
-8. Live web search is not implemented. Do not describe it as available.
+8. Current-information chat requests use Gemini's built-in Google Search grounding when supported by the configured model and API key. Grounding source links are validated and shown with the answer; ordinary chats do not enable web search. Live provider access is not verified by local tests.
 9. PDF.js is loaded from a CDN without a pinned SRI hash in this candidate; review/self-host before production. Scanned PDFs need OCR, not included. PDF creation is restored using a dependency-free PDF writer and supports basic Helvetica text layout; unsupported Unicode characters are simplified.
 10. Import supports chats, memories, and tasks with validation and new server-generated IDs; settings from exports are not automatically imported. Export contains chats, memories, tasks, and settings.
 11. This is a single-user-first Access-gated app but the database schema is multi-tenant. Verify the Access application policy and allowed email list before using personal data.

@@ -1,7 +1,7 @@
 import sqlite3, pathlib
-root=pathlib.Path(__file__).resolve().parents[1]
+root=pathlib.Path(__file__).resolve().parent
 db=sqlite3.connect(':memory:')
-db.executescript((root/'migrations/0001_init.sql').read_text())
+db.executescript((root/'0001_init.sql').read_text())
 tests=0
 def check(name, condition):
  global tests
