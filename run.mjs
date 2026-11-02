@@ -39,6 +39,15 @@ await atest('PDF export creates a valid PDF blob with a cross-reference table', 
 test('documents UI offers actual PDF export rather than a text-file fallback',()=>{ const html=fs.readFileSync(new URL('./public/index.html',import.meta.url),'utf8'); const app=fs.readFileSync(new URL('./public/app.js',import.meta.url),'utf8'); assert.match(html,/Export as text file/); assert.match(app,/application\/pdf/); assert.match(app,/function makePdf/); assert.doesNotMatch(html,/PDF export is not enabled in this build/); });
 test('frontend uses safe DOM APIs for source links without HTML injection or browser-only state', () => { const app=fs.readFileSync(new URL('./public/app.js',import.meta.url),'utf8'); assert.equal(app.includes('innerHTML'),false); assert.equal(app.includes('localStorage'),false); assert.match(app,/replaceChildren/); assert.match(app,/credentials:'same-origin'/); assert.match(app,/function addMessage\(role,text,image,sources\)/); assert.match(app,/url\.protocol!=='https:'/); });
 test('D1 tenant queries are parameterized and user-scoped', () => { const src=fs.readFileSync(new URL('./src/index.js',import.meta.url),'utf8'); assert.match(src,/SELECT id,title,route,updated_at FROM chats WHERE user_id=/); assert.match(src,/DELETE FROM memories WHERE user_id=\? AND id=\?/); assert.match(src,/UPDATE tasks SET status=\? WHERE user_id=\? AND id=\?/); });
+test('Worker Previews use their own D1 database and safe runtime vars', () => {
+  const config=JSON.parse(fs.readFileSync(new URL('./wrangler.jsonc',import.meta.url),'utf8'));
+  const productionDb=config.d1_databases.find(db=>db.binding==='DB');
+  const previewDb=config.previews?.d1_databases?.find(db=>db.binding==='DB');
+  assert.ok(previewDb,'Preview DB binding is configured');
+  assert.notEqual(previewDb.database_id,productionDb.database_id,'Preview cannot write to the test Worker DB');
+  assert.equal(previewDb.database_name,'chatgpt-nyx-preview-pr14');
+  assert.deepEqual(config.previews.vars,config.vars,'Preview runtime vars are explicit and match the safe test values');
+});
 
 globalThis.fetch = async url => { assert.equal(String(url),'https://test.cloudflareaccess.com/cdn-cgi/access/certs'); return new Response(JSON.stringify({keys:[jwk]}),{status:200,headers:{'Content-Type':'application/json'}}); };
 await atest('valid RSA-signed Access JWT is accepted', async()=>{ const result=await __test.verifyAccessJwt(token(),env); assert.equal(result.userId,'user-1'); assert.equal(result.email,'owner@example.com'); });
