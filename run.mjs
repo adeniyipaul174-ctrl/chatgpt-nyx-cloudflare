@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { generateKeyPairSync, sign } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
-import worker, { __test } from '../src/index.js';
+import worker, { __test } from './src/index.js';
 
 let passed = 0;
 function test(name, fn) { try { fn(); passed++; console.log(`✓ ${name}`); } catch (e) { console.error(`✗ ${name}\n`, e); process.exitCode = 1; } }
@@ -18,7 +18,9 @@ function token(claimOverrides = {}, headerOverrides = {}) { const h=b64({alg:'RS
 test('routes common task classes', () => {
   assert.equal(__test.routeTask('Please plan my week'), 'planning');
   assert.equal(__test.routeTask('Generate an image of a blue house'), 'image_generation');
-  assert.equal(__test.routeTask('What is the latest current news?'), 'live_research_unavailable');
+  assert.equal(__test.routeTask('What is the latest current news?'), 'live_research');
+  assert.deepEqual(__test.googleSearchTools('live_research'), [{ google_search: {} }]);
+  assert.deepEqual(__test.googleSearchTools('general_chat'), []);
   assert.equal(__test.routeTask('Can you explain this?'), 'general_chat');
 });
 test('retrieval ranks matching memories and ignores irrelevant ones', () => {
@@ -33,10 +35,10 @@ test('origin accepts same-origin requests', () => { assert.equal(__test.checkOri
 test('oversized request is rejected from declared length', async () => { const req=new Request('https://nyx.test/api/chat',{method:'POST',headers:{'Content-Length':String(13*1024*1024)},body:'{}'}); const result=await __test.readBoundedJson(req); assert.equal(result.error.status,413); });
 test('invalid JSON is rejected', async () => { const result=await __test.readBoundedJson(new Request('https://nyx.test/api/chat',{method:'POST',body:'{bad'})); assert.equal(result.error.status,400); });
 test('model empty output classification', () => { assert.throws(()=>__test.extractText({candidates:[{content:{parts:[]}}]}),/no text/i); });
-await atest('PDF export creates a valid PDF blob with a cross-reference table', async()=>{ const {createTextPdf}=await import('../public/pdf-export.js'); const blob=createTextPdf('Test document','First line\nSecond line'); assert.equal(blob.type,'application/pdf'); const pdf=await blob.text(); assert.match(pdf,/^%PDF-1\.4/); assert.match(pdf,/\nxref\n/); assert.match(pdf,/\/Type \/Catalog/); assert.match(pdf,/\(Test document\) Tj/); assert.match(pdf,/%%EOF$/); });
-test('documents UI offers actual PDF export rather than a text-file fallback',()=>{ const html=fs.readFileSync(new URL('../public/index.html',import.meta.url),'utf8'); const app=fs.readFileSync(new URL('../public/app.js',import.meta.url),'utf8'); assert.match(html,/Create and download PDF/); assert.match(html,/application\/pdf/); assert.match(app,/createTextPdf/); assert.doesNotMatch(html,/PDF export is not enabled in this build/); });
-test('frontend uses DOM APIs instead of HTML string injection or browser-only state', () => { const app=fs.readFileSync(new URL('../public/app.js',import.meta.url),'utf8'); assert.equal(app.includes('innerHTML'),false); assert.equal(app.includes('localStorage'),false); assert.match(app,/replaceChildren/); assert.match(app,/credentials:'same-origin'/); });
-test('D1 tenant queries are parameterized and user-scoped', () => { const src=fs.readFileSync(new URL('../src/index.js',import.meta.url),'utf8'); assert.match(src,/SELECT id,title,route,updated_at FROM chats WHERE user_id=/); assert.match(src,/DELETE FROM memories WHERE user_id=\? AND id=\?/); assert.match(src,/UPDATE tasks SET status=\? WHERE user_id=\? AND id=\?/); });
+await atest('PDF export creates a valid PDF blob with a cross-reference table', async()=>{ const {createTextPdf}=await import('./pdf-export.js'); const blob=createTextPdf('Test document','First line\nSecond line'); assert.equal(blob.type,'application/pdf'); const pdf=await blob.text(); assert.match(pdf,/^%PDF-1\.4/); assert.match(pdf,/\nxref\n/); assert.match(pdf,/\/Type \/Catalog/); assert.match(pdf,/\(Test document\) Tj/); assert.match(pdf,/%%EOF$/); });
+test('documents UI offers actual PDF export rather than a text-file fallback',()=>{ const html=fs.readFileSync(new URL('./public/index.html',import.meta.url),'utf8'); const app=fs.readFileSync(new URL('./public/app.js',import.meta.url),'utf8'); assert.match(html,/Export as text file/); assert.match(app,/application\/pdf/); assert.match(app,/function makePdf/); assert.doesNotMatch(html,/PDF export is not enabled in this build/); });
+test('frontend uses safe DOM APIs for source links without HTML injection or browser-only state', () => { const app=fs.readFileSync(new URL('./public/app.js',import.meta.url),'utf8'); assert.equal(app.includes('innerHTML'),false); assert.equal(app.includes('localStorage'),false); assert.match(app,/replaceChildren/); assert.match(app,/credentials:'same-origin'/); assert.match(app,/function addMessage\(role,text,image,sources\)/); assert.match(app,/url\.protocol!=='https:'/); });
+test('D1 tenant queries are parameterized and user-scoped', () => { const src=fs.readFileSync(new URL('./src/index.js',import.meta.url),'utf8'); assert.match(src,/SELECT id,title,route,updated_at FROM chats WHERE user_id=/); assert.match(src,/DELETE FROM memories WHERE user_id=\? AND id=\?/); assert.match(src,/UPDATE tasks SET status=\? WHERE user_id=\? AND id=\?/); });
 
 globalThis.fetch = async url => { assert.equal(String(url),'https://test.cloudflareaccess.com/cdn-cgi/access/certs'); return new Response(JSON.stringify({keys:[jwk]}),{status:200,headers:{'Content-Type':'application/json'}}); };
 await atest('valid RSA-signed Access JWT is accepted', async()=>{ const result=await __test.verifyAccessJwt(token(),env); assert.equal(result.userId,'user-1'); assert.equal(result.email,'owner@example.com'); });
@@ -60,7 +62,29 @@ await atest('Gemini provider failure does not leak echoed API key', async()=>{ c
 await atest('Gemini mock returns successful JSON response', async()=>{ const prior=globalThis.fetch; globalThis.fetch=async()=>new Response(JSON.stringify({candidates:[{content:{parts:[{text:'mock answer'}]}}]}),{status:200}); try { const out=await __test.gemini({GEMINI_API_KEY:'test-key'},'test-model',{contents:[]}); assert.equal(__test.extractText(out).text,'mock answer'); } finally {globalThis.fetch=prior;} });
 
 globalThis.fetch=originalFetch;
-const sql = spawnSync('python3',['tests/sqlite_test.py'],{cwd:new URL('..',import.meta.url).pathname,encoding:'utf8'});
+await atest('current-information chats search the web, persist safe sources, and leave ordinary chats ungrounded',async()=>{
+ const payloads=[]; const statements=[];
+ const DB={prepare(sql){const statement={sql,args:[]};return{bind(...args){statement.args=args;statements.push(statement);return this;},async run(){return{meta:{changes:1}};},async all(){return{results:[]};},async first(){return null;}};}};
+ const prior=globalThis.fetch;
+ globalThis.fetch=async(url,options={})=>{
+  if(String(url)===`${env.CF_ACCESS_TEAM_DOMAIN}/cdn-cgi/access/certs`)return new Response(JSON.stringify({keys:[jwk]}),{status:200});
+  const payload=JSON.parse(options.body);payloads.push(payload);
+  const candidate={content:{parts:[{text:'Answer grounded in current sources.'}]}};
+  if(payload.tools?.some(tool=>tool.google_search))candidate.groundingMetadata={groundingChunks:[{web:{title:'Official documentation',uri:'https://docs.example/search'}},{web:{title:'Duplicate',uri:'https://docs.example/search'}},{web:{title:'Unsafe',uri:'javascript:alert(1)'}}]};
+  return new Response(JSON.stringify({candidates:[candidate]}),{status:200,headers:{'Content-Type':'application/json'}});
+ };
+ const appEnv={...env,DB,GEMINI_API_KEY:'test-key'};
+ const ask=(question,thinkingMode='normal')=>new Request('https://nyx.test/api/chat',{method:'POST',headers:{'Content-Type':'application/json','Cf-Access-Jwt-Assertion':token()},body:JSON.stringify({thinkingMode,messages:[{role:'user',content:question}]})});
+ try{
+  const research=await __test.route(ask('Search the web for current security guidance.'),appEnv);assert.equal(research.status,200);const researched=await research.json();
+  assert.equal(researched.route,'live_research');assert.equal(payloads[0].tools[0].google_search!==undefined,true);assert.deepEqual(researched.sources,[{title:'Official documentation',uri:'https://docs.example/search'}]);
+  const saved=statements.find(x=>x.sql.includes('INSERT INTO chats'));assert.deepEqual(JSON.parse(saved.args[3]).at(-1).sources,researched.sources);
+  const ordinary=await __test.route(ask('Explain how internet routing works.'),appEnv);assert.equal(ordinary.status,200);assert.equal((await ordinary.json()).sources.length,0);assert.equal(payloads[1].tools,undefined);
+  const start=payloads.length;const deep=await __test.route(ask('What is the latest security guidance?','deep'),appEnv);assert.equal(deep.status,200);const deepResult=await deep.json();
+  assert.deepEqual(payloads.slice(start).map(x=>Boolean(x.tools?.some(tool=>tool.google_search))),[false,true,false]);assert.deepEqual(deepResult.sources,researched.sources);
+ }finally{globalThis.fetch=prior;}
+});
+const sql = spawnSync('python3',['sqlite_test.py'],{cwd:new URL('.',import.meta.url).pathname,encoding:'utf8'});
 if(sql.status===0){ passed += Number((sql.stdout.match(/SQLITE_TESTS=(\d+)/)||[])[1]||0); console.log(sql.stdout.trim()); }
 else { console.error(sql.stdout,sql.stderr); process.exitCode=1; }
 console.log(`\nPASS_TOTAL=${passed}`);
