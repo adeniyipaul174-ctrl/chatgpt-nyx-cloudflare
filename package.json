@@ -4,8 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "check": "node --check src/index.js && node --check public/app.js && node --check run.mjs && node --check scripts/mock-preview.mjs",
-    "test": "node run.mjs",
+    "check": "node --check src/index.js && node --check public/app.js && node --check run.mjs && node --check scripts/mock-preview.mjs && node --check src/binary-analysis.mjs && node --check src/ghidra-client.mjs && node --check tests/binary-analysis.test.mjs && node --check tests/ghidra-client.test.mjs",
+    "test": "node run.mjs && node tests/binary-analysis.test.mjs && node tests/ghidra-client.test.mjs",
     "dev": "wrangler dev",
     "preview:mock": "node scripts/mock-preview.mjs",
     "deploy": "node scripts/guard-deploy.mjs",
