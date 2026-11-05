@@ -1,9 +1,9 @@
 /**
  * NyX binary attachment triage: strictly static, never executes the specimen.
- * Bounded to 3 MiB to fit the existing JSON request limit and Worker memory.
+ * Bounded to 6 MiB to fit the existing JSON request limit and Worker memory.
  * This is NOT a decompiler; it provides facts for the AI to reason over.
  */
-export const MAX_BINARY_BYTES = 3 * 1024 * 1024;
+export const MAX_BINARY_BYTES = 6 * 1024 * 1024;
 const MAX_SECTIONS = 64;
 const MAX_STRINGS = 120;
 const MAX_IMPORTS = 100;
@@ -52,11 +52,11 @@ function decodeAttachment(attachment) {
   const name = String(attachment.filename || attachment.name || "binary").split(/[\\/]/).pop().slice(0, 160);
   if (!/^[\x20-\x7e]+$/.test(name) || /[\x00-\x1f]/.test(name)) throw inputError("Invalid file name.");
   const base64 = attachment.data;
-  if (typeof base64 !== "string" || base64.length === 0 || base64.length > Math.ceil(MAX_BINARY_BYTES / 3) * 4) throw inputError("File must be no larger than 3 MiB.");
+  if (typeof base64 !== "string" || base64.length === 0 || base64.length > Math.ceil(MAX_BINARY_BYTES / 3) * 4) throw inputError("File must be no larger than 6 MiB.");
   if (base64.length % 4 || !/^[A-Za-z0-9+/]*={0,2}$/.test(base64)) throw inputError("Invalid file encoding.");
   let binary;
   try { binary = atob(base64); } catch { throw inputError("Invalid base64 binary upload."); }
-  if (!binary.length || binary.length > MAX_BINARY_BYTES) throw inputError("File must be between 1 byte and 3 MiB.");
+  if (!binary.length || binary.length > MAX_BINARY_BYTES) throw inputError("File must be between 1 byte and 6 MiB.");
   const bytes = Uint8Array.from(binary, c => c.charCodeAt(0));
   return {bytes, filename:name};
 }
