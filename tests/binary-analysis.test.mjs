@@ -37,5 +37,5 @@ for (const invalid of [{filename:'x',data:''},{filename:'x',data:'?!'},{filename
    assert.equal((await inspectBinary(invalid)).filename,'bad.bin');
  } else await assert.rejects(()=>inspectBinary(invalid),/Invalid|no larger|between 1 byte/i);
 }
-await assert.rejects(()=>inspectBinary(payload(new Uint8Array(MAX_BINARY_BYTES+1))),/3 MiB/);
+await assert.rejects(()=>inspectBinary(payload(new Uint8Array(MAX_BINARY_BYTES+1))),/6 MiB/);
 console.log('PASS: binary parsing, hash, imports, bounded strings, malformed input, size limits');
