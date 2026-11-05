@@ -55,7 +55,7 @@ async function send(text) {
   const images = state.pendingImages.splice(0);
   state.pendingBinary = null;
   $('attachmentLabel').textContent = '';
-  addMessage('user', binary ? userText + '\\n[Attached binary: ' + binary.name + ']' : userText);
+  addMessage('user', binary ? userText + '\n[Attached binary: ' + binary.name + ']' : userText);
   state.current.push({role:'user',content:userText});
   const typing = addMessage('assistant', binary ? 'Nyx is inspecting the binary headers, imports and strings…' : 'Nyx is thinking…');
   try {
@@ -75,7 +75,7 @@ async function send(text) {
     state.pendingImages.unshift(...images);
     if (binary) state.pendingBinary = binary;
     $('attachmentLabel').textContent = binary ? 'Binary ready to retry: ' + binary.name : (images.length ? images.length + ' image(s) ready to retry' : '');
-    addMessage('assistant','I could not complete that request. Your message remains here; retry when ready.\\n\\n'+e.message);
+    addMessage('assistant','I could not complete that request. Your message remains here; retry when ready.\n\n'+e.message);
     const retry=node('button','Retry last message');
     retry.className='primary';
     retry.addEventListener('click',()=>{const last=state.current.at(-1);if(last?.role==='user'){state.current.pop();send(last.content)}});
@@ -97,7 +97,7 @@ $('attachBtn').addEventListener('click',()=>$('chatImage').click());
 $('chatImage').addEventListener('change',async e=>{
   for(const file of [...e.target.files].slice(0,5)){
     const isImage=['image/jpeg','image/png','image/webp'].includes(file.type);
-    const isBinary=/\\.(exe|dll|so|dylib|elf|bin|sys|ocx|com|wasm|o|a)$/i.test(file.name);
+    const isBinary=/\.(exe|dll|so|dylib|elf|bin|sys|ocx|com|wasm|o|a)$/i.test(file.name);
     if(isImage) {
       if(state.pendingBinary){toast('Send the binary separately from images.');continue;}
       if(file.size>4*1024*1024){toast(file.name+' is too large (max 4 MB per image).');continue;}
