@@ -1,0 +1,10 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "nyx-ida-bridge-stage",
+  "main": "worker.mjs",
+  "compatibility_date": "2026-11-05",
+  "observability": { "enabled": true, "traces": { "enabled": true } },
+  "r2_buckets": [
+    { "binding": "REPORTS", "bucket_name": "nyx-ida-reports-stage" }
+  ]
+}
