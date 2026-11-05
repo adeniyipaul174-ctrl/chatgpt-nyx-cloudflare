@@ -97,7 +97,7 @@ $('attachBtn').addEventListener('click',()=>$('chatImage').click());
 $('chatImage').addEventListener('change',async e=>{
   for(const file of [...e.target.files].slice(0,5)){
     const isImage=['image/jpeg','image/png','image/webp'].includes(file.type);
-    const isBinary=/\.(exe|dll|so|dylib|elf|bin|sys|ocx|com|wasm|o|a)$/i.test(file.name);
+    const isBinary=/\.(exe|dll|sys|ocx|com|dylib|elf|bin|wasm|o|a|so(?:\.\d+)*)$/i.test(file.name)||!file.name.includes('.')||/octet-stream|x-executable|x-sharedlib|x-msdownload/i.test(file.type);
     if(isImage) {
       if(state.pendingBinary){toast('Send the binary separately from images.');continue;}
       if(file.size>4*1024*1024){toast(file.name+' is too large (max 4 MB per image).');continue;}
@@ -105,7 +105,7 @@ $('chatImage').addEventListener('change',async e=>{
       state.pendingImages.push({name:file.name,mimeType:file.type,data:await fileToBase64(file)});
     } else if(isBinary){
       if(state.pendingImages.length){toast('Send the binary separately from images.');continue;}
-      if(file.size<1 || file.size>3*1024*1024){toast('Binary must be between 1 byte and 3 MiB for automatic chat inspection.');continue;}
+      if(file.size<1 || file.size>6*1024*1024){toast('Binary must be between 1 byte and 6 MiB for automatic chat inspection.');continue;}
       state.pendingBinary={name:file.name,data:await fileToBase64(file)};
     } else toast('Unsupported attachment. Choose an image or .exe, .dll, .so, .elf, .bin, .dylib, .wasm or similar binary.');
   }
