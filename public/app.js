@@ -1,7 +1,7 @@
 (() => {
 'use strict';
 const $ = id => document.getElementById(id);
-const state = { memories: [], tasks: [], chats: [], settings: {customInstructions:'',thinkingMode:'normal'}, current: [], currentChatId: null, pendingImages: [], busy: false, deep: false };
+const state = { memories: [], tasks: [], chats: [], settings: {customInstructions:'',thinkingMode:'normal'}, current: [], currentChatId: null, pendingImages: [], pendingBinary: null, busy: false, deep: false };
 const titles = {chat:'New chat',memory:'Memory',tasks:'Tasks',studio:'Image Studio',documents:'Images & documents',settings:'Settings'};
 function node(tag, text, className) { const el=document.createElement(tag); if(text!==undefined) el.textContent=String(text); if(className)el.className=className; return el; }
 function toast(text) { const el=$('toast'); el.textContent=text; el.classList.remove('hidden'); setTimeout(()=>el.classList.add('hidden'),3500); }
@@ -40,15 +40,80 @@ function renderMemories(){const list=$('memoryList');list.replaceChildren();if(!
 function renderTasks(){const list=$('taskList');list.replaceChildren();if(!state.tasks.length){list.appendChild(node('div','No tasks yet.','panel muted'));return;}for(const t of state.tasks){const row=node('div',undefined,'item'),body=node('div',undefined,'body'),done=node('button',t.status==='done'?'Reopen':'Complete'),del=node('button','Delete');body.append(node('span',t.title),node('small',`${t.status} · ${t.created_at||''}`));done.addEventListener('click',async()=>{try{await api('/api/tasks','PUT',{id:t.id,status:t.status==='done'?'open':'done'});await refreshState();renderTasks();}catch(e){toast(e.message)}});del.addEventListener('click',async()=>{try{await api('/api/tasks','DELETE',{id:t.id});await refreshState();renderTasks();}catch(e){toast(e.message)}});row.append(body,done,del);list.appendChild(row);}}
 async function refreshState(){const data=await api('/api/state');state.chats=data.chats||[];state.memories=data.memories||[];state.tasks=data.tasks||[];state.settings=data.settings||{customInstructions:'',thinkingMode:'normal'};renderHistory();}
 function contextBody(){return {thinkingMode:state.deep||state.settings.thinkingMode==='deep'?'deep':'normal'};}
-async function send(text){if(state.busy)return;const content=(text??$('message').value).trim();if(!content&&!state.pendingImages.length)return;state.busy=true;$('sendBtn').disabled=true;$('sendBtn').textContent='Thinking…';$('hero').classList.add('hidden');$('suggestions').classList.add('hidden');$('message').value='';const images=state.pendingImages.splice(0);$('attachmentLabel').textContent='';addMessage('user',content);state.current.push({role:'user',content});const typing=addMessage('assistant','Nyx is thinking…');
-  try{const result=await api('/api/chat','POST',{...contextBody(),chatId:state.currentChatId||undefined,messages:state.current,images:images.map(i=>({data:i.data,mimeType:i.mimeType}))});typing.remove();addMessage('assistant',result.reply||'No reply returned.',undefined,result.sources);state.current.push({role:'assistant',content:result.reply||'',sources:result.sources||[]});state.currentChatId=result.chatId||state.currentChatId;await refreshState();if(result.truncated)toast('The answer may be cut short by the model token limit. Ask Nyx to continue.');}
-  catch(e){typing.remove();addMessage('assistant','I could not complete that request. Your message remains here; retry when ready.\n\n'+e.message);const retry=node('button','Retry last message');retry.className='primary';retry.addEventListener('click',()=>{const last=state.current.at(-1);if(last?.role==='user'){state.current.pop();send(last.content)}});$('chat').lastElementChild?.lastElementChild?.appendChild(node('br'));$('chat').lastElementChild?.lastElementChild?.appendChild(retry);toast(e.message);}
-  finally{state.busy=false;$('sendBtn').disabled=false;$('sendBtn').textContent='Send ↑';$('message').focus();}}
+async function send(text) {
+  if (state.busy) return;
+  const content = (text ?? $('message').value).trim();
+  const binary = state.pendingBinary;
+  if (!content && !state.pendingImages.length && !binary) return;
+  const userText = content || (binary ? 'Reverse engineer ' + binary.name + '. Explain what it contains and what can be established from static analysis.' : 'Analyze the attached image.');
+  state.busy = true;
+  $('sendBtn').disabled = true;
+  $('sendBtn').textContent = binary ? 'Analyzing…' : 'Thinking…';
+  $('hero').classList.add('hidden');
+  $('suggestions').classList.add('hidden');
+  $('message').value = '';
+  const images = state.pendingImages.splice(0);
+  state.pendingBinary = null;
+  $('attachmentLabel').textContent = '';
+  addMessage('user', binary ? userText + '\\n[Attached binary: ' + binary.name + ']' : userText);
+  state.current.push({role:'user',content:userText});
+  const typing = addMessage('assistant', binary ? 'Nyx is inspecting the binary headers, imports and strings…' : 'Nyx is thinking…');
+  try {
+    const result = await api('/api/chat','POST',{
+      ...contextBody(),chatId:state.currentChatId||undefined,messages:state.current,
+      images:images.map(i=>({data:i.data,mimeType:i.mimeType})),
+      ...(binary ? {binary:{filename:binary.name,data:binary.data}} : {})
+    });
+    typing.remove();
+    addMessage('assistant',result.reply||'No reply returned.',undefined,result.sources);
+    state.current.push({role:'assistant',content:result.reply||'',sources:result.sources||[]});
+    state.currentChatId=result.chatId||state.currentChatId;
+    await refreshState();
+    if(result.truncated) toast('The answer may be cut short by the model token limit. Ask Nyx to continue.');
+  } catch(e) {
+    typing.remove();
+    state.pendingImages.unshift(...images);
+    if (binary) state.pendingBinary = binary;
+    $('attachmentLabel').textContent = binary ? 'Binary ready to retry: ' + binary.name : (images.length ? images.length + ' image(s) ready to retry' : '');
+    addMessage('assistant','I could not complete that request. Your message remains here; retry when ready.\\n\\n'+e.message);
+    const retry=node('button','Retry last message');
+    retry.className='primary';
+    retry.addEventListener('click',()=>{const last=state.current.at(-1);if(last?.role==='user'){state.current.pop();send(last.content)}});
+    $('chat').lastElementChild?.lastElementChild?.appendChild(node('br'));
+    $('chat').lastElementChild?.lastElementChild?.appendChild(retry);
+    toast(e.message);
+  } finally {
+    state.busy=false;
+    $('sendBtn').disabled=false;
+    $('sendBtn').textContent='Send ↑';
+    $('message').focus();
+  }
+}
 $('sendBtn').addEventListener('click',()=>send());$('message').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();}});
 document.querySelectorAll('[data-prompt]').forEach(b=>b.addEventListener('click',()=>{const p=b.dataset.prompt;if(/create an image/i.test(p)){showPage('studio');return;}$('message').value=p;send(p);}));
-$('newChatBtn').addEventListener('click',()=>{state.current=[];state.currentChatId=null;$('chat').replaceChildren();$('hero').classList.remove('hidden');$('suggestions').classList.remove('hidden');$('message').value='';showPage('chat');});
+$('newChatBtn').addEventListener('click',()=>{state.pendingImages=[];state.pendingBinary=null;$('attachmentLabel').textContent='';state.current=[];state.currentChatId=null;$('chat').replaceChildren();$('hero').classList.remove('hidden');$('suggestions').classList.remove('hidden');$('message').value='';showPage('chat');});
 function fileToBase64(file){return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(String(r.result).split(',')[1]);r.onerror=reject;r.readAsDataURL(file);});}
-$('attachBtn').addEventListener('click',()=>$('chatImage').click());$('chatImage').addEventListener('change',async e=>{for(const file of [...e.target.files].slice(0,5)){if(file.size>4*1024*1024){toast(file.name+' is too large (max 4 MB per image).');continue;}if(state.pendingImages.reduce((n,x)=>n+x.data.length,0)+file.size*1.4>8*1024*1024){toast('Attached images exceed the combined upload limit. Send fewer or smaller images.');continue;}state.pendingImages.push({name:file.name,mimeType:file.type,data:await fileToBase64(file)});}$('attachmentLabel').textContent=state.pendingImages.length?`${state.pendingImages.length} image(s) ready to attach`:'';e.target.value='';});
+$('attachBtn').addEventListener('click',()=>$('chatImage').click());
+$('chatImage').addEventListener('change',async e=>{
+  for(const file of [...e.target.files].slice(0,5)){
+    const isImage=['image/jpeg','image/png','image/webp'].includes(file.type);
+    const isBinary=/\\.(exe|dll|so|dylib|elf|bin|sys|ocx|com|wasm|o|a)$/i.test(file.name);
+    if(isImage) {
+      if(state.pendingBinary){toast('Send the binary separately from images.');continue;}
+      if(file.size>4*1024*1024){toast(file.name+' is too large (max 4 MB per image).');continue;}
+      if(state.pendingImages.reduce((n,x)=>n+x.data.length,0)+file.size*1.4>8*1024*1024){toast('Attached images exceed the combined upload limit.');continue;}
+      state.pendingImages.push({name:file.name,mimeType:file.type,data:await fileToBase64(file)});
+    } else if(isBinary){
+      if(state.pendingImages.length){toast('Send the binary separately from images.');continue;}
+      if(file.size<1 || file.size>3*1024*1024){toast('Binary must be between 1 byte and 3 MiB for automatic chat inspection.');continue;}
+      state.pendingBinary={name:file.name,data:await fileToBase64(file)};
+    } else toast('Unsupported attachment. Choose an image or .exe, .dll, .so, .elf, .bin, .dylib, .wasm or similar binary.');
+  }
+  $('attachmentLabel').textContent=state.pendingBinary
+    ? 'Binary ready: '+state.pendingBinary.name+' (static inspection)'
+    : state.pendingImages.length ? state.pendingImages.length+' image(s) ready to attach' : '';
+  e.target.value='';
+});
 $('deepBtn').addEventListener('click',()=>{state.deep=!state.deep;$('deepBtn').textContent='◎ Deep mode: '+(state.deep?'On':'Off');});
 $('voiceBtn').addEventListener('click',()=>{const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR)return toast('Voice input is not supported in this browser.');try{const r=new SR();r.lang=navigator.language||'en-US';r.onresult=e=>{$('message').value=e.results[0][0].transcript;$('message').focus();};r.onerror=()=>toast('Voice input failed or microphone permission was denied.');r.start();}catch{toast('Could not start voice input.');}});
 $('speakBtn').addEventListener('click',()=>{if(!('speechSynthesis'in window))return toast('Speech output is not supported in this browser.');const last=state.current.slice().reverse().find(m=>m.role==='assistant');if(!last?.content)return toast('There is no Nyx answer to read yet.');speechSynthesis.cancel();speechSynthesis.speak(new SpeechSynthesisUtterance(last.content));});
