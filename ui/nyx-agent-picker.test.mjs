@@ -1,4 +1,5 @@
 import test from 'node:test';
+import {Script} from 'node:vm';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 
@@ -33,4 +34,10 @@ test('no network, code execution, untrusted HTML, or secrets in the picker',()=>
  assert.equal(source.includes('fetch('),false);
  assert.equal(source.includes('eval('),false);
  assert.equal(source.includes('OPENROUTER_API_KEY'),false);
+});
+
+test('client-side selector JavaScript parses without dependencies',()=>{
+ const match=source.match(/<script>([\s\S]*?)<\/script>/);
+ assert.ok(match);
+ assert.doesNotThrow(()=>new Script(match[1]));
 });
