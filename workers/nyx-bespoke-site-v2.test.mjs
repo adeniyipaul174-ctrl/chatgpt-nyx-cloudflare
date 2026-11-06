@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {nxBespokePlan,nxBespokeClean,nxBespokeCheck,nxWebsiteBuildBespoke} from './nyx-bespoke-site-v2.mjs';
+import {nxBespokePlan,nxBespokeClean,nxBespokeCheck,nxBespokeRepairHtml,nxWebsiteBuildBespoke} from './nyx-bespoke-site-v2.mjs';
+import {nxBespokePolish,nxBespokeArchetype} from './nyx-bespoke-polish.mjs';
 const palette=(background='#111827',accent='#f43f5e')=>({background,text:'#f7f6f2',accent,surface:'#273345',muted:'#d0d0d0'});
 function planFor(brief,brand='Atelier',colors=palette(),types=['hero','gallery','editorial','contact']){
  return {brand,industry:'creative',concept:'Asymmetric architectural grid and immersive editorial type',composition:'Large offset art, tall split hero',palette:colors,headingFont:'Playfair Display',bodyFont:'Manrope',sections:types.map((type,i)=>({type,title:'Section '+i,purpose:type,composition:'bespoke '+type})),imageArt:'Editorial'};
@@ -73,4 +74,27 @@ test('safe Google Fonts and HTML-escaped Unsplash URLs pass; unquoted URLs fail'
    .replace('</body>','<img src="https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&amp;fit=crop&amp;w=1400&amp;q=82" alt="studio"></body>');
  assert.equal(nxBespokeCheck(safe,p).valid,true);
  assert.equal(nxBespokeCheck(plain.replace('</body>','<img src=javascript:alert(1)></body>'),p).valid,false);
+});
+
+test('styling differs by industry and changes actual visual composition',()=>{
+ const editorial=nxBespokePlan({...planFor('fashion','Aurelia Studio',palette('#f8f6f1','#b66a50')),industry:'creative design studio'},'Create luxury editorial creative agency website');
+ const technical=nxBespokePlan({...planFor('software','Vector Grid',palette('#08182e','#2be7fa')),industry:'data platform software'},'Create dark SaaS analytics platform website');
+ const immersive=nxBespokePlan({...planFor('restaurant','Olive Restaurant',palette('#f4ead7','#985c36')),industry:'restaurant hospitality'},'Create intimate Mediterranean restaurant website');
+ assert.equal(nxBespokeArchetype(editorial),'editorial');
+ assert.equal(nxBespokeArchetype(technical),'technical');
+ assert.equal(nxBespokeArchetype(immersive),'immersive');
+ const e=nxBespokePolish(htmlFor(editorial),editorial),t=nxBespokePolish(htmlFor(technical),technical),i=nxBespokePolish(htmlFor(immersive),immersive);
+ assert.ok(e.includes('data-nx-bespoke-polish="editorial"'));
+ assert.ok(t.includes('data-nx-bespoke-polish="technical"'));
+ assert.ok(i.includes('data-nx-bespoke-polish="immersive"'));
+ assert.ok(e.includes('#b66a50')&&t.includes('#2be7fa'));
+ assert.notEqual(e,t);assert.notEqual(t,i);
+ for(const [html,plan] of [[e,editorial],[t,technical],[i,immersive]])assert.ok(nxBespokeCheck(html,plan).valid);
+});
+test('code repair closes missing semantic structure without pretending to add requested sections',()=>{
+ const p=nxBespokePlan(planFor('Brand Studio','Brand Studio'),'Create a website for Brand Studio');
+ const incomplete=htmlFor(p).replace('<main id="home">','').replace('</main>','').replace('<footer>© Brand Studio</footer>','');
+ const repaired=nxBespokeRepairHtml(incomplete,p);
+ assert.match(repaired,/<main\b/);assert.match(repaired,/<\/main>/);assert.match(repaired,/<footer>/);
+ assert.ok(nxBespokeCheck(nxBespokePolish(repaired,p),p).valid);
 });
