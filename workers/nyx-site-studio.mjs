@@ -14,6 +14,7 @@ export function nxWebsiteIntent(prompt,revision){
  const p=prompt.trim();if(!p)return false;
  if(revision&&typeof revision==='object'&&/^(change|update|revise|redo|improve|refine|make|replace|adjust|add|remove|switch|modify|rework|rebuild|redesign)\b/i.test(p))return true;
  if(/^(how|why|what|where|who|when|explain|tell me about)\b/i.test(p))return false;
+ if(/^(?:create|generate|draw|design|make|render)\b.{0,90}\b(?:image|picture|photo|screenshot|mockup)\b/i.test(p))return false;
  return /\b(build|create|design|generate|make|develop|produce|launch|redesign|rebuild)\b[\s\S]{0,130}\b(website|web\s?page|landing\s?page|homepage|portfolio\s?site|business\s?site|online\s?store)\b/i.test(p)||/^(website|webpage|landing page)\s+(for|about|named)\b/i.test(p);
 }
 function nxSiteLink(value){
