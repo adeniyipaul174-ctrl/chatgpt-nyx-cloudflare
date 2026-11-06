@@ -47,6 +47,53 @@
 .top .nx-mode-option[aria-checked="true"]{border-color:#8575bb67;background:linear-gradient(100deg,#5f528843,#3c3a511f)}
 @media(max-width:650px){.top .nx-mode-trigger{padding:4px 7px;border-radius:12px}}
 @media(max-width:390px){.top .nx-mode-trigger{padding:3px 5px}}
+
+/* NyX mobile header: graphite/silver with restrained pink accents.
+   Scoped to existing .top header; preserves the native agent-mode input. */
+.top{position:relative;z-index:30;overflow:visible}
+.top>div:first-child{display:flex;align-items:center;min-width:0;white-space:nowrap;flex-wrap:nowrap}
+.top>div:last-child{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:nowrap;min-width:0}
+.top>div:last-child>button{flex:0 0 auto;margin:0}
+.top .nx-mode-picker{position:relative;z-index:31;flex:0 0 auto}
+.top .nx-mode-trigger{background:linear-gradient(150deg,#27282d,#18191d 75%);border-color:#42434c;color:#f5f5f7;box-shadow:inset 0 1px #ffffff10,0 5px 18px #0004}
+.top .nx-mode-trigger:hover{border-color:#7d8089;background:linear-gradient(150deg,#32333a,#1c1d22)}
+.top .nx-mode-trigger[aria-expanded="true"]{border-color:#ef86b5;box-shadow:0 0 0 3px #f35f9f20}
+.nx-mode-mark{background:linear-gradient(145deg,#525760,#25262b);border-color:#73778155;color:#fff}
+.nx-mode-menu{z-index:3000;background:linear-gradient(165deg,#23252b,#121317 77%);border-color:#44474f;box-shadow:0 24px 70px #000c,0 4px 14px #0007;overflow-x:hidden!important}
+.nx-mode-option[data-nx-mode="team"] .nx-mode-symbol{color:#ffafcf;background:#f35f9f1a;border-color:#f35f9f4d}
+.top .nx-mode-option[aria-checked="true"]{border-color:#f35f9f55;background:linear-gradient(105deg,#f35f9f16,#ffffff07)}
+.nx-mode-check{background:#ed74ad;color:#19141a}
+.nx-mode-heading span:last-child{color:#e9a8ca;background:#f35f9f12;border-color:#f35f9f30}
+.nx-mode-footer span{color:#ed74ad}
+/* Existing .top button { display:inline-flex } otherwise sends menu options sideways. */
+.top .nx-mode-option{display:flex!important;align-items:center!important;width:100%!important;text-align:left!important;white-space:normal!important}
+@media(max-width:700px){
+ .top{height:62px!important;min-height:62px!important;padding:0 12px!important;gap:6px;justify-content:space-between;overflow:visible}
+ .top>div:first-child{flex:0 0 auto;gap:1px;min-width:0;white-space:nowrap}
+ .top>div:last-child{flex:0 0 auto;gap:6px;white-space:nowrap;min-width:0}
+ .top #menu{display:inline-flex;align-items:center;justify-content:center;width:34px!important;min-width:34px!important;height:37px!important;min-height:37px!important;margin:0!important;padding:0!important;border:0!important;flex:none}
+ .top>div:first-child>strong{font-size:19px!important;letter-spacing:-.075em;white-space:nowrap}
+ .top>div:first-child>small{font-size:10px!important;margin-left:3px!important;white-space:nowrap}
+ .top #settingsTop,.top #newTop{width:37px!important;height:37px!important;min-width:37px!important;min-height:37px!important;max-width:37px!important;margin:0!important;padding:7px!important;border-radius:12px!important;flex:0 0 37px;font-size:0!important;line-height:1!important}
+ .top #settingsTop .nx-icon,.top #newTop .nx-icon{width:19px!important;height:19px!important}
+ .top .nx-mode-trigger{height:37px!important;min-height:37px!important;min-width:0!important;max-width:107px;padding:4px 7px!important;gap:5px!important;border-radius:12px!important;margin:0!important;white-space:nowrap}
+ .nx-mode-mark{width:24px;height:24px;flex:0 0 24px;border-radius:8px;font-size:14px}
+ .top .nx-mode-trigger-copy strong{font-size:11px!important;white-space:nowrap}
+ .nx-mode-trigger-copy small{display:none!important}
+ .nx-mode-chevron{flex:0 0 11px;width:11px;height:11px;margin-left:0}
+ .top .nx-mode-picker{isolation:auto;z-index:32}
+ .nx-mode-menu{position:fixed!important;top:calc(66px + env(safe-area-inset-top,0px))!important;left:12px!important;right:12px!important;width:auto!important;max-width:none!important;max-height:min(465px,calc(100dvh - 90px));border-radius:17px}
+ .top .nx-mode-option{min-height:52px}
+}
+@media(max-width:350px){
+ .top{padding:0 9px!important;gap:4px}
+ .top>div:last-child{gap:4px}
+ .top>div:first-child>small{display:none}
+ .top #menu{width:31px!important;min-width:31px!important}
+ .top #settingsTop,.top #newTop{width:34px!important;min-width:34px!important;max-width:34px!important;flex-basis:34px}
+ .top .nx-mode-trigger{padding:4px 5px!important;gap:4px!important}
+ .nx-mode-menu{left:9px!important;right:9px!important}
+}
 </style>
 <div id="nxModePicker" class="nx-mode-picker">
 <!-- The native select is retained as a progressive enhancement fallback and
