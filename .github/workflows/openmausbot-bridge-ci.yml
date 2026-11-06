@@ -1,0 +1,38 @@
+name: OpenMausBot bridge checks (no deploy)
+on:
+  pull_request:
+    paths:
+      - "src/openmausbot.js"
+      - "src/index.js"
+      - "public/index.html"
+      - "public/app.js"
+      - "run.mjs"
+      - "docs/openmausbot-integration.md"
+      - ".gitmodules"
+      - "vendor/OpenMausBot"
+      - ".github/workflows/openmausbot-bridge-ci.yml"
+  workflow_dispatch:
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          submodules: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: Verify imported upstream revision is pinned
+        run: |
+          git ls-tree HEAD vendor/OpenMausBot | grep -F "e8dc6cfccabbb499e4ded16c07b462a466460ecc"
+      - name: Run NyX security and bridge tests
+        run: npm test
+      - name: JavaScript syntax checks
+        run: |
+          npm run check
+          node --check src/openmausbot.js
+      - name: Check patches
+        run: git diff --check HEAD~1 HEAD
