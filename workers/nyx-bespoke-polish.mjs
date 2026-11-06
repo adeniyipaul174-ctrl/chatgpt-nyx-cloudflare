@@ -4,7 +4,9 @@ const NX_BESPOKE_POLISH_STYLES={editorial:"\nbody{font-family:Arial,Helvetica,sa
 export function nxBespokeArchetype(plan){
  const t=[plan.industry,plan.concept,plan.composition,plan.brief].join(' ').toLowerCase();
  if(/\b(?:software|platform|data|saas|fintech|technology|developer|ai product|cloud|dashboard|cyber)\b/.test(t))return 'technical';
- if(/\b(?:travel|hotel|restaurant|cafe|coffee|food|resort|tourism|spa|wellness|retreat|hospitality)\b/.test(t)||/full[ -]?bleed|immersive/i.test(t))return 'immersive';
+ if(/\b(?:travel|hotel|restaurant|cafe|coffee|food|resort|tourism|spa|wellness|retreat|hospitality)\b/.test(t))return 'immersive';
+ if(/\b(?:agency|creative studio|design studio|architect|luxury|editorial)\b/.test(t))return 'editorial';
+ if(/full[ -]?bleed|immersive/i.test(t))return 'immersive';
  if(/\b(?:fashion|streetwear|lookbook|boutique|apparel|photograph|portfolio|bold graphic)\b/.test(t))return 'showcase';
  return 'editorial';
 }
