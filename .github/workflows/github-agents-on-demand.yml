@@ -30,7 +30,7 @@ on:
       - "tasks/nyx-task.md"
 permissions:
   contents: read
-  models: read
+  id-token: write
 concurrency:
   group: nyx-github-agent-runner
   cancel-in-progress: false
@@ -43,8 +43,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "24"
-      - name: Test serverless agent port
-        run: node --test scripts/nyx-github-agents.test.mjs
+      - name: Test serverless agent port and cryptographic OIDC verifier
+        run: node --test scripts/nyx-github-agents.test.mjs workers/nyx-github-oidc.test.mjs
   run-agents:
     needs: validate
     runs-on: ubuntu-latest
@@ -54,9 +54,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "24"
-      - name: Run NyX agents with GitHub Models
+      - name: Run NyX agents with short-lived OIDC and existing NyX Workers AI
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NYX_ACTIONS_URL: https://nyx-agent-team-stage.adeniyipaul174.workers.dev/api/nyx/github-agents/infer
           NYX_TASK: ${{ inputs.task }}
           NYX_AGENT_MODE: ${{ inputs.mode }}
         run: node scripts/nyx-github-agents.mjs
