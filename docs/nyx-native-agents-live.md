@@ -1,5 +1,7 @@
 # NyX Agent Team — Cloudflare production deployment
 
+> **Latest production update (November 6, 2026):** The Agent Team is now integrated into the **normal NyX chat** with Auto, Normal, Team, Planner, Writer, Coder and Reviewer modes. Current live version: `e463106f-f313-4706-b1b4-00486cb4032d`. See [normal-chat agent integration](nyx-normal-chat-agents.md). The version numbers below are preserved as historical release notes, not the latest production status.
+
 **Published on 2026-11-06.** This change was applied directly to the current live Cloudflare Worker **`chatgpt-nyx-v3-test`**, rather than deploying the outdated GitHub root checkout.
 
 - Live entry: https://chatgpt-nyx-v3-test.adeniyipaul174.workers.dev/agents
