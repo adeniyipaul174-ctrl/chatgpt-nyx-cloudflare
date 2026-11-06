@@ -1,0 +1,126 @@
+<!-- Live NyX agent picker UI: custom dark dropdown with accessible fallback. -->
+<style>
+/* NyX custom agent picker — dark glass, silver/lilac accents. */
+.nx-mode-picker{position:relative;isolation:isolate;flex:0 0 auto;font-family:inherit}
+.nx-mode-native{font:600 12px/1.2 system-ui;min-height:38px;max-width:125px;color:#eeeef5;background:#1b1d26;border:1px solid #444753;border-radius:12px;padding:7px}
+.nx-mode-picker.nx-enhanced .nx-mode-native{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;border:0!important;opacity:0!important;pointer-events:none;clip-path:inset(50%);white-space:nowrap}
+.nx-mode-picker:not(.nx-enhanced) .nx-mode-trigger{display:none}
+.nx-mode-trigger{appearance:none;display:flex;gap:9px;align-items:center;justify-content:flex-start;min-width:145px;height:43px;margin:0;padding:6px 10px 6px 7px;color:#f7f6fc;background:linear-gradient(150deg,#282736,#191b26 70%);border:1px solid #484756;border-radius:14px;cursor:pointer;box-shadow:inset 0 1px rgba(255,255,255,.08),0 5px 18px #0002;transition:border-color .18s,background .18s,box-shadow .18s,transform .18s;font:inherit}
+.nx-mode-trigger:hover{background:linear-gradient(145deg,#323044,#222332);border-color:#756e94;box-shadow:inset 0 1px rgba(255,255,255,.11),0 5px 20px #0003}
+.nx-mode-trigger[aria-expanded="true"]{border-color:#aa9cda;box-shadow:0 0 0 3px #ad95ee20,inset 0 1px #ffffff14}
+.nx-mode-trigger:focus-visible,.nx-mode-option:focus-visible{outline:2px solid #cbbafa;outline-offset:2px}
+.nx-mode-mark{display:grid;place-items:center;flex:0 0 30px;width:30px;height:30px;border:1px solid #7669a44d;border-radius:10px;background:linear-gradient(135deg,#7e6cbb,#3c355c);box-shadow:inset 0 1px #fff3;color:#f9f4ff;font-size:18px;line-height:1}
+.nx-mode-trigger-copy{display:flex;flex-direction:column;align-items:flex-start;min-width:0;gap:1px;line-height:1.1}
+.nx-mode-trigger-copy strong{font-size:12px;letter-spacing:.005em;font-weight:710;white-space:nowrap}
+.nx-mode-trigger-copy small{font-size:9px;letter-spacing:.02em;color:#b3afc4;white-space:nowrap}
+.nx-mode-chevron{width:13px;height:13px;flex:none;margin-left:auto;color:#bfb9d6;transition:transform .18s}
+.nx-mode-trigger[aria-expanded="true"] .nx-mode-chevron{transform:rotate(180deg)}
+.nx-mode-menu{position:absolute;z-index:2500;right:0;top:calc(100% + 11px);width:min(326px,calc(100vw - 30px));max-height:min(465px,calc(100dvh - 95px));overflow-y:auto;overscroll-behavior:contain;padding:9px;background:linear-gradient(150deg,#232430,#13151d 79%);border:1px solid #514c65;border-radius:19px;box-shadow:0 20px 64px #000a,0 3px 12px #0008,inset 0 1px #ffffff15;backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);animation:nxModeOpen .16s ease-out;scrollbar-width:thin;scrollbar-color:#615b76 transparent}
+.nx-mode-menu[hidden]{display:none!important}
+@keyframes nxModeOpen{from{opacity:0;transform:translateY(-5px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+.nx-mode-heading{display:flex;align-items:center;justify-content:space-between;padding:10px 11px 12px;font-size:10px;font-weight:800;letter-spacing:.13em;color:#aaa7b9;text-transform:uppercase}
+.nx-mode-heading span:last-child{font-weight:650;font-size:9px;letter-spacing:.01em;text-transform:none;color:#a495d3;background:#8c76bd17;border:1px solid #8c76bd44;padding:4px 7px;border-radius:99px}
+.nx-mode-separator{margin:7px 9px;border-top:1px solid #ffffff15}
+.nx-mode-option{display:flex;align-items:center;gap:11px;width:100%;padding:10px;border:1px solid transparent;border-radius:12px;background:transparent;color:#f2f1f8;text-align:left;cursor:pointer;font:inherit;transition:background .14s,border-color .14s}
+.nx-mode-option:hover{background:#ffffff0b}
+.nx-mode-option[aria-checked="true"]{border-color:#8575bb67;background:linear-gradient(100deg,#5f528843,#3c3a511f);box-shadow:inset 0 1px #ffffff0b}
+.nx-mode-symbol{display:grid;place-items:center;width:37px;height:37px;flex:0 0 37px;border-radius:12px;color:#cfc3f5;background:#9486c51a;border:1px solid #998ac63b;font-size:18px;font-weight:600}
+.nx-mode-option[data-nx-mode="off"] .nx-mode-symbol{color:#b8c1d0;background:#9daab313;border-color:#aab2c02b}
+.nx-mode-option[data-nx-mode="team"] .nx-mode-symbol{color:#ddd2ff;background:linear-gradient(135deg,#7160ad77,#393052);border-color:#a99bdb5e}
+.nx-mode-option-text{flex:1;min-width:0}
+.nx-mode-option-text strong{display:block;font-size:12px;font-weight:700;letter-spacing:.004em;line-height:1.4}
+.nx-mode-option-text small{display:block;margin-top:2px;color:#a8a9bb;font-size:10.4px;line-height:1.3}
+.nx-mode-check{display:grid;place-items:center;flex:none;width:17px;height:17px;border-radius:50%;background:#b8a5f0;color:#17121e;font-size:11px;opacity:0;transform:scale(.7);transition:opacity .13s,transform .13s}
+.nx-mode-option[aria-checked="true"] .nx-mode-check{opacity:1;transform:scale(1)}
+.nx-mode-footer{padding:12px 11px 7px;margin-top:7px;border-top:1px solid #ffffff15;color:#9697a9;font-size:10px;line-height:1.5}
+.nx-mode-footer span{color:#c8bcf1}
+@media(max-width:650px){.nx-mode-trigger{min-width:0;height:37px;gap:5px;padding:4px 7px;border-radius:12px}.nx-mode-mark{width:26px;height:26px;flex-basis:26px;border-radius:9px;font-size:15px}.nx-mode-trigger-copy strong{font-size:11px}.nx-mode-trigger-copy small{display:none}.nx-mode-chevron{width:11px;height:11px;margin-left:2px}.nx-mode-menu{right:-6px;top:calc(100% + 10px)}}
+@media(max-width:390px){.nx-mode-trigger{padding:3px 5px}.nx-mode-trigger-copy strong{max-width:57px;text-overflow:ellipsis;overflow:hidden}.nx-mode-menu{right:-40px;max-width:calc(100vw - 18px)}}
+@media(prefers-reduced-motion:reduce){.nx-mode-menu{animation:none}.nx-mode-option,.nx-mode-trigger,.nx-mode-chevron,.nx-mode-check{transition:none}}
+</style>
+<div id="nxModePicker" class="nx-mode-picker">
+<!-- The native select is retained as a progressive enhancement fallback and
+     as the single source of truth for existing NyX chat requests. -->
+<button type="button" id="nxModeTrigger" class="nx-mode-trigger" aria-label="Agent mode: Auto. Choose mode" aria-haspopup="menu" aria-expanded="false" aria-controls="nxModeMenu"><span class="nx-mode-mark" id="nxModeMark" aria-hidden="true">✦</span><span class="nx-mode-trigger-copy"><strong id="nxModeLabel">Auto</strong><small id="nxModeSubtitle">Smart routing</small></span><svg class="nx-mode-chevron" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></button><div id="nxModeMenu" class="nx-mode-menu" role="menu" aria-label="Choose NyX agent mode" hidden><div class="nx-mode-heading">YOUR INTELLIGENCE <span>7 modes</span></div><button type="button" class="nx-mode-option" role="menuitemradio" data-nx-mode="auto" aria-checked="true" tabindex="-1"><span class="nx-mode-symbol" aria-hidden="true">✦</span><span class="nx-mode-option-text"><strong>Auto</strong><small>NyX picks the right specialist</small></span><span class="nx-mode-check" aria-hidden="true">✓</span></button>
+<button type="button" class="nx-mode-option" role="menuitemradio" data-nx-mode="off" aria-checked="false" tabindex="-1"><span class="nx-mode-symbol" aria-hidden="true">○</span><span class="nx-mode-option-text"><strong>Normal</strong><small>Just NyX, no agent handoff</small></span><span class="nx-mode-check" aria-hidden="true">✓</span></button>
+<div class="nx-mode-separator" role="separator"></div><button type="button" class="nx-mode-option" role="menuitemradio" data-nx-mode="team" aria-checked="false" tabindex="-1"><span class="nx-mode-symbol" aria-hidden="true">✧</span><span class="nx-mode-option-text"><strong>Agent Team</strong><small>Plan, create and review together</small></span><span class="nx-mode-check" aria-hidden="true">✓</span></button>
+<button type="button" class="nx-mode-option" role="menuitemradio" data-nx-mode="planner" aria-checked="false" tabindex="-1"><span class="nx-mode-symbol" aria-hidden="true">▦</span><span class="nx-mode-option-text"><strong>Planner</strong><small>Break big ideas into clear steps</small></span><span class="nx-mode-check" aria-hidden="true">✓</span></button>
+<button type="button" class="nx-mode-option" role="menuitemradio" data-nx-mode="writer" aria-checked="false" tabindex="-1"><span class="nx-mode-symbol" aria-hidden="true">✎</span><span class="nx-mode-option-text"><strong>Writer</strong><small>Sharper words, stories and copy</small></span><span class="nx-mode-check" aria-hidden="true">✓</span></button>
+<button type="button" class="nx-mode-option" role="menuitemradio" data-nx-mode="coder" aria-checked="false" tabindex="-1"><span class="nx-mode-symbol" aria-hidden="true">⌘</span><span class="nx-mode-option-text"><strong>Coder</strong><small>Build, debug and explain code</small></span><span class="nx-mode-check" aria-hidden="true">✓</span></button>
+<button type="button" class="nx-mode-option" role="menuitemradio" data-nx-mode="reviewer" aria-checked="false" tabindex="-1"><span class="nx-mode-symbol" aria-hidden="true">◇</span><span class="nx-mode-option-text"><strong>Reviewer</strong><small>Spot gaps and improve the result</small></span><span class="nx-mode-check" aria-hidden="true">✓</span></button><div class="nx-mode-footer"><span>✦</span> Switch anytime. Your conversation stays in this chat.</div></div>
+</div>
+
+<script>
+/* Accessible visual agent selector; original #nxChatAgentMode controls all requests. */
+(function(){
+ "use strict";
+ var wrap=document.getElementById("nxModePicker");
+ var nativeSelect=document.getElementById("nxChatAgentMode");
+ var trigger=document.getElementById("nxModeTrigger");
+ var menu=document.getElementById("nxModeMenu");
+ if(!wrap||!nativeSelect||!trigger||!menu)return;
+ var entries=Array.prototype.slice.call(menu.querySelectorAll("[data-nx-mode]"));
+ var label=document.getElementById("nxModeLabel"),mark=document.getElementById("nxModeMark");
+ var subtitle=document.getElementById("nxModeSubtitle");
+ var modes={
+  auto:["Auto","Smart routing","✦"],off:["Normal","Standard chat","○"],team:["Agent Team","Multi-agent","✧"],
+  planner:["Planner","Strategy & plans","▦"],writer:["Writer","Words & ideas","✎"],
+  coder:["Coder","Build & debug","⌘"],reviewer:["Reviewer","Quality check","◇"]
+ };
+ var storageKey="nyx_chat_agent_mode_v1";
+ function close(restoreFocus){
+  if(menu.hidden)return;
+  menu.hidden=true;trigger.setAttribute("aria-expanded","false");
+  if(restoreFocus)trigger.focus();
+ }
+ function open(){
+  menu.hidden=false;trigger.setAttribute("aria-expanded","true");
+  var chosen=entries.find(function(b){return b.dataset.nxMode===nativeSelect.value;})||entries[0];
+  chosen.focus();
+ }
+ function update(mode,persist){
+  if(!Object.prototype.hasOwnProperty.call(modes,mode))mode="auto";
+  nativeSelect.value=mode;
+  var info=modes[mode];
+  label.textContent=info[0];subtitle.textContent=info[1];mark.textContent=info[2];
+  trigger.setAttribute("aria-label","Agent mode: "+info[0]+". Choose mode");
+  entries.forEach(function(item){
+   var chosen=item.dataset.nxMode===mode;
+   item.setAttribute("aria-checked",String(chosen));
+   item.tabIndex=chosen?0:-1;
+  });
+  if(persist){try{localStorage.setItem(storageKey,mode);}catch(e){}}
+ }
+ var saved="auto";
+ try{saved=localStorage.getItem(storageKey)||"auto";}catch(e){}
+ update(saved,false);
+ nativeSelect.addEventListener("change",function(){update(nativeSelect.value,true);});
+ trigger.addEventListener("click",function(){menu.hidden?open():close(false);});
+ menu.addEventListener("click",function(e){
+  var item=e.target.closest("[data-nx-mode]");
+  if(!item||!menu.contains(item))return;
+  update(item.dataset.nxMode,true);close(true);
+ });
+ menu.addEventListener("keydown",function(e){
+  var focused=entries.indexOf(document.activeElement);
+  if(e.key==="Escape"){e.preventDefault();close(true);return;}
+  if(["ArrowDown","ArrowUp","Home","End"].indexOf(e.key)>=0){
+   e.preventDefault();
+   var index=e.key==="Home"?0:e.key==="End"?entries.length-1:
+    (focused+(e.key==="ArrowDown"?1:-1)+entries.length)%entries.length;
+   entries[index].focus();
+  }
+  if(e.key==="Tab")close(false);
+ });
+ trigger.addEventListener("keydown",function(e){
+  if(e.key==="ArrowDown"||e.key==="ArrowUp"||e.key==="Enter"||e.key===" "){
+   if(e.key==="ArrowDown"||e.key==="ArrowUp"){e.preventDefault();open();}
+  }
+  if(e.key==="Escape")close(false);
+ });
+ document.addEventListener("pointerdown",function(e){if(!wrap.contains(e.target))close(false);});
+ document.addEventListener("keydown",function(e){if(e.key==="Escape"&&!menu.hidden)close(true);});
+ nativeSelect.setAttribute("aria-hidden","true");nativeSelect.tabIndex=-1;
+ wrap.classList.add("nx-enhanced");
+})();
+</script>
