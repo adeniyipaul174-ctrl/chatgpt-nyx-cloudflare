@@ -3,7 +3,7 @@ import {chromium} from "playwright-core";
 import {existsSync} from "node:fs";
 import {nxSiteRenderHtml,nxSiteNormalize} from "../workers/nyx-site-studio.mjs";
 const url=process.env.NYX_SITE_STUDIO_URL;
-assert.ok(url&&url.startsWith("https://nyx-live-site-polish-stage."),"Dedicated stage URL required");
+assert.ok(url&&url.startsWith("https://chatgpt-nyx-v3-test."),"Production URL required");
 const html=nxSiteRenderHtml(nxSiteNormalize({brand:"Lumière Studio",category:"studio",theme:"blush",headline:"Beautiful days begin here.",highlight:"Designed for you."}));
 const publicHealth=await fetch(url+"/api/health");
 assert.equal(publicHealth.status,200);
