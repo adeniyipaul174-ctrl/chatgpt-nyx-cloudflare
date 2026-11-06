@@ -56,6 +56,25 @@ export function nxBespokeClean(source){
  if(!/^<!doctype html>/i.test(html))html='<!doctype html>\n'+html;
  return html;
 }
+export function nxBespokeRepairHtml(source,plan){
+ let html=nxBespokeClean(source);
+ if(!/<html\b[^>]*lang=/i.test(html))html=html.replace(/<html\b/i,'<html lang="en"');
+ if(!/<meta\b[^>]*name=["']viewport["']/i.test(html))
+   html=html.replace(/<\/head>/i,'<meta name="viewport" content="width=device-width,initial-scale=1"></head>');
+ if(!/<main\b/i.test(html)){
+  if(/<\/header>/i.test(html))html=html.replace(/<\/header>/i,'</header><main>');
+  else if(/<body\b[^>]*>/i.test(html))html=html.replace(/<body\b[^>]*>/i,x=>x+'<main>');
+  if(/<main\b/i.test(html)){
+   if(/<footer\b/i.test(html))html=html.replace(/<footer\b/i,'</main><footer>');
+   else html=html.replace(/<\/body>/i,'</main></body>');
+  }
+ }
+ if(!/<footer\b/i.test(html)){
+  const title=String(plan.brand||'Your Brand').replace(/&/g,'&amp;').replace(/</g,'&lt;');
+  html=html.replace(/<\/body>/i,'<footer><p>© '+new Date().getUTCFullYear()+' '+title+'. All rights reserved.</p></footer></body>');
+ }
+ return html;
+}
 export function nxBespokeCheck(html,plan){
  const errors=[];
  if(typeof html!=='string'||html.length<4800||html.length>135000)errors.push('incomplete or oversized HTML');
@@ -66,6 +85,7 @@ export function nxBespokeCheck(html,plan){
  ])if(!rule.test(html))errors.push('missing '+label);
  const count=(html.match(/<section\b/gi)||[]).length;
  if(count<3)errors.push('too few sections');
+ if(plan.sections?.length>=3&&count>plan.sections.length+2)errors.push('unrequested duplicate sections ('+count+' versus '+plan.sections.length+' planned)');
  if(/<\s*(?:script|iframe|object|embed|applet|form|base|svg|math)\b|<meta\s+http-equiv|\son[a-z]{3,24}\s*=|javascript\s*:|@import\b|\bsrcset\s*=|\bsrcdoc\s*=|\bformaction\s*=/i.test(html))errors.push('unsafe or unsupported executable markup');
  const imageLinks=[...html.matchAll(/\bsrc\s*=\s*["']([^"']+)["']/gi)].map(x=>x[1].replace(/&amp;/gi,'&'));
  if(imageLinks.some(x=>!/^https:\/\/images\.unsplash\.com\/photo-[\w-]+(?:\?[\w=&.%+-]+)?$/i.test(x)))errors.push('unapproved image host');
@@ -119,7 +139,7 @@ export async function nxWebsiteBuildBespoke(env,brief,previous=null){
   return nxBespokeReply(r);
  };
  let draft=await code(task),html,quality,review=null;
- try{html=nxBespokeClean(draft);quality=nxBespokeCheck(html,plan)}
+ try{html=nxBespokePolish(nxBespokeRepairHtml(draft,plan),plan);quality=nxBespokeCheck(html,plan)}
  catch(err){quality={valid:false,errors:[String(err?.message||'Incomplete website')]}};
  if(quality.valid)review=await nxBespokeCritique(env,brief,plan,html);
  if(!quality.valid||(review?.score!==null&&review?.score<8)){
@@ -131,7 +151,7 @@ export async function nxWebsiteBuildBespoke(env,brief,previous=null){
   const repair='The first website is not good enough. Specific problems: '+failures.join('; ')+
     '. REBUILD THE ENTIRE HTML DOCUMENT, not just a CSS patch. Strictly follow every layout composition, exact headline, brand, section and color in the full brief. Produce more distinctive visual composition and complete responsive CSS. Start <!doctype html> and end </html>.\n'+task+
     '\nPrevious draft (for improvement):\n'+String(draft).slice(0,9500);
-  draft=await code(repair);html=nxBespokeClean(draft);quality=nxBespokeCheck(html,plan);
+  draft=await code(repair);html=nxBespokePolish(nxBespokeRepairHtml(draft,plan),plan);quality=nxBespokeCheck(html,plan);
   if(quality.valid)review=await nxBespokeCritique(env,brief,plan,html);
  }
  if(!quality.valid)throw Error('Website generation did not meet your brief: '+quality.errors.slice(0,2).join('; ')+'. Please retry.');
