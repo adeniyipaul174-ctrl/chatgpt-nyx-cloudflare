@@ -3,7 +3,7 @@ import {existsSync} from 'node:fs';
 import {nxSiteRenderHtml,nxSiteNormalize} from '../workers/nyx-site-studio.mjs';
 import assert from 'node:assert/strict';
 // Test current staged client, including template-literal-safe revision routing.
-const BASE='https://nyx-site-studio-stage.adeniyipaul174.workers.dev';
+const BASE=process.env.NYX_SITE_STUDIO_URL||'https://nyx-site-studio-stage.adeniyipaul174.workers.dev';
 const executablePath=[process.env.CHROME_PATH,'/usr/bin/google-chrome','/usr/bin/google-chrome-stable','/usr/bin/chromium'].find(p=>p&&existsSync(p));
 if(!executablePath)throw Error('Chrome unavailable; site studio browser test cannot pass');
 const browser=await chromium.launch({headless:true,executablePath,args:['--no-sandbox','--disable-dev-shm-usage']});
