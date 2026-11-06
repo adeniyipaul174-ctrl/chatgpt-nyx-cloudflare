@@ -42,6 +42,7 @@ export function nxBespokePlan(raw,brief,previous){
   brief:String(brief).slice(0,4000)
  };
  p.requestedColors=[...new Set((brief.match(/#[a-f0-9]{6}\b/gi)||[]).map(x=>x.toLowerCase()))].slice(0,10);
+ p.exactPhrases=[...new Set([...String(brief).matchAll(/[\"“]([^\"”]{8,125})[\"”]/g)].map(x=>x[1].trim()))].slice(0,12);
  if(!p.concept)throw Error('The art director did not specify a distinctive visual concept.');
  return p;
 }
@@ -65,7 +66,7 @@ export function nxBespokeCheck(html,plan){
  ])if(!rule.test(html))errors.push('missing '+label);
  const count=(html.match(/<section\b/gi)||[]).length;
  if(count<3)errors.push('too few sections');
- if(/<\s*(?:script|iframe|object|embed|applet|form|base|svg|math)\b|<meta\s+http-equiv|\son[a-z]{3,24}\s*=|javascript\s*:|@import\b/i.test(html))errors.push('unsafe or unsupported executable markup');
+ if(/<\s*(?:script|iframe|object|embed|applet|form|base|svg|math)\b|<meta\s+http-equiv|\son[a-z]{3,24}\s*=|javascript\s*:|@import\b|\bsrcset\s*=|\bsrcdoc\s*=|\bformaction\s*=/i.test(html))errors.push('unsafe or unsupported executable markup');
  const imageLinks=[...html.matchAll(/\bsrc\s*=\s*["']([^"']+)["']/gi)].map(x=>x[1]);
  if(imageLinks.some(x=>!/^https:\/\/images\.unsplash\.com\/photo-[\w-]+(?:\?[\w=&.%+-]+)?$/i.test(x)))errors.push('unapproved image host');
  const hrefs=[...html.matchAll(/\bhref\s*=\s*["']([^"']+)["']/gi)].map(x=>x[1]);
@@ -78,10 +79,24 @@ export function nxBespokeCheck(html,plan){
  const colors=Object.values(plan.palette||{});
  if(colors.filter(x=>html.toLowerCase().includes(x.toLowerCase())).length<2)errors.push('planned palette ignored');
  for(const x of plan.requestedColors||[])if(!html.toLowerCase().includes(x))errors.push('requested '+x+' omitted');
+ const visible=html.replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').toLowerCase();
+ for(const quote of plan.exactPhrases||[])if(!visible.includes(quote.toLowerCase()))errors.push('exact client copy omitted: '+quote.slice(0,45));
  return {valid:errors.length===0,errors,sections:count,bytes:html.length};
 }
 const NX_BESPOKE_DIRECTOR='Act as an elite website creative director. Create ORIGINAL art direction for the SPECIFIC supplied brief, never a fixed website template. Preserve exact requested colors, brand, sections, content, and layout. Select colors per brief (not default colors), visual motifs, typography, and distinctive composition. Output STRICT JSON, nothing else. Schema: {brand,industry,concept,composition,palette:{background,text,accent,surface,muted},headingFont,bodyFont,imageArt,interactionNotes,sections:[{type,title,purpose,composition}]}. Include all requested sections, 3 to 12; order and geometry should differ with industry. All colors 6-digit #HEX. headingFont/bodyFont from Manrope, DM Sans, Outfit, Playfair Display, Cormorant Garamond, DM Serif Display, Space Grotesk, Fraunces, Inter, Bodoni Moda, Sora, Libre Baskerville. No fabricated reviews, results, credentials, or people.';
 const NX_BESPOKE_CODER='You are a world-class creative web designer AND senior HTML/CSS engineer. Generate a complete ORIGINAL editorial-quality single-page website. YOU design the layout and CSS from the supplied client brief plus art direction, NOT a repeated Services/About/Process template. Use sophisticated typography, negative space, interesting grid composition, custom sections, varied radii, deliberate image cropping, polished CTAs, strong contrast, subtle CSS interactions, and mobile responsive layouts. Respect user brand and ALL exact requested #HEX colors, typography, copy and sections. Produce entirely bespoke HTML/CSS including complete <html lang="en">, viewport meta, <header>, working <nav> anchors, <main>, at least three <section> blocks, <footer>, and at least one <style> with @media(max-width:720px). Include <details> for accordion if needed. All CSS inline in <style>. Use only the APPROVED image URLs supplied; other image URLs are forbidden. Do not invent reviews, credentials, stats or contact details. No scripts, no forms, no inline events, no iframes, no embeds, no CSS imports, no external stylesheet, no SVG. Links within the page should use real anchor IDs. Any contact, checkout or backend actions not supplied by user are presentation only; do not fake connected systems. Return ONLY THE ENTIRE HTML DOCUMENT, starting <!doctype html> and finishing </html>, no code fences or explanations. It must be >= 4,800 characters and polished enough for a paying client.';
+async function nxBespokeCritique(env,brief,plan,html){
+ try{
+  const instruction='Act as a critical senior web design reviewer. Assess whether the GENERATED HTML/CSS genuinely follows the exact user brief and unique art direction. Check requested composition, colors, exact copy, section types and order, responsive grids, use of imagery, and whether it looks distinctive rather than a generic landing-page template. Be strict. Return ONLY JSON with score (integer 0-10) and missing (array of at most 7 short actionable defects). A normal page with generic vertical sections ignoring bento, diagonal, editorial, etc should score below 7. No markdown.';
+  const r=await env.AI.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast',{
+   messages:[{role:'system',content:instruction},{role:'user',content:'CLIENT BRIEF:\n'+brief+'\nART DIRECTION:\n'+JSON.stringify(plan).slice(0,5000)+'\nGENERATED HTML/CSS:\n'+html.slice(0,14500)}],
+   max_tokens:470,temperature:.15
+  });
+  const v=nxBespokeJson(nxBespokeReply(r));
+  return {score:Number.isFinite(v.score)?Math.max(0,Math.min(10,v.score)):null,
+   missing:Array.isArray(v.missing)?v.missing.slice(0,7).map(x=>String(x).slice(0,160)):[]};
+ }catch{return null}
+}
 export async function nxWebsiteBuildBespoke(env,brief,previous=null){
  if(!env?.AI)throw Error('NyX website AI is unavailable.');
  if(typeof brief!=='string'||brief.trim().length<12||brief.length>4000)throw Error('Please describe the website in 12 to 4,000 characters.');
@@ -102,13 +117,23 @@ export async function nxWebsiteBuildBespoke(env,brief,previous=null){
   });
   return nxBespokeReply(r);
  };
- let draft=await code(task),html,quality;
+ let draft=await code(task),html,quality,review=null;
  try{html=nxBespokeClean(draft);quality=nxBespokeCheck(html,plan)}
  catch(err){quality={valid:false,errors:[String(err?.message||'Incomplete website')]}};
- if(!quality.valid){
-  const repair='The initial website was rejected: '+quality.errors.join('; ')+'. REGENERATE THE ENTIRE COMPLETE DOCUMENT, NOT A PATCH. Keep user brief and original site plan. Finish with </html>.\n'+task+'\nPrior draft for diagnosis:\n'+draft.slice(0,8500);
+ if(quality.valid)review=await nxBespokeCritique(env,brief,plan,html);
+ if(!quality.valid||(review?.score!==null&&review?.score<8)){
+  const failures=[
+   ...(quality?.errors||[]),
+   ...(review?.missing||[]),
+   ...(review?.score!==null&&review?.score<8?['Visual design score '+review.score+'/10; redesign required']:[])
+  ];
+  const repair='The first website is not good enough. Specific problems: '+failures.join('; ')+
+    '. REBUILD THE ENTIRE HTML DOCUMENT, not just a CSS patch. Strictly follow every layout composition, exact headline, brand, section and color in the full brief. Produce more distinctive visual composition and complete responsive CSS. Start <!doctype html> and end </html>.\n'+task+
+    '\nPrevious draft (for improvement):\n'+String(draft).slice(0,9500);
   draft=await code(repair);html=nxBespokeClean(draft);quality=nxBespokeCheck(html,plan);
+  if(quality.valid)review=await nxBespokeCritique(env,brief,plan,html);
  }
  if(!quality.valid)throw Error('Website generation did not meet your brief: '+quality.errors.slice(0,2).join('; ')+'. Please retry.');
- return {kind:'website',reply:'Built a custom '+quality.sections+'-section responsive website from your exact brief. Preview, export HTML or request specific changes. Real payment processing, working forms and database features need separate integrations.',siteHtml:html,siteSpec:{version:2,brand:plan.brand,designPlan:plan,sections:quality.sections,engine:'bespoke-code-v2'}};
+ if(review?.score!==null&&review?.score<6)throw Error('The generated website did not meet the design-quality review. Please refine or shorten the brief and retry.');
+ return {kind:'website',reply:'Built a custom '+quality.sections+'-section responsive website from your exact brief. Preview, export HTML or request specific changes. Real payment processing, working forms and database features need separate integrations.',siteHtml:html,siteSpec:{version:2,brand:plan.brand,designPlan:plan,sections:quality.sections,engine:'bespoke-code-v2',reviewScore:review?.score??null}};
 }
