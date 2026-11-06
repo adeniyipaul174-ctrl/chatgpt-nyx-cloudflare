@@ -65,7 +65,7 @@ export function nxBespokeCheck(html,plan){
  ])if(!rule.test(html))errors.push('missing '+label);
  const count=(html.match(/<section\b/gi)||[]).length;
  if(count<3)errors.push('too few sections');
- if(/<\s*(?:script|iframe|object|embed|applet|form|base|svg|math)\b|<meta\s+http-equiv|on[a-z]{3,24}\s*=|javascript\s*:|@import\b/i.test(html))errors.push('unsafe or unsupported executable markup');
+ if(/<\s*(?:script|iframe|object|embed|applet|form|base|svg|math)\b|<meta\s+http-equiv|\son[a-z]{3,24}\s*=|javascript\s*:|@import\b/i.test(html))errors.push('unsafe or unsupported executable markup');
  const imageLinks=[...html.matchAll(/\bsrc\s*=\s*["']([^"']+)["']/gi)].map(x=>x[1]);
  if(imageLinks.some(x=>!/^https:\/\/images\.unsplash\.com\/photo-[\w-]+(?:\?[\w=&.%+-]+)?$/i.test(x)))errors.push('unapproved image host');
  const hrefs=[...html.matchAll(/\bhref\s*=\s*["']([^"']+)["']/gi)].map(x=>x[1]);
