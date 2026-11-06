@@ -56,7 +56,7 @@ test('two-model design-then-code execution preserves detailed prompt',async()=>{
 });
 test('invalid code retries exactly once then fails visibly',async()=>{
  let i=0;const fake={AI:{run:async()=>{i++;return {response:i===1?JSON.stringify(planFor('X')):'<html>bad page</html>'}}}};
- await assert.rejects(()=>nxWebsiteBuildBespoke(fake,'Build a beautiful website for a studio'),/unfinished|did not meet/);
+ await assert.rejects(()=>nxWebsiteBuildBespoke(fake,'Build a beautiful website for a studio'),/unfinished|did not meet|complete head/);
  assert.equal(i,3);
 });
 
