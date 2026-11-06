@@ -65,3 +65,12 @@ test('exact quoted client headings cannot be silently paraphrased',()=>{
  assert.deepEqual(p.exactPhrases,['We Create Brands That Leave a Lasting Impression.']);
  assert.equal(nxBespokeCheck(htmlFor({...p,brand:'Creative Agency'}),p).valid,false);
 });
+
+test('safe Google Fonts and HTML-escaped Unsplash URLs pass; unquoted URLs fail',()=>{
+ const p=nxBespokePlan(planFor('Test'),'Build a new professional website for Test');
+ const plain=htmlFor(p);
+ const safe=plain.replace('</head>','<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700&amp;display=swap"></head>')
+   .replace('</body>','<img src="https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&amp;fit=crop&amp;w=1400&amp;q=82" alt="studio"></body>');
+ assert.equal(nxBespokeCheck(safe,p).valid,true);
+ assert.equal(nxBespokeCheck(plain.replace('</body>','<img src=javascript:alert(1)></body>'),p).valid,false);
+});
