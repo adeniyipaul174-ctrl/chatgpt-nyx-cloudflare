@@ -50,16 +50,7 @@ export async function githubModel({token,agent,content,fetchImpl=fetch,endpoint=
    body:JSON.stringify({agent,content:content.slice(0,10000)}),
    signal:controller.signal,redirect:'error'
   });
-  if(!response.ok) {
-   if(response.status===401 && process.env.NYX_DEBUG_OIDC==='true' && endpoint===MODEL_ENDPOINT) {
-    try {
-     const diag=await fetchImpl('https://nyx-agent-team-stage.adeniyipaul174.workers.dev/api/nyx/github-agents/debug-jwks');
-     const obj=await diag.json();
-     console.log('GitHub JWK public metadata diagnostic:',JSON.stringify(obj));
-    }catch{console.log('GitHub JWK diagnostic unavailable')}
-   }
-   throw Error('NyX AI returned HTTP '+response.status+'. Check GitHub OIDC or AI quota.');
-  }
+  if(!response.ok)throw Error('NyX AI returned HTTP '+response.status+'. Check GitHub OIDC or AI quota.');
   const json=await response.json(),answer=json?.choices?.[0]?.message?.content;
   if(typeof answer!=='string'||!answer.trim())throw Error('NyX AI returned an empty answer.');
   return answer.slice(0,12000);
@@ -85,17 +76,6 @@ async function main() {
  const task=process.env.NYX_TASK?.trim()||await readFile(resolve('tasks/nyx-task.md'),'utf8');
  const mode=process.env.NYX_AGENT_MODE||'team';
  const token=await githubOidcToken();
- if(process.env.NYX_DEBUG_OIDC==='true') {
-  const p=JSON.parse(Buffer.from(token.split('.')[1],'base64url').toString('utf8'));
-  const h=JSON.parse(Buffer.from(token.split('.')[0],'base64url').toString('utf8'));
-  console.log('GitHub OIDC claim summary:',JSON.stringify({
-   alg:h.alg,kid:h.kid,iss:p.iss,aud:p.aud,repository:p.repository,
-   repository_id:p.repository_id,repository_owner_id:p.repository_owner_id,
-   ref:p.ref,workflow_ref:p.workflow_ref,sub:p.sub,
-   event_name:p.event_name,run_id:p.run_id,
-   iat:p.iat,exp:p.exp
-  }));
- }
  const result=await runAgents({task,mode,token,model:DEFAULT_MODEL});
  const dest=resolve('nyx-agent-results');await mkdir(dest,{recursive:true});
  await writeFile(resolve(dest,'result.md'),formatMarkdown(result)+'\n',{mode:0o600});
