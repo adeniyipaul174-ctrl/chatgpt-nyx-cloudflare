@@ -24,6 +24,9 @@ export function nxInChatPick(task, mode='auto') {
     ||/\b(?:create (?:a|an) (?:project|launch|business) plan|plan (?:the|a|my) (?:project|launch))\b/i.test(q))return 'planner';
   return null;
 }
+export function nxInChatEarly(mode) {
+ return ['team','planner','writer','coder','reviewer'].includes(mode);
+}
 function nxInChatContext(messages) {
   if(!Array.isArray(messages))return '';
   return messages.slice(-6,-1).filter(x=>['user','assistant'].includes(x?.role)&&typeof x?.content==='string')
