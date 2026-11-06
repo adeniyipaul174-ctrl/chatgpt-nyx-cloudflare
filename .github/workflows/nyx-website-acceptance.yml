@@ -1,0 +1,24 @@
+name: NyX Website Studio browser acceptance (staging only)
+on:
+  push:
+    branches:
+      - feature/openmausbot-integration
+    paths:
+      - "ui/nyx-website-studio.acceptance.mjs"
+      - ".github/workflows/nyx-website-acceptance.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: Install isolated browser-test package
+        run: npm install --no-save --ignore-scripts --no-package-lock playwright-core@1.57.0
+      - name: Exercise published staging UI and preview
+        run: node ui/nyx-website-studio.acceptance.mjs
