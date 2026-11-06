@@ -23,7 +23,7 @@ function nxGhFrom64(part){
 function nxGhDecodeJson(part){return JSON.parse(new TextDecoder().decode(nxGhFrom64(part)))}
 async function nxGhGetKeys(fetchImpl,refresh){
  if(!refresh&&nxGhJwksCache&&Date.now()-nxGhJwksAt<600000)return nxGhJwksCache;
- const r=await fetchImpl(NX_GH_JWKS_URL,{redirect:'error',signal:AbortSignal.timeout(7000)});
+ const r=await fetchImpl(NX_GH_JWKS_URL,{redirect:'manual',signal:AbortSignal.timeout(7000)});
  if(!r.ok)throw Error('No GitHub OIDC keys');
  const json=await r.json();
  if(!Array.isArray(json?.keys)||json.keys.length<1||json.keys.length>30)throw Error('Invalid OIDC keyset');
