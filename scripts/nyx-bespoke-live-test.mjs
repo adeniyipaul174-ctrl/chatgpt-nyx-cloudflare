@@ -1,4 +1,5 @@
 // One-shot end-to-end test of NyX bespoke website generation on staging.
+// Test run: verifies the real 3-stage art direction, code and critique sequence.
 // Signed GitHub Actions OIDC is accepted only by the designated staging route.
 // The sample brief is public; never use real customer details in CI logs.
 import assert from 'node:assert/strict';
