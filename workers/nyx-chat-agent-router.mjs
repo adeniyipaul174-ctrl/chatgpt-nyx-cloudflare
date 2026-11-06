@@ -50,7 +50,7 @@ export async function nxInChatExecute({task,mode='auto',messages=[],style='balan
   }
   const plan=await ask('planner',brief);
   if(typeof plan!=='string'||!plan.trim())throw Error('Empty plan');
-  const workingRole=/\b(?:code|script|program|javascript|typescript|python|api|github|implement software|build (?:an? )?app)\b/i.test(safeTask)?'coder':'writer';
+  const workingRole=/\b(?:code|script|program|javascript|typescript|python|api|github|website|implement software|build (?:an? )?app)\b/i.test(safeTask)?'coder':'writer';
   const draft=await ask(workingRole,brief+'\n\nAGENT PLAN (review critically):\n'+plan.slice(0,3900));
   if(typeof draft!=='string'||!draft.trim())throw Error('Empty created result');
   const review=await ask('reviewer',brief+'\n\nDRAFT FOR QUALITY REVIEW:\n'+draft.slice(0,5000));
