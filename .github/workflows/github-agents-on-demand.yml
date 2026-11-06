@@ -28,6 +28,7 @@ on:
       - "scripts/nyx-github-agents.mjs"
       - "scripts/nyx-github-agents.test.mjs"
       - "tasks/nyx-task.md"
+      - "scripts/nyx-bespoke-live-test.mjs"
 permissions:
   contents: read
   id-token: write
@@ -60,6 +61,10 @@ jobs:
           NYX_TASK: ${{ inputs.task }}
           NYX_AGENT_MODE: ${{ inputs.mode }}
         run: node scripts/nyx-github-agents.mjs
+      # Only runs for an explicit one-time test commit, not ordinary user tasks.
+      - name: Test real bespoke website build on isolated Cloudflare Worker
+        if: github.event_name == 'push' && contains(github.event.head_commit.message, '[site-v2-test]')
+        run: node scripts/nyx-bespoke-live-test.mjs
       - name: Upload results
         if: always()
         uses: actions/upload-artifact@v4
