@@ -1,4 +1,4 @@
-// Real deployed NyX HTML and UI test. Browser session is synthetic; no actual account cookies or credentials.
+// Real deployed NyX HTML and UI test (post mobile agent-label fix). Browser session is synthetic; no actual account cookies or credentials.
 import {chromium} from 'playwright-core';
 import {existsSync} from 'node:fs';
 import assert from 'node:assert/strict';
