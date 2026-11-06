@@ -1,4 +1,4 @@
-name: NyX live Website Studio polish staging checks
+name: NyX Website Studio production acceptance
 on:
   push:
     branches:
@@ -19,9 +19,9 @@ jobs:
           node-version: "24"
       - name: Install Chrome test adapter
         run: npm install --no-save --ignore-scripts --no-package-lock playwright-core@1.57.0
-      - name: Check site restoration endpoint and browser preview
+      - name: Verify production site restoration and website preview
         env:
-          NYX_SITE_STUDIO_URL: https://nyx-live-site-polish-stage.adeniyipaul174.workers.dev
+          NYX_SITE_STUDIO_URL: https://chatgpt-nyx-v3-test.adeniyipaul174.workers.dev
         run: |
           node ui/nyx-live-site-polish-checks.mjs
           node ui/nyx-site-studio-browser.mjs
