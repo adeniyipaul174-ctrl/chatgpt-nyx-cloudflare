@@ -50,7 +50,16 @@ export async function githubModel({token,agent,content,fetchImpl=fetch,endpoint=
    body:JSON.stringify({agent,content:content.slice(0,10000)}),
    signal:controller.signal,redirect:'error'
   });
-  if(!response.ok)throw Error('NyX AI returned HTTP '+response.status+'. Check GitHub OIDC or AI quota.');
+  if(!response.ok) {
+   if(response.status===401 && process.env.NYX_DEBUG_OIDC==='true' && endpoint===MODEL_ENDPOINT) {
+    try {
+     const diag=await fetchImpl('https://nyx-agent-team-stage.adeniyipaul174.workers.dev/api/nyx/github-agents/debug-jwks');
+     const obj=await diag.json();
+     console.log('GitHub JWK public metadata diagnostic:',JSON.stringify(obj));
+    }catch{console.log('GitHub JWK diagnostic unavailable')}
+   }
+   throw Error('NyX AI returned HTTP '+response.status+'. Check GitHub OIDC or AI quota.');
+  }
   const json=await response.json(),answer=json?.choices?.[0]?.message?.content;
   if(typeof answer!=='string'||!answer.trim())throw Error('NyX AI returned an empty answer.');
   return answer.slice(0,12000);
