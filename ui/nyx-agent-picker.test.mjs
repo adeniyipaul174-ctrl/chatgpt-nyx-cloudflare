@@ -41,3 +41,10 @@ test('client-side selector JavaScript parses without dependencies',()=>{
  assert.ok(match);
  assert.doesNotThrow(()=>new Script(match[1]));
 });
+
+test('compact trigger names remain accessible as full agent names',()=>{
+ assert.match(source,/team:\["Team","Multi-agent","✧"\]/);
+ assert.match(source,/reviewer:\["Review","Quality check","◇"\]/);
+ assert.match(source,/mode==="team"\?"Agent Team"/);
+ assert.match(source,/mode==="reviewer"\?"Reviewer"/);
+});
