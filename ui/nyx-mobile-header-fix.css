@@ -44,3 +44,8 @@
  .top .nx-mode-trigger{padding:4px 5px!important;gap:4px!important}
  .nx-mode-menu{left:9px!important;right:9px!important}
 }
+/* Long mode names must never collide with the chevron on narrow screens. */
+@media(max-width:700px){
+ .top .nx-mode-trigger-copy{flex:1 1 auto;min-width:0;overflow:hidden}
+ .top .nx-mode-trigger-copy strong{display:block;max-width:100%!important;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+}
