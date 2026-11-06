@@ -98,3 +98,13 @@ test('code repair closes missing semantic structure without pretending to add re
  assert.match(repaired,/<main\b/);assert.match(repaired,/<\/main>/);assert.match(repaired,/<footer>/);
  assert.ok(nxBespokeCheck(nxBespokePolish(repaired,p),p).valid);
 });
+
+test('fake contact forms are converted to an honest static CTA, not left functional-looking',()=>{
+ const plan=nxBespokePlan(planFor('Aurelia Studio','Aurelia Studio'),'Create a professional website for Aurelia Studio');
+ const original=htmlFor(plan).replace('<section id="contact"><h2>','<section id="contact" class="contact"><h2>')
+  .replace('</section><section><h2>Our approach','<input type="text" placeholder="Email"><textarea placeholder="Message"></textarea><button>Send</button></section><section><h2>Our approach');
+ const repaired=nxBespokeRepairHtml(original,plan);
+ assert.ok(!/<input\b|<textarea\b|<button\b/i.test(repaired));
+ assert.match(repaired,/Contact-form delivery can be connected before publishing/);
+ assert.equal(nxBespokeCheck(nxBespokePolish(repaired,plan),plan).valid,true);
+});
