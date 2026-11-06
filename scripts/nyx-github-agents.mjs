@@ -75,7 +75,19 @@ export function formatMarkdown(result) {
 async function main() {
  const task=process.env.NYX_TASK?.trim()||await readFile(resolve('tasks/nyx-task.md'),'utf8');
  const mode=process.env.NYX_AGENT_MODE||'team';
- const result=await runAgents({task,mode,token:await githubOidcToken(),model:DEFAULT_MODEL});
+ const token=await githubOidcToken();
+ if(process.env.NYX_DEBUG_OIDC==='true') {
+  const p=JSON.parse(Buffer.from(token.split('.')[1],'base64url').toString('utf8'));
+  const h=JSON.parse(Buffer.from(token.split('.')[0],'base64url').toString('utf8'));
+  console.log('GitHub OIDC claim summary:',JSON.stringify({
+   alg:h.alg,kid:h.kid,iss:p.iss,aud:p.aud,repository:p.repository,
+   repository_id:p.repository_id,repository_owner_id:p.repository_owner_id,
+   ref:p.ref,workflow_ref:p.workflow_ref,sub:p.sub,
+   event_name:p.event_name,run_id:p.run_id,
+   iat:p.iat,exp:p.exp
+  }));
+ }
+ const result=await runAgents({task,mode,token,model:DEFAULT_MODEL});
  const dest=resolve('nyx-agent-results');await mkdir(dest,{recursive:true});
  await writeFile(resolve(dest,'result.md'),formatMarkdown(result)+'\n',{mode:0o600});
  await writeFile(resolve(dest,'result.json'),JSON.stringify({at:new Date().toISOString(),...result},null,2)+'\n',{mode:0o600});
