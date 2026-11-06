@@ -34,8 +34,8 @@
  async function getHtml(message){
   if(!message||!message.websiteSpec)return null;
   var content=null;
-  if(message.websiteId&&typeof findBlob==="function"){
-   try{var blob=await findBlob(message.websiteId);if(blob)content=await blob.text()}catch(e){}
+  if(message.websiteId&&typeof window.nyxWebsiteFindBlob==="function"){
+   try{var blob=await window.nyxWebsiteFindBlob(message.websiteId);if(blob)content=await blob.text()}catch(e){}
   }
   if(content)return content;
   // On a second device, regenerate the static HTML from its saved spec without a model call.
@@ -44,7 +44,7 @@
    if(!response.ok)throw Error("Website file could not be restored.");
    var data=await response.json();content=data.html;
    if(typeof content!=="string"||content.length>110000)throw Error("Website file was invalid.");
-   if(message.websiteId&&typeof putBlob==="function")await putBlob(message.websiteId,new Blob([content],{type:"text/html"}));
+   if(message.websiteId&&typeof window.nyxWebsitePutBlob==="function")await window.nyxWebsitePutBlob(message.websiteId,new Blob([content],{type:"text/html"}));
    return content;
   }catch(e){if(typeof notify==="function")notify("Could not restore this website. Try regenerating it.");return null}
  }
