@@ -4,7 +4,6 @@ import assert from 'node:assert/strict';
 import {existsSync} from 'node:fs';
 import {readFile,mkdir} from 'node:fs/promises';
 import {resolve} from 'node:path';
-import {pathToFileURL} from 'node:url';
 import {chromium} from 'playwright-core';
 const path=resolve('nyx-agent-results/aurelia-bespoke-site.html');
 assert.ok(existsSync(path),'Real generated website HTML artifact missing');
@@ -19,7 +18,7 @@ try{
   const context=await browser.newContext({viewport:{width,height:900},deviceScaleFactor:1});
   const page=await context.newPage();
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
-  await page.goto(pathToFileURL(path).href,{waitUntil:'domcontentloaded',timeout:30000});
+  await page.setContent(source,{waitUntil:'domcontentloaded',timeout:30000});
   const status=await page.evaluate(()=>{
    const css=getComputedStyle(document.body);
    const bounds=document.querySelector('h1')?.getBoundingClientRect();
