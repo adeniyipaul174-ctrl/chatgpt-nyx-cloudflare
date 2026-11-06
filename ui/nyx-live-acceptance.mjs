@@ -84,7 +84,8 @@ try{
    if(width===393||width===320||width===768){
      await page.locator('[data-nx-mode="reviewer"]').click();
      assert.equal(await page.locator('#nxChatAgentMode').inputValue(),'reviewer','native select synchronized');
-     assert.equal(await page.locator('#nxModeLabel').innerText(),'Reviewer','custom trigger synchronized');
+     assert.equal(await page.locator('#nxModeLabel').innerText(),'Review','compact custom trigger synchronized');
+     assert.match(await page.locator('#nxModeTrigger').getAttribute('aria-label'),/Reviewer/,'full accessible name retained');
      assert.equal(await page.locator('#nxModeTrigger').getAttribute('aria-expanded'),'false','menu closes after click');
      assert.equal(await page.evaluate(()=>localStorage.getItem('nyx_chat_agent_mode_v1')),'reviewer','saved selection');
      await page.reload({waitUntil:'domcontentloaded'});
