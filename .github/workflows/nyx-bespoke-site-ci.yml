@@ -6,6 +6,7 @@ on:
     paths:
       - "workers/nyx-bespoke-site-v2.mjs"
       - "workers/nyx-bespoke-site-v2.test.mjs"
+      - "workers/nyx-bespoke-polish.mjs"
       - ".github/workflows/nyx-bespoke-site-ci.yml"
 permissions:
   contents: read
@@ -21,4 +22,5 @@ jobs:
       - name: Check output validation and unique responsive design planning
         run: |
           node --check workers/nyx-bespoke-site-v2.mjs
+          node --check workers/nyx-bespoke-polish.mjs
           node --test workers/nyx-bespoke-site-v2.test.mjs
