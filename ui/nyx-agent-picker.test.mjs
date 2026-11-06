@@ -6,7 +6,7 @@ const source=await readFile(new URL('./nyx-agent-picker-snippet.html',import.met
 const modes=['auto','off','team','planner','writer','coder','reviewer'];
 
 test('all seven modes are exposed exactly once and have radio semantics',()=>{
- const found=[...source.matchAll(/data-nx-mode="([^"]+)"/g)].map(x=>x[1]);
+ const found=[...source.matchAll(/<button\b[^>]*data-nx-mode="([^"]+)"[^>]*>/g)].map(x=>x[1]);
  assert.deepEqual(found,modes);
  assert.equal((source.match(/role="menuitemradio"/g)||[]).length,7);
  assert.equal((source.match(/class="nx-mode-check"/g)||[]).length,7);
