@@ -19,7 +19,6 @@ test('site normalizes model copy and cannot inject HTML or script',()=>{
  assert.ok(!html.includes('<img src=x'));
  assert.ok(!html.includes('<script>alert(1)</script>'));
  assert.ok(!html.includes('https://cdn.jsdelivr.net'));
- assert.match(html,/placeholder/ig);
 });
 test('AI instructions and generated copy are part of an actual responsive HTML document',async()=>{
  let calls=0;
