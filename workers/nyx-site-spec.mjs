@@ -11,7 +11,8 @@ const text=(a,b,n,fallback)=>clean(a||b,n)||fallback;
 export function siteIntent(message,hasPrior=false){
  if(typeof message!=="string"||message.length>5000)return false;
  const q=message.trim();
- if(/^(?:what|why|how|where|explain|tell me|should|can i)\b/i.test(q)&&!/\b(?:create|build|design|make|generate)\b/i.test(q))return false;
+ if(/^(?:what|why|how|where|explain|tell me|should)\b/i.test(q))return false;
+ if(/\b(?:logo|image|picture|poster|banner|icon)\b.{0,42}\b(?:for|of)\b.{0,42}\b(?:website|web\s?site)\b/i.test(q))return false;
  if(/^(?:\/website|@website|\/site)\b/i.test(q))return true;
  if(/\b(?:create|build|design|make|generate|develop|craft)\b[\s\S]{0,110}\b(?:website|web\s?site|web\s?page|landing\s?page|home\s?page|portfolio\s?site|online\s?store|business\s?site|shopfront)\b/i.test(q))return true;
  return hasPrior&&/^(?:make|change|edit|revise|update|redo|improve|add|remove|switch)\b/i.test(q)&&/\b(?:it|this|the|website|site|page|theme|color|colour|design|hero|font|background|section|layout)\b/i.test(q);
