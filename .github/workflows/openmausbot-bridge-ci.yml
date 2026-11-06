@@ -4,6 +4,8 @@ on:
     paths:
       - "src/openmausbot.js"
       - "src/nyx-native-agents-reference.js"
+      - "workers/nyx-chat-agent-router.mjs"
+      - "workers/nyx-chat-agent-router.test.mjs"
       - "docs/nyx-native-agents-live.md"
       - "src/index.js"
       - "public/index.html"
@@ -38,5 +40,6 @@ jobs:
           npm run check
           node --check src/openmausbot.js
           node --check src/nyx-native-agents-reference.js
+          node --test workers/nyx-chat-agent-router.test.mjs
       - name: Check patches
         run: git diff --check HEAD~1 HEAD
