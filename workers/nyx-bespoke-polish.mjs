@@ -10,7 +10,7 @@ export function nxBespokeArchetype(plan){
 }
 export function nxBespokePolish(html,plan){
  const mode=nxBespokeArchetype(plan),pal=plan.palette||{};
- const photo=NX_BESPOKE_IMAGES[mode==='technical'?11:mode==='immersive'?3:mode==='showcase'?5:2];
+ const photo=({technical:'photo-1498050108023-c5249f4df085',immersive:'photo-1517248135467-4c7edcad34c4',showcase:'photo-1483985988355-763728e1935b',editorial:'photo-1600607687920-4e2a09cf159d'})[mode];
  const brand=String(plan.brand||'Studio').replace(/[^a-z0-9 &.-]/gi,' ').slice(0,60);
  const css=':root{--nx-bg:'+pal.background+';--nx-ink:'+pal.text+';--nx-accent:'+pal.accent+';--nx-surface:'+pal.surface+';--nx-muted:'+pal.muted+';--nx-brand-label:"'+brand+'";--nx-photo:url(https://images.unsplash.com/'+photo+'?auto=format&fit=crop&w=1400&q=82);--nx-card-bg:'+pal.surface+';--nx-card-border:'+pal.muted+'33;--nx-footer:'+pal.text+';--nx-footer-ink:'+pal.background+'}';
  const style='<style data-nx-bespoke-polish="'+mode+'">'+css+NX_BESPOKE_POLISH_BASE+NX_BESPOKE_POLISH_STYLES[mode]+'</style>';
