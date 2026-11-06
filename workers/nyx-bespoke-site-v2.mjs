@@ -1,3 +1,4 @@
+import {nxBespokePolish} from './nyx-bespoke-polish.mjs';
 // NyX bespoke website builder: architect first, write bespoke HTML/CSS second.
 // Deliberately no fallback to the old fixed-site template.
 const NX_BESPOKE_IMAGES=[
