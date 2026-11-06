@@ -57,6 +57,7 @@ jobs:
       - name: Run NyX agents with short-lived OIDC and existing NyX Workers AI
         env:
           NYX_ACTIONS_URL: https://nyx-agent-team-stage.adeniyipaul174.workers.dev/api/nyx/github-agents/infer
+          NYX_DEBUG_OIDC: 'true'
           NYX_TASK: ${{ inputs.task }}
           NYX_AGENT_MODE: ${{ inputs.mode }}
         run: node scripts/nyx-github-agents.mjs
