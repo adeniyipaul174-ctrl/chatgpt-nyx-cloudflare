@@ -18,7 +18,8 @@ const nxSiteImages={
 };
 export function nxSiteIntent(value) {
  const q=String(value||'').trim();
- if(!q||q.length>4000||/^(?:how|why|what|when|where|who|can|could|should|do|does|is|are|explain|tell me|show me how)\b/i.test(q))return false;
+ if(!q||q.length>4000||/^(?:how|why|what|when|where|who|should|do|does|is|are|explain|tell me|show me how)\b/i.test(q))return false;
+ if(/\b(?:image|picture|screenshot|mockup|photo|logo)\b.{0,45}\b(?:of|showing|for)\b.{0,45}\b(?:website|webpage|landing\s?page)\b/i.test(q))return false;
  if(/\b(?:find|search|browse|audit|review|analy[sz]e|test|inspect)\b.{0,50}\b(?:websites?|sites?)\b/i.test(q))return false;
  return /\b(?:build|create|design|generate|make|develop|code|produce)\b.{0,100}\b(?:website|web\s?site|landing\s?page|webpage|web\s?page|portfolio\s?site|online\s?store|storefront)\b|\b(?:website|landing\s?page|portfolio\s?site|online\s?store|storefront)\b.{0,70}\b(?:build|create|design|generate|make)\b/i.test(q);
 }
