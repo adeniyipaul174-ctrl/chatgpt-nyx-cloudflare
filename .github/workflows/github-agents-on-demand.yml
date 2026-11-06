@@ -29,6 +29,7 @@ on:
       - "scripts/nyx-github-agents.test.mjs"
       - "tasks/nyx-task.md"
       - "scripts/nyx-bespoke-live-test.mjs"
+      - "ui/nyx-bespoke-visual-audit.mjs"
 permissions:
   contents: read
   id-token: write
@@ -65,6 +66,11 @@ jobs:
       - name: Test real bespoke website build on isolated Cloudflare Worker
         if: github.event_name == 'push' && contains(github.event.head_commit.message, '[site-v2-test]')
         run: node scripts/nyx-bespoke-live-test.mjs
+      - name: Check real generated website at phone, tablet and desktop sizes
+        if: github.event_name == 'push' && contains(github.event.head_commit.message, '[site-v2-test]')
+        run: |
+          npm install --no-save --ignore-scripts --no-package-lock playwright-core@1.57.0
+          node ui/nyx-bespoke-visual-audit.mjs
       - name: Upload results
         if: always()
         uses: actions/upload-artifact@v4
