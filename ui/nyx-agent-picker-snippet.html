@@ -94,6 +94,12 @@
  .top .nx-mode-trigger{padding:4px 5px!important;gap:4px!important}
  .nx-mode-menu{left:9px!important;right:9px!important}
 }
+
+/* Long mode names must never collide with the chevron on narrow screens. */
+@media(max-width:700px){
+ .top .nx-mode-trigger-copy{flex:1 1 auto;min-width:0;overflow:hidden}
+ .top .nx-mode-trigger-copy strong{display:block;max-width:100%!important;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+}
 </style>
 <div id="nxModePicker" class="nx-mode-picker">
 <!-- The native select is retained as a progressive enhancement fallback and
@@ -120,9 +126,9 @@
  var label=document.getElementById("nxModeLabel"),mark=document.getElementById("nxModeMark");
  var subtitle=document.getElementById("nxModeSubtitle");
  var modes={
-  auto:["Auto","Smart routing","✦"],off:["Normal","Standard chat","○"],team:["Agent Team","Multi-agent","✧"],
+  auto:["Auto","Smart routing","✦"],off:["Normal","Standard chat","○"],team:["Team","Multi-agent","✧"],
   planner:["Planner","Strategy & plans","▦"],writer:["Writer","Words & ideas","✎"],
-  coder:["Coder","Build & debug","⌘"],reviewer:["Reviewer","Quality check","◇"]
+  coder:["Coder","Build & debug","⌘"],reviewer:["Review","Quality check","◇"]
  };
  var storageKey="nyx_chat_agent_mode_v1";
  function close(restoreFocus){
@@ -140,7 +146,7 @@
   nativeSelect.value=mode;
   var info=modes[mode];
   label.textContent=info[0];subtitle.textContent=info[1];mark.textContent=info[2];
-  trigger.setAttribute("aria-label","Agent mode: "+info[0]+". Choose mode");
+  trigger.setAttribute("aria-label","Agent mode: "+(mode==="team"?"Agent Team":mode==="reviewer"?"Reviewer":info[0])+". Choose mode");
   entries.forEach(function(item){
    var chosen=item.dataset.nxMode===mode;
    item.setAttribute("aria-checked",String(chosen));
