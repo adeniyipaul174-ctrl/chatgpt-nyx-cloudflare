@@ -111,7 +111,9 @@ export function nxSiteHTML(spec){
  '<footer class="footer"><div class="wrap"><div class="row"><div><a class="brand" href="#home"><i>'+e(s.brand[0]?.toUpperCase()||'N')+'</i>'+e(s.brand)+'</a><p>'+e(s.heroDescription)+'</p></div><div><a href="#services">Services</a> · <a href="#about">About</a> · <a href="#contact">Contact</a></div></div><div class="footbar"><span>© '+new Date().getUTCFullYear()+' '+e(s.brand)+'. All rights reserved.</span><span>Designed with purpose. Built with care.</span></div></div></footer><script>'+js+'</scr'+'ipt></body></html>';
 }
 function nxParseSpec(raw){
- const str=typeof raw==='string'?raw:raw?.response||raw?.choices?.[0]?.message?.content||'';
+ const value=typeof raw==='string'?raw:raw?.response??raw?.choices?.[0]?.message?.content??'';
+ if(value&&typeof value==='object'&&!Array.isArray(value))return value;
+ const str=value;
  if(typeof str!=='string')return null;
  const begin=str.indexOf('{'),end=str.lastIndexOf('}');if(begin<0||end<=begin||end-begin>19000)return null;
  try{const data=JSON.parse(str.slice(begin,end+1));return data&&typeof data==='object'&&!Array.isArray(data)?data:null}catch{return null}
