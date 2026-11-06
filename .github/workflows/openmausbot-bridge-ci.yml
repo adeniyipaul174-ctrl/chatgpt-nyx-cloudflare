@@ -8,6 +8,8 @@ on:
       - "workers/nyx-chat-agent-router.test.mjs"
       - "ui/nyx-agent-picker-snippet.html"
       - "ui/nyx-agent-picker.test.mjs"
+      - "ui/nyx-mobile-header-fix.css"
+      - "ui/nyx-mobile-header-fix.test.mjs"
       - "docs/nyx-native-agents-live.md"
       - "src/index.js"
       - "public/index.html"
@@ -44,5 +46,6 @@ jobs:
           node --check src/nyx-native-agents-reference.js
           node --test workers/nyx-chat-agent-router.test.mjs
           node --test ui/nyx-agent-picker.test.mjs
+          node --test ui/nyx-mobile-header-fix.test.mjs
       - name: Check patches
         run: git diff --check HEAD~1 HEAD
