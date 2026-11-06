@@ -2,6 +2,7 @@ import {chromium} from 'playwright-core';
 import {existsSync} from 'node:fs';
 import {nxSiteRenderHtml,nxSiteNormalize} from '../workers/nyx-site-studio.mjs';
 import assert from 'node:assert/strict';
+// Test current staged client, including template-literal-safe revision routing.
 const BASE='https://nyx-site-studio-stage.adeniyipaul174.workers.dev';
 const executablePath=[process.env.CHROME_PATH,'/usr/bin/google-chrome','/usr/bin/google-chrome-stable','/usr/bin/chromium'].find(p=>p&&existsSync(p));
 if(!executablePath)throw Error('Chrome unavailable; site studio browser test cannot pass');
