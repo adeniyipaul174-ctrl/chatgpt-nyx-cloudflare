@@ -52,5 +52,5 @@ test('client preview never grants scripts to an AI generated website',async()=>{
  assert.match(code,/setAttribute\('sandbox',''\)/);
  assert.match(code,/setAttribute\('referrerpolicy','no-referrer'\)/);
  assert.match(code,/frame\.srcdoc=html/);
- assert.match(code,/new Blob/); // preview uses blob saved from generated site via NyX chat
+ assert.match(code,/await findBlob\(message.siteId\)/); // preview loads a stored website artifact
 });
