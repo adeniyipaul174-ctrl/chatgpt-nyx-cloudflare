@@ -1,4 +1,4 @@
-// Acceptance for the staged NyX Website Builder. No real sign-in or API secrets used.
+// Acceptance for the staged NyX Website Builder after media-store bridging. No real sign-in or API secrets used.
 import {chromium} from "playwright-core";
 import {existsSync} from "node:fs";
 import assert from "node:assert/strict";
