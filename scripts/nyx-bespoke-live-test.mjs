@@ -1,4 +1,5 @@
 // One-shot end-to-end test of NyX bespoke website generation on staging.
+// Verify the latest structural repairs and industry-specific visual finish.
 // Test run: verifies the real art direction, HTML code generation, critique, and mobile visual QA.
 // Signed GitHub Actions OIDC is accepted only by the designated staging route.
 // The sample brief is public; never use real customer details in CI logs.
