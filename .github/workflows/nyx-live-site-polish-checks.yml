@@ -1,0 +1,27 @@
+name: NyX live Website Studio polish staging checks
+on:
+  push:
+    branches:
+      - feature/openmausbot-integration
+    paths:
+      - ".github/workflows/nyx-live-site-polish-checks.yml"
+      - "ui/nyx-live-site-polish-checks.mjs"
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: Install Chrome test adapter
+        run: npm install --no-save --ignore-scripts --no-package-lock playwright-core@1.57.0
+      - name: Check site restoration endpoint and browser preview
+        env:
+          NYX_SITE_STUDIO_URL: https://nyx-live-site-polish-stage.adeniyipaul174.workers.dev
+        run: |
+          node ui/nyx-live-site-polish-checks.mjs
+          node ui/nyx-site-studio-browser.mjs
