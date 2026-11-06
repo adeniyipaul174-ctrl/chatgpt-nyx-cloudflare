@@ -13,7 +13,7 @@ const timer=setTimeout(()=>abort.abort(),420000);
 try{
  const r=await fetch(url,{method:'POST',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({prompt:brief}),signal:abort.signal,redirect:'error'});
  const responseText=await r.text();
- if(!r.ok)throw Error('NyX bespoke generation returned HTTP '+r.status+': '+responseText.slice(0,350));
+ if(!r.ok)throw Error('NyX bespoke generation returned HTTP '+r.status+': '+responseText.slice(0,1100));
  const d=JSON.parse(responseText),html=d.siteHtml||'',spec=d.siteSpec;
  assert.equal(d.kind,'website');
  assert.equal(spec?.engine,'bespoke-code-v2');
