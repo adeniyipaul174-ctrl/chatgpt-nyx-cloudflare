@@ -81,7 +81,7 @@ try{
   assert.ok(html.includes('<!DOCTYPE html>'));
   await textarea.fill(html.replace('A new chapter begins together.','A fresh chapter begins together.'));
   await page.locator('#nxStudioApply').click();
-  await iframe.locator('h1').waitFor();
+  await iframe.locator('h1').filter({hasText:'A fresh chapter'}).waitFor({timeout:12000});
   assert.match(await iframe.locator('h1').innerText(),/A fresh chapter/);
   const downloadPromise=page.waitForEvent('download');
   await page.locator('[data-nx-site-action="download"]').click();
