@@ -1,14 +1,14 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {websiteIntent,normalizeSite,generateSiteSpec,siteEscape,SITE_PALETTES} from "./nyx-site-spec.mjs";
+import {siteIntent,normalizeSite,generateSiteSpec,siteEscape,SITE_PALETTES} from "./nyx-site-spec.mjs";
 import {renderWebsite} from "./nyx-site-render.mjs";
 test("site intent does not steal explanations or unrelated image requests",()=>{
  for(const x of ["How do I make a website?","Explain website hosting","Draw me a logo","Review my existing website","What is HTML?"])
-  assert.equal(websiteIntent(x),false,x);
+  assert.equal(siteIntent(x),false,x);
  for(const x of ["Create a beautiful website for my bakery","Build a professional landing page","Make an online store for Luna","/website for my consultancy"])
-  assert.equal(websiteIntent(x),true,x);
- assert.equal(websiteIntent("Make it green",true),true);
- assert.equal(websiteIntent("Make it green",false),false);
+  assert.equal(siteIntent(x),true,x);
+ assert.equal(siteIntent("Make it green",true),true);
+ assert.equal(siteIntent("Make it green",false),false);
 });
 test("spec is bounded and prevents arbitrary email links, URLs and unsafe colors",()=>{
  const s=normalizeSite({brand:"<img onerror=alert(1)>",theme:"url(javascript:alert(1))",contact:{email:"x@evil.com?subject=<script>"},hero:{title:"<script>alert(1)</script>"},features:[{title:"<svg onload=alert(1)>",text:"hello"},{title:"Good feature",text:"Clear message"}]});
