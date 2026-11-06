@@ -7,7 +7,7 @@ import {mkdir, readFile, writeFile} from 'node:fs/promises';
 import {fileURLToPath} from 'node:url';
 import {resolve} from 'node:path';
 
-export const MODEL_ENDPOINT='https://nyx-agent-team-stage.adeniyipaul174.workers.dev/api/nyx/github-agents/infer';
+export const MODEL_ENDPOINT='https://chatgpt-nyx-v3-test.adeniyipaul174.workers.dev/api/nyx/github-agents/infer';
 export const DEFAULT_MODEL='nyx-workers-ai';
 const PROMPTS=Object.freeze({
  planner:'You are NyX Planner. Produce a specific, practical plan. State assumptions, ordered actions, and success checks. Never claim an action was performed.',
@@ -24,10 +24,7 @@ export function validateMode(input) {
  if(!['team','planner','writer','coder','reviewer'].includes(mode))throw Error('Invalid mode.');
  return mode;
 }
-const ACCEPTED_ENDPOINTS=new Set([
- 'https://nyx-agent-team-stage.adeniyipaul174.workers.dev/api/nyx/github-agents/infer',
- 'https://chatgpt-nyx-v3-test.adeniyipaul174.workers.dev/api/nyx/github-agents/infer'
-]);
+const ACCEPTED_ENDPOINTS=new Set(['https://chatgpt-nyx-v3-test.adeniyipaul174.workers.dev/api/nyx/github-agents/infer']);
 export async function githubOidcToken(fetchImpl=fetch,env=process.env) {
  const rawUrl=env.ACTIONS_ID_TOKEN_REQUEST_URL,requestToken=env.ACTIONS_ID_TOKEN_REQUEST_TOKEN;
  if(!rawUrl||!requestToken)throw Error('This action requires GitHub Actions OIDC (id-token: write).');
