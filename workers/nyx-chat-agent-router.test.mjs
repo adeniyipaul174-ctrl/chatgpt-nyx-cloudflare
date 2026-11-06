@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {nxInChatPick,nxInChatExecute} from './nyx-chat-agent-router.mjs';
+import {nxInChatPick,nxInChatExecute,nxInChatEarly} from './nyx-chat-agent-router.mjs';
 
 test('normal conversation stays normal by default',()=>{
  for(const q of ['Hello','What is the weather?','Who made the first computer?','What are AI agents?','Explain how agents work','Make an image of a fox'])
@@ -40,4 +40,9 @@ test('multi agent jobs pass context and review the draft',async()=>{
 test('agent routing ignores malformed or oversize requests',async()=>{
  assert.equal(nxInChatPick('x'.repeat(4001)),null);
  assert.equal(await nxInChatExecute({task:'Hello',mode:'auto',ask:()=>{throw Error('Should not call')}}),null);
+});
+
+test('selected specialist receives text requests before automatic search and browse',()=>{
+ for(const mode of ['team','planner','writer','coder','reviewer'])assert.equal(nxInChatEarly(mode),true);
+ for(const mode of ['auto','off','unknown',''])assert.equal(nxInChatEarly(mode),false);
 });
