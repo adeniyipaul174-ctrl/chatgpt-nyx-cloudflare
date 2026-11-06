@@ -50,11 +50,18 @@ test('two-model design-then-code execution preserves detailed prompt',async()=>{
  const result=await nxWebsiteBuildBespoke(fake,'Create a website for Aurelia Studio with #fff8f2 and #b66a50');
  assert.equal(result.siteSpec.brand,'Aurelia Studio');assert.match(result.siteHtml,/Aurelia Studio/);
  assert.equal(result.siteSpec.engine,'bespoke-code-v2');
- assert.equal(seen.length,2);
+ assert.equal(seen.length,3); // director, coder, independent design reviewer
  assert.match(seen[1].input.messages[1].content,/#fff8f2/);
 });
 test('invalid code retries exactly once then fails visibly',async()=>{
  let i=0;const fake={AI:{run:async()=>{i++;return {response:i===1?JSON.stringify(planFor('X')):'<html>bad page</html>'}}}};
  await assert.rejects(()=>nxWebsiteBuildBespoke(fake,'Build a beautiful website for a studio'),/unfinished|did not meet/);
  assert.equal(i,3);
+});
+
+test('exact quoted client headings cannot be silently paraphrased',()=>{
+ const brief='Build a website for a creative agency. Heading must say "We Create Brands That Leave a Lasting Impression."';
+ const p=nxBespokePlan(planFor(brief,'Creative Agency'),brief);
+ assert.deepEqual(p.exactPhrases,['We Create Brands That Leave a Lasting Impression.']);
+ assert.equal(nxBespokeCheck(htmlFor({...p,brand:'Creative Agency'}),p).valid,false);
 });
