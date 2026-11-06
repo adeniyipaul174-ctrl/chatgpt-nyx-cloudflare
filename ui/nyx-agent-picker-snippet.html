@@ -37,6 +37,16 @@
 @media(max-width:650px){.nx-mode-trigger{min-width:0;height:37px;gap:5px;padding:4px 7px;border-radius:12px}.nx-mode-mark{width:26px;height:26px;flex-basis:26px;border-radius:9px;font-size:15px}.nx-mode-trigger-copy strong{font-size:11px}.nx-mode-trigger-copy small{display:none}.nx-mode-chevron{width:11px;height:11px;margin-left:2px}.nx-mode-menu{right:-6px;top:calc(100% + 10px)}}
 @media(max-width:390px){.nx-mode-trigger{padding:3px 5px}.nx-mode-trigger-copy strong{max-width:57px;text-overflow:ellipsis;overflow:hidden}.nx-mode-menu{right:-40px;max-width:calc(100vw - 18px)}}
 @media(prefers-reduced-motion:reduce){.nx-mode-menu{animation:none}.nx-mode-option,.nx-mode-trigger,.nx-mode-chevron,.nx-mode-check{transition:none}}
+
+/* Keep NyX's generic .top button rule from overriding the custom control. */
+.top .nx-mode-trigger{background:linear-gradient(150deg,#282736,#191b26 70%);border:1px solid #484756;border-radius:14px;padding:6px 10px 6px 7px;color:#f7f6fc}
+.top .nx-mode-trigger:hover{background:linear-gradient(145deg,#323044,#222332);border-color:#756e94}
+.top .nx-mode-trigger[aria-expanded="true"]{border-color:#aa9cda}
+.top .nx-mode-option{background:transparent;border:1px solid transparent;border-radius:12px;padding:10px;color:#f2f1f8}
+.top .nx-mode-option:hover{background:#ffffff0b}
+.top .nx-mode-option[aria-checked="true"]{border-color:#8575bb67;background:linear-gradient(100deg,#5f528843,#3c3a511f)}
+@media(max-width:650px){.top .nx-mode-trigger{padding:4px 7px;border-radius:12px}}
+@media(max-width:390px){.top .nx-mode-trigger{padding:3px 5px}}
 </style>
 <div id="nxModePicker" class="nx-mode-picker">
 <!-- The native select is retained as a progressive enhancement fallback and
