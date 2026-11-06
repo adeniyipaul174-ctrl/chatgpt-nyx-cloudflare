@@ -69,9 +69,16 @@ export function formatMarkdown(result) {
   ...Object.entries(result.results).flatMap(([key,value])=>['## '+(labels[key]||key),'',value,'']),
   '---','Generated on an ephemeral GitHub Actions runner. This is an AI suggestion, not evidence of tool execution or a persistent OpenMausBot workspace.'].join('\n');
 }
+export function parseTaskFile(input) {
+ if(typeof input!=='string')throw Error('Task file must contain text.');
+ const match=input.match(/^\s*@agent[ \t]+(team|planner|writer|coder|reviewer)[ \t]*(?:\r?\n|$)/i);
+ return {task:validateTask(match?input.slice(match[0].length):input),mode:match?validateMode(match[1]):null};
+}
 async function main() {
- const task=process.env.NYX_TASK?.trim()||await readFile(resolve('tasks/nyx-task.md'),'utf8');
- const mode=process.env.NYX_AGENT_MODE||'team';
+ const userInput=process.env.NYX_TASK?.trim();
+ const fileTask=userInput?{task:validateTask(userInput),mode:null}:parseTaskFile(await readFile(resolve('tasks/nyx-task.md'),'utf8'));
+ const task=fileTask.task;
+ const mode=process.env.NYX_AGENT_MODE||fileTask.mode||'team';
  const token=await githubOidcToken();
  const result=await runAgents({task,mode,token,model:DEFAULT_MODEL});
  const dest=resolve('nyx-agent-results');await mkdir(dest,{recursive:true});
