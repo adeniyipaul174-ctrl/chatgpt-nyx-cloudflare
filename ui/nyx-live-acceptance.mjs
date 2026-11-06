@@ -64,6 +64,23 @@ try{
    assert.deepEqual(menu.items.map(x=>x.value),['auto','off','team','planner','writer','coder','reviewer']);
    for(let i=1;i<menu.items.length;i++)assert.ok(menu.items[i].top>=menu.items[i-1].bottom-1,'menu items overlap at '+width);
    assert.ok(menu.items.every(x=>x.display==='flex'),'menu items use flex rows');
+   // Long selected names must not collide with the adjacent settings action.
+   if([320,393,768].includes(width)){
+     const cases=['team','planner','writer','coder','reviewer','auto','off'];
+     for(let i=0;i<cases.length;i++){
+       await page.locator('[data-nx-mode="'+cases[i]+'"]').click();
+       const geometry=await page.evaluate(()=>{
+         const xy=s=>{const r=document.querySelector(s).getBoundingClientRect();return {left:r.left,right:r.right,width:r.width}};
+         return {trigger:xy('#nxModeTrigger'),label:xy('#nxModeLabel'),chevron:xy('.nx-mode-chevron'),settings:xy('#settingsTop')};
+       });
+       assert.ok(geometry.trigger.right<=geometry.settings.left+1,'agent trigger overlaps settings at '+width+' mode='+cases[i]+': '+JSON.stringify(geometry));
+       assert.ok(geometry.label.right<=geometry.chevron.left+2,'agent name overlaps chevron at '+width+' mode='+cases[i]+': '+JSON.stringify(geometry));
+       assert.ok(geometry.trigger.left>=-1&&geometry.trigger.right<=width+1,'agent trigger off-screen at '+width+' mode='+cases[i]);
+       if(i<cases.length-1)await page.locator('#nxModeTrigger').click();
+     }
+     await page.locator('#nxModeTrigger').click();
+   }
+
    if(width===393||width===320||width===768){
      await page.locator('[data-nx-mode="reviewer"]').click();
      assert.equal(await page.locator('#nxChatAgentMode').inputValue(),'reviewer','native select synchronized');
