@@ -141,6 +141,7 @@ function nxProjectSharedStyle(plan){
  '.nx-project-desktop{display:flex;gap:clamp(11px,2vw,29px);align-items:center;justify-content:flex-end;flex-wrap:wrap}'+
  '.nx-project-header a{color:var(--nx-brand-text);text-decoration:none;font:700 13px/1.5 system-ui,sans-serif}'+
  '.nx-project-desktop a[aria-current=page],.nx-project-header a:hover{color:var(--nx-brand-accent)}'+
+ '.nx-project-contact-cta{padding:clamp(22px,4vw,46px);border:1px solid var(--nx-brand-muted);background:var(--nx-brand-surface);border-radius:18px;color:var(--nx-brand-text);max-width:680px}.nx-project-contact-cta strong{font-size:clamp(22px,3vw,38px)}.nx-project-contact-cta a{display:inline-flex;margin-top:14px;padding:13px 20px;background:var(--nx-brand-accent);color:var(--nx-brand-background);border-radius:99px;text-decoration:none;font-weight:700}.nx-project-contact-cta small{display:block;margin-top:15px;opacity:.75}'+
  '.nx-project-mobile{display:none}.nx-project-mobile summary{cursor:pointer;list-style:none;padding:10px 14px;border:1px solid currentColor;border-radius:12px;font:700 12px system-ui}'+
  '@media(max-width:750px){.nx-project-nav{padding:12px 17px;min-height:64px}.nx-project-desktop{display:none}.nx-project-mobile{display:block;position:relative}'+
  '.nx-project-mobile nav{position:absolute;top:46px;right:0;z-index:99;min-width:min(260px,85vw);display:grid;gap:12px;padding:17px 20px;background:var(--nx-brand-background);border:1px solid var(--nx-brand-muted);border-radius:12px;box-shadow:0 20px 48px #0004}}'+
@@ -173,6 +174,18 @@ export function nxProjectFinishPage(raw,plan,slug){
  // Generated navigation is replaced with links to the actual project files.
  html=html.replace(/<header\b[^>]*>[\s\S]*?<\/header>/i,'');
  html=html.replace(/<nav\b[^>]*>[\s\S]*?<\/nav>/gi,'');
+ // Model-authored demo forms are never treated as working email delivery.
+ // Preserve a usable contact area without enabling arbitrary form actions.
+ const suppliedEmail=String(plan.brief||'').match(/[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/i)?.[0]||'';
+ html=html.replace(/<form\b[^>]*>[\s\S]*?<\/form>/gi,()=>{
+  const copy='<strong>Let’s start a conversation.</strong><p>Share your idea and connect with our team.</p>';
+  return '<div class="nx-project-contact-cta">'+copy+(suppliedEmail?'<a href="mailto:'+nxProjEsc(suppliedEmail)+'">Email us ↗</a>':'<small>Contact details can be connected when this site is published.</small>')+'</div>';
+ });
+ // Strip non-functional AI-generated scripts and SVG icons. The exported
+ // website uses CSS and native links instead of unreviewed executable code.
+ html=html.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,'');
+ html=html.replace(/<svg\b[^>]*>[\s\S]*?<\/svg>/gi,'<span aria-hidden="true">✦</span>');
+
  if(!/<html\b[^>]*lang=/i.test(html))html=html.replace(/<html\b/i,'<html lang="en"');
  if(!/<meta\b[^>]*name=["']viewport["']/i.test(html))html=html.replace(/<\/head>/i,'<meta name="viewport" content="width=device-width,initial-scale=1"></head>');
  if(!/<body\b[^>]*>/i.test(html))html=html.replace(/<\/head>/i,'</head><body>');
