@@ -1,4 +1,5 @@
 // Real Cloudflare AI 429 recovery acceptance. No user login or paid AI tokens.
+// Confirms that page sections are edits, while new standalone pages get their own files.
 import assert from 'node:assert/strict';
 import {githubOidcToken} from './nyx-github-agents.mjs';
 const url='https://nyx-site-v4-rescue-stage.adeniyipaul174.workers.dev/__nyx/site-v4-rescue-test';
