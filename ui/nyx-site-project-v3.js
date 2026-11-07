@@ -68,7 +68,7 @@ function nxProjectPreviewHtml(html,session,hash){
  if(/<\s*(?:script|iframe|object|embed|form|svg)\b|\son[a-z]{3,24}\s*=|javascript\s*:/i.test(html))throw Error('Unsafe HTML cannot be previewed.');
  const code="document.addEventListener('click',function(e){var a=e.target.closest('a[href]');if(!a)return;var h=a.getAttribute('href');if(/^[a-z0-9-]+[.]html(?:#[a-z0-9_-]+)?$/i.test(h)){e.preventDefault();parent.postMessage({type:'nyx-project-go',nonce:'"+session+"',path:h},'*')}});";
  const csp="default-src 'none'; img-src https://images.unsplash.com data:; font-src https://fonts.gstatic.com; style-src 'unsafe-inline' https://fonts.googleapis.com; script-src 'nonce-"+session+"'; connect-src 'none'; form-action 'none'; base-uri 'none'";
- const meta='<meta http-equiv="Content-Security-Policy" content="'+csp+'"><script nonce="'+session+'">'+code+'</script>';
+ const meta='<meta http-equiv="Content-Security-Policy" content="'+csp+'"><script nonce="'+session+'">'+code+'<\/script>';
  return html.replace(/<\/head>/i,meta+'</head>');
 }
 async function nxProjectOpen(message){
