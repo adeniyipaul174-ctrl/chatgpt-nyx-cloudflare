@@ -1,4 +1,5 @@
-// Real AI execution on private, OIDC-protected staging Worker.
+// Real AI execution on isolated, OIDC-protected staging Worker.
+// Verify the exact live generator and retrieve actionable backend errors.
 // Invoked by the existing allowlisted GitHub workflow identity.
 // Retry includes safe contact-form conversion, precise branding and mobile screenshot audits.
 // Preserves generated HTML files as artifacts for visual review.
