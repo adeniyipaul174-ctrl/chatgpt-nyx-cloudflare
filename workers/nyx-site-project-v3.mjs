@@ -77,6 +77,12 @@ export function nxProjectNormalizePlan(raw,brief='',previous=null){
  const o=raw&&typeof raw==='object'&&!Array.isArray(raw)?raw:{};
  const prev=previous?.plan||{};
  const rawPages=Array.isArray(o.pages)?o.pages:[];
+ if(!previous?.plan){
+  const palette=o.palette||{};
+  const explicit=nxProjUserColors(brief);
+  const good=['background','text','accent'].every(k=>/^#[0-9a-f]{6}$/i.test(palette[k]||'')||!!explicit.roles[k])||explicit.values.length>=3;
+  if(!good)throw Error('The design planner did not choose a complete color palette. Please retry.');
+ }
  const pages=rawPages.slice(0,7).map((x,i)=>({
   slug:nxProjSlug(x?.slug||x?.title||('page-'+i)),
   title:nxProjText(x?.title,65)||'Page '+(i+1),
