@@ -29,6 +29,7 @@ on:
       - "scripts/nyx-github-agents.test.mjs"
       - "tasks/nyx-task.md"
       - "scripts/nyx-bespoke-live-test.mjs"
+      - "scripts/nyx-site-project-v3-live-test.mjs"
       - "ui/nyx-bespoke-visual-audit.mjs"
 permissions:
   contents: read
@@ -63,6 +64,9 @@ jobs:
           NYX_AGENT_MODE: ${{ inputs.mode }}
         run: node scripts/nyx-github-agents.mjs
       # Only runs for an explicit one-time test commit, not ordinary user tasks.
+      - name: Verify real AI multipage build and create-page edit on isolated Worker
+        if: github.event_name == 'push' && contains(github.event.head_commit.message, '[site-v3-test]')
+        run: node scripts/nyx-site-project-v3-live-test.mjs
       - name: Test real bespoke website build on isolated Cloudflare Worker
         if: github.event_name == 'push' && contains(github.event.head_commit.message, '[site-v2-test]')
         run: node scripts/nyx-bespoke-live-test.mjs
