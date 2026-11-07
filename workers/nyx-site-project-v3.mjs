@@ -23,7 +23,7 @@ function nxProjParse(str){
 const nxProjReply=r=>r?.response||r?.choices?.[0]?.message?.content||'';
 
 let NX_PROJECT_AI_QUOTA_UNTIL=0;
-export export async function nxProjectModel(env,model,payload,fetchImpl=fetch){
+export async function nxProjectModel(env,model,payload,fetchImpl=fetch){
  if(Date.now()>=NX_PROJECT_AI_QUOTA_UNTIL&&env?.AI){
   try{return await env.AI.run(model,payload)}
   catch(e){
