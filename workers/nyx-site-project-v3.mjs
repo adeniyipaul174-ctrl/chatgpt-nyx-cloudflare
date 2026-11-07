@@ -409,7 +409,8 @@ function nxProjectOperationFallback(prompt,project){
  const p=String(prompt||'').toLowerCase().replace(/^(?:(?:hey\s+nyx[,! ]*|please\s+|can\s+you\s+|could\s+you\s+|would\s+you\s+|i\s+want\s+(?:you\s+)?to\s+|i\s+need\s+(?:you\s+)?to\s+|now\s+|also\s+)+)/,'');
  const findTarget=()=>project.plan.pages.find(x=>p.includes(x.slug.replace(/-/g,' '))||p.includes(x.title.toLowerCase()))?.slug||'index';
  const matched=p.match(/(?:add|create|build|make|design)\s+(?:a\s+|an\s+|the\s+|new\s+|another\s+)*(?:page\s+(?:for|called|named)\s+)?([a-z][\w -]{2,35}?)\s+page/);
- if(/^(add|create|build|make|design)\s+/.test(p)&&(p.includes(' page')||p.includes('new page'))){
+ const sectionOnPage=/\b(?:section|gallery|cards|banner|widget|component|images?|layout)\b.{0,85}\b(?:on|in|to)\s+(?:the\s+)?(?:home|about|services|pricing|contact|portfolio|shop|gallery|products|faq)\s+page\b/i.test(p);
+ if(/^(add|create|build|make|design)\s+/.test(p)&&!sectionOnPage&&(p.includes(' page')||p.includes('new page'))){
   const title=matched?.[1]||p.match(/(?:new|another)\s+([a-z][\w-]+)\s+page/)?.[1]||'New Page';
   return {action:'add_page',target:nxProjSlug(title),title:title.replace(/\b\w/g,c=>c.toUpperCase())};
  }
