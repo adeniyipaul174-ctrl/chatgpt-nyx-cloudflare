@@ -1,0 +1,52 @@
+import assert from "node:assert/strict";
+import {chromium} from "playwright-core";
+import {existsSync} from "node:fs";
+import {nxSiteRenderHtml,nxSiteNormalize} from "../workers/nyx-site-studio.mjs";
+const url=process.env.NYX_SITE_STUDIO_URL;
+assert.ok(url&&url.startsWith("https://chatgpt-nyx-v3-test."),"Production URL required");
+const html=nxSiteRenderHtml(nxSiteNormalize({brand:"Lumière Studio",category:"studio",theme:"blush",headline:"Beautiful days begin here.",highlight:"Designed for you."}));
+const publicHealth=await fetch(url+"/api/health");
+assert.equal(publicHealth.status,200);
+const csp=publicHealth.headers.get("content-security-policy")||"";
+const pageResponse=await fetch(url+"/");
+assert.equal(pageResponse.status,200);
+const actualCsp=pageResponse.headers.get("content-security-policy")||"";
+assert.match(actualCsp,/images\.unsplash\.com/);
+assert.match(actualCsp,/fonts\.googleapis\.com/);
+assert.match(actualCsp,/fonts\.gstatic\.com/);
+assert.match(actualCsp,/frame-src 'self' blob:/);
+const denied=await fetch(url+"/api/nyx/site/render",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({spec:{brand:"Unauthorized"}})});
+assert.equal(denied.status,401,"Restoration requires signed-in account");
+console.log("PASS CSP allowlist and signed-in site restoration guard");
+
+const exe=["/usr/bin/google-chrome","/usr/bin/chromium","/usr/bin/google-chrome-stable"].find(existsSync);
+if(!exe)throw Error("System Chrome unavailable");
+const browser=await chromium.launch({headless:true,executablePath:exe,args:["--no-sandbox","--disable-dev-shm-usage"]});
+try{
+ const context=await browser.newContext({viewport:{width:393,height:840}});
+ const page=await context.newPage();
+ const blocked=[];
+ page.on("console",message=>{if(message.type()==="error"&&/Content Security Policy|Refused to load/.test(message.text()))blocked.push(message.text())});
+ await page.route("**/api/auth/me",r=>r.fulfill({status:200,contentType:"application/json",body:JSON.stringify({authenticated:true,user:{id:"safe_site_test",name:"Design Test",email:"test@example.invalid"}})}));
+ await page.route("**/api/nyx",r=>r.fulfill({status:200,contentType:"application/json",body:JSON.stringify({kind:"website",reply:"Website ready.",siteSpec:{brand:"Lumière Studio",theme:"blush",category:"studio"},siteHtml:html})}));
+ await page.goto(url+"/",{waitUntil:"domcontentloaded",timeout:25000});
+ await page.waitForSelector("#nxModePicker.nx-enhanced",{timeout:18000});
+ await page.waitForFunction(()=>!document.body.classList.contains("nx-auth-checking"));
+ await page.locator("#prompt").fill("Create a beautiful website for Lumière Studio");
+ await page.locator("#send").click();
+ await page.locator(".nx-site-card").waitFor({timeout:15000});
+ await page.locator(".nx-site-card button").first().click();
+ await page.locator(".nx-site-overlay").waitFor();
+ const iframe=page.frameLocator(".nx-site-frame");
+ await iframe.locator("h1").waitFor({timeout:14000});
+ assert.match(await iframe.locator("h1").innerText(),/Beautiful days/);
+ const image=iframe.locator(".photo img");
+ await image.waitFor();
+ const result=await image.evaluate(el=>({complete:el.complete,src:el.currentSrc||el.src,naturalWidth:el.naturalWidth}));
+ assert.match(result.src,/images\.unsplash\.com/);
+ const relevant=blocked.filter(x=>/images\.unsplash\.com|fonts\.googleapis\.com|fonts\.gstatic\.com|frame-src/.test(x));
+ assert.equal(relevant.length,0,"Images/fonts/preview must not be blocked by CSP");
+ console.log("PASS preview renders and remote image/font requests are not CSP-blocked. Image loaded="+(result.naturalWidth>0));
+ await context.close();
+}catch(err){console.error("POLISH STAGING FAILED:",err.stack||String(err));process.exitCode=1}
+finally{await browser.close()}

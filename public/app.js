@@ -2,7 +2,7 @@
 'use strict';
 const $ = id => document.getElementById(id);
 const state = { memories: [], tasks: [], chats: [], settings: {customInstructions:'',thinkingMode:'normal'}, current: [], currentChatId: null, pendingImages: [], busy: false, deep: false };
-const titles = {chat:'New chat',memory:'Memory',tasks:'Tasks',studio:'Image Studio',documents:'Images & documents',settings:'Settings'};
+const titles = {chat:'New chat',memory:'Memory',tasks:'Tasks',studio:'Image Studio',documents:'Images & documents',agents:'Agent Team',settings:'Settings'};
 function node(tag, text, className) { const el=document.createElement(tag); if(text!==undefined) el.textContent=String(text); if(className)el.className=className; return el; }
 function toast(text) { const el=$('toast'); el.textContent=text; el.classList.remove('hidden'); setTimeout(()=>el.classList.add('hidden'),3500); }
 async function api(path, method='GET', body) {
@@ -18,7 +18,7 @@ function showPage(page) {
   document.querySelectorAll("[id^='page-']").forEach(x=>x.classList.add('hidden'));
   $('page-'+page).classList.remove('hidden'); document.querySelectorAll('[data-page]').forEach(b=>b.classList.toggle('active',b.dataset.page===page));
   $('pageTitle').textContent=titles[page]||page; $('composerWrap').classList.toggle('hidden',page!=='chat'); $('sidebar').classList.remove('open');
-  if(page==='memory')renderMemories(); if(page==='tasks')renderTasks(); if(page==='settings')loadSettings();
+  if(page==='memory')renderMemories(); if(page==='tasks')renderTasks(); if(page==='settings')loadSettings(); if(page==='agents')loadMausAgents();
 }
 document.querySelectorAll('[data-page]').forEach(b=>b.addEventListener('click',()=>showPage(b.dataset.page)));
 $('menuBtn').addEventListener('click',()=>$('sidebar').classList.toggle('open'));
@@ -66,6 +66,60 @@ $('analyzeImage').addEventListener('click',async()=>{const file=$('analysisImage
 $('analyzePdf').addEventListener('click',async()=>{const file=$('pdfFile').files[0];if(!file)return toast('Choose a PDF first.');if(file.size>20*1024*1024)return toast('Choose a PDF smaller than 20 MB.');if(!window.pdfjsLib)return toast('PDF.js could not load. Check your connection and retry.');const btn=$('analyzePdf');btn.disabled=true;btn.textContent='Reading PDF…';try{pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';const bytes=await file.arrayBuffer();const pdf=await pdfjsLib.getDocument({data:bytes}).promise;let text='';for(let i=1;i<=pdf.numPages&&text.length<45000;i++){const page=await pdf.getPage(i);const content=await page.getTextContent();text+=content.items.map(x=>x.str).join(' ')+'\n';}if(!text.trim()){btn.textContent='Running OCR…';const images=[];for(let i=1;i<=Math.min(pdf.numPages,5);i++){const page=await pdf.getPage(i);const viewport=page.getViewport({scale:1.35});const canvas=document.createElement('canvas');canvas.width=Math.ceil(viewport.width);canvas.height=Math.ceil(viewport.height);const ctx=canvas.getContext('2d',{alpha:false});await page.render({canvasContext:ctx,viewport}).promise;const dataUrl=canvas.toDataURL('image/jpeg',0.68);images.push({mimeType:'image/jpeg',data:dataUrl.split(',')[1]});canvas.width=1;canvas.height=1;}const ocr=await api('/api/ocr-document','POST',{filename:file.name,images});text=ocr.text||'';if(!text.trim())throw new Error('OCR could not find readable text in the first five pages.');}btn.textContent='Analyzing…';const result=await api('/api/analyze-document','POST',{filename:file.name,text,question:$('pdfQuestion').value});$('pdfResult').replaceChildren(node('p',result.analysis));if(pdf.numPages>5&&!text.trim())toast('Only the first five scanned pages are OCR processed.');}catch(e){$('pdfResult').replaceChildren(node('p',e.message,'status bad'));toast(e.message)}finally{btn.disabled=false;btn.textContent='Extract and analyze PDF';}});
 function makePdf(title,body){const safe=s=>String(s).normalize('NFKD').replace(/[^\x20-\x7E]/g,'?').replace(/\\/g,'\\\\').replace(/\(/g,'\\(').replace(/\)/g,'\\)');const lines=[];for(const paragraph of (title+'\n\n'+body).split(/\r?\n/)){const words=paragraph.split(/\s+/);let line='';for(const word of words){if((line+' '+word).trim().length>88){lines.push(line);line=word;}else line=(line+' '+word).trim();}lines.push(line);}const pages=[];for(let i=0;i<lines.length;i+=48)pages.push(lines.slice(i,i+48));if(!pages.length)pages.push(['']);const objs=[];const add=x=>(objs.push(x),objs.length);const catalog=add('');const pagesObj=add('');const font=add('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>');const kids=[];for(const chunk of pages){const content='BT /F1 10 Tf 48 790 Td 14 TL '+chunk.map((l,i)=>(i?'T* ':'')+'('+safe(l)+') Tj').join(' ')+' ET';const stream=add(`<< /Length ${content.length} >>\nstream\n${content}\nendstream`);const page=add(`<< /Type /Page /Parent ${pagesObj} 0 R /MediaBox [0 0 612 842] /Resources << /Font << /F1 ${font} 0 R >> >> /Contents ${stream} 0 R >>`);kids.push(`${page} 0 R`);}objs[catalog-1]='<< /Type /Catalog /Pages '+pagesObj+' 0 R >>';objs[pagesObj-1]=`<< /Type /Pages /Kids [${kids.join(' ')}] /Count ${kids.length} >>`;let pdf='%PDF-1.4\n';const offsets=[0];objs.forEach((o,i)=>{offsets.push(pdf.length);pdf+=`${i+1} 0 obj\n${o}\nendobj\n`;});const xref=pdf.length;pdf+=`xref\n0 ${objs.length+1}\n0000000000 65535 f \n`;for(let i=1;i<offsets.length;i++)pdf+=String(offsets[i]).padStart(10,'0')+' 00000 n \n';pdf+=`trailer\n<< /Size ${objs.length+1} /Root ${catalog} 0 R >>\nstartxref\n${xref}\n%%EOF`;return new Blob([pdf],{type:'application/pdf'});}
 $('makeTextFile').addEventListener('click',()=>{const title=$('pdfTitle').value.trim()||'Nyx document';const body=$('pdfContent').value.trim();if(!body)return toast('Enter some document text first.');const blob=makePdf(title,body);const url=URL.createObjectURL(blob);const a=node('a');a.href=url;a.download=title.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')+'.pdf';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);});
+
+const maus = {bots:[]};
+async function loadMausAgents(){
+  const statusEl=$('mausStatus'),picker=$('mausBot'),sendBtn=$('mausSend');
+  statusEl.className='status';
+  sendBtn.disabled=true;
+  try {
+    const info=await api('/api/openmausbot/status');
+    if(!info.configured){statusEl.textContent='Not connected. Set the private OpenMausBot server URL and session token in Cloudflare.';return;}
+    if(!info.allowed){statusEl.textContent='Your Cloudflare Access email is not approved for the agent connection.';return;}
+    const result=await api('/api/openmausbot/bots');
+    const previouslySelected=picker.value;
+    maus.bots=Array.isArray(result.bots)?result.bots:[];
+    picker.replaceChildren();
+    for(const bot of maus.bots){const opt=node('option',bot.name);opt.value=bot.id;picker.appendChild(opt);}
+    if(maus.bots.some(b=>b.id===previouslySelected))picker.value=previouslySelected;
+    if(!maus.bots.length){const empty=node('option','No agents in this workspace');empty.value='';picker.appendChild(empty);}
+    sendBtn.disabled=!maus.bots.length;
+    statusEl.textContent=maus.bots.length+' agent(s) available from the connected server.';
+    statusEl.className='status ok';
+  }catch(err){maus.bots=[];picker.replaceChildren();statusEl.textContent=err.message;statusEl.className='status bad';}
+}
+$('mausRefresh').addEventListener('click',loadMausAgents);
+$('mausSend').addEventListener('click',async()=>{
+  const bot=maus.bots.find(b=>b.id===$('mausBot').value);
+  const message=$('mausPrompt').value.trim();
+  if(!bot)return toast('Choose an agent first.');
+  if(!message || message.length>5000)return toast('Enter a task up to 5,000 characters.');
+  if(!confirm('Send these instructions to '+bot.name+'? This agent may use tools or a remote computer.'))return;
+  const button=$('mausSend');button.disabled=true;
+  try{
+    const receipt=await api('/api/openmausbot/send','POST',{botId:bot.id,text:message});
+    $('mausReceipt').textContent=receipt.queued?'Task queued on OpenMausBot.':'Task delivered to OpenMausBot.';
+    toast('Instructions sent. OpenMausBot handles tool permissions.');
+    await loadMausAgents();
+  }catch(err){$('mausReceipt').textContent='Send failed: '+err.message;toast(err.message);}
+  finally{button.disabled=!maus.bots.length;}
+});
+async function loadMausMessages(){
+  const out=$('mausMessages');out.replaceChildren();
+  const bot=maus.bots.find(b=>b.id===$('mausBot').value);
+  if(!bot)return out.appendChild(node('p','Choose an agent.','muted'));
+  if(!bot.threadId)return out.appendChild(node('p','This agent has no current conversation ID. Refresh agents after starting a task.','muted'));
+  try{
+    const result=await api('/api/openmausbot/messages?threadId='+encodeURIComponent(bot.threadId));
+    if(!result.messages?.length)return out.appendChild(node('p','No recent text messages found.','muted'));
+    for(const m of result.messages){
+      const row=node('div',undefined,'item'),body=node('div',undefined,'body');
+      body.append(node('b',m.role==='bot'?bot.name:m.role==='user'?'You':'Agent activity'),node('p',m.text));
+      row.appendChild(body);out.appendChild(row);
+    }
+  }catch(err){out.appendChild(node('p','Could not load messages: '+err.message,'status bad'));}
+}
+$('mausMessagesRefresh').addEventListener('click',loadMausMessages);
 async function status(){try{const s=await api('/api/ai-status');$('apiStatus').textContent=s.configured&&s.databaseConfigured?'Access secured · D1 connected · provider configured':'Needs setup: '+(!s.databaseConfigured?'D1 database ':!s.configured?'Gemini key ':'');$('apiStatus').className='status '+(s.configured&&s.databaseConfigured?'ok':'bad');$('capabilityStatus').replaceChildren();for(const [label,value] of [['Cloudflare Access','JWT verification required'],['Cloud memory/history','D1 '+(s.databaseConfigured?'configured':'not configured')],['Gemini text','configured: '+s.configured],['Text model',s.textModel],['Image model',s.imageModel],['Live web search','On demand for current-information prompts; model/account support required']]){const row=node('div',undefined,'item');row.append(node('span',label),node('span',String(value)));$('capabilityStatus').appendChild(row);}}catch(e){$('apiStatus').textContent='Secure API unavailable: '+e.message;$('apiStatus').className='status bad';}}
 (async()=>{try{await refreshState();await status();}catch(e){$('apiStatus').textContent='Setup required: '+e.message;$('apiStatus').className='status bad';toast(e.message);}})();
 })();

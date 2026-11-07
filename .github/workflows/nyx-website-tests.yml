@@ -1,0 +1,28 @@
+name: NyX Website Studio tests (no deploy)
+on:
+  push:
+    branches:
+      - feature/openmausbot-integration
+    paths:
+      - "workers/nyx-site-spec.mjs"
+      - "workers/nyx-site-css.mjs"
+      - "workers/nyx-site-render.mjs"
+      - "workers/nyx-site.test.mjs"
+      - ".github/workflows/nyx-website-tests.yml"
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: Validate generated standalone websites
+        run: |
+          node --check workers/nyx-site-spec.mjs
+          node --check workers/nyx-site-css.mjs
+          node --check workers/nyx-site-render.mjs
+          node --test workers/nyx-site.test.mjs
