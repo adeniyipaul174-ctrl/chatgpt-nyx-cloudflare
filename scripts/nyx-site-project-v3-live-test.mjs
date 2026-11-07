@@ -1,4 +1,5 @@
 // Real AI execution on isolated, OIDC-protected staging Worker.
+// Current provider test uses only a no-cost, explicit code model.
 // Verify the exact live generator and retrieve actionable backend errors.
 // Invoked by the existing allowlisted GitHub workflow identity.
 // Retry includes safe contact-form conversion, precise branding and mobile screenshot audits.
