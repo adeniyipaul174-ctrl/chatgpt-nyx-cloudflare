@@ -126,3 +126,15 @@ test('explicitly named brand is preserved rather than rewritten by the design mo
  const q=nxProjectNormalizePlan({...base,brand:'Generic Studio'},'Build a site for AURELIA STUDIO, a creative agency.');
  assert.equal(q.brand,'AURELIA STUDIO');
 });
+
+test('unconnected forms are replaced safely instead of claiming message delivery',()=>{
+ const plan=nxProjectNormalizePlan(base,'Create a four page studio website');
+ const page=plan.pages.find(x=>x.slug==='contact');
+ const sample=pageHtml(page,plan).replace('</main>','<form action="/api/send"><input name="email"><button type="submit">Send</button></form><svg><path d="M0 0"></path></svg><script>alert(1)</script></main>');
+ const result=nxProjectFinishPage(sample,plan,'contact');
+ assert.equal(nxProjectValidateHtml(result,plan).ok,true);
+ assert.ok(!result.includes('<form'));
+ assert.ok(!result.includes('<script>'));
+ assert.ok(!result.includes('<svg'));
+ assert.match(result,/Contact details can be connected/);
+});
