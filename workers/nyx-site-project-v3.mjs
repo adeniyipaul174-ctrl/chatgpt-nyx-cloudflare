@@ -75,7 +75,7 @@ export function nxProjectIntent(prompt,hasProject=false){
  const p=String(prompt||'').trim().toLowerCase();
  if(!p||p.length>4000)return false;
  if(hasProject){
-  if(/^(?:build|create|design|make|generate)\s+(?:a|an|another|new)\s+(?:completely\s+)?(?:website|web\s*site|landing\s*page)\s+(?:for|about|called)\s+/.test(p))return false;
+  if(/^(?:build|create|design|make|generate)\s+(?:a|an|another|new)\s+(?:(?:completely\s+)?new\s+|completely\s+)?(?:website|web\s*site|landing\s*page)\s+(?:for|about|called)\s+/.test(p))return false;
   return /^(?:please\s+)?(?:add|create|build|design|generate|change|edit|update|replace|remove|delete|rename|redo|revise|rework|improve|fix|make|switch|put|insert|include|move|rearrange|modify|redesign|give|use|turn)\s+/.test(p)||/(?:on|in|to)\s+(?:the\s+)?(?:home|about|services|pricing|contact|portfolio|shop|gallery|products|faq)\s+page/.test(p);
  }
  return /\b(?:create|build|develop|design|generate|make|launch)\b[\s\S]{0,110}\b(?:website|web\s*site|webpage|landing\s*page|online\s*store)\b/i.test(p);
