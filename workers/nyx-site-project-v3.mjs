@@ -278,12 +278,94 @@ function nxProjectPlanPrompt(brief,previous){
  return 'COMPLETE CLIENT REQUEST:\n'+brief+'\n\nEXISTING PROJECT (if redesigning):\n'+old+
   '\n\nPlan all requested pages, with distinctive layout notes for EACH page. Required output is strict JSON only. Pay particular attention to exact user colors, page names and navigation. Do not reuse a fixed palette.';
 }
+// When a free model fails to return structured JSON, retain the exact user brief
+// and build a distinct architecture. This is a plan fallback, NOT a generic HTML template.
+export function nxProjectFallbackPlan(brief,previous=null){
+ const p=String(brief||''),lower=p.toLowerCase(),old=previous?.plan||{};
+ const themes={
+  tech:{background:'#081a31',text:'#f4f8ff',accent:'#4de0e5',surface:'#152843',muted:'#a4bad0'},
+  food:{background:'#f5ebd9',text:'#263a2c',accent:'#ad5e35',surface:'#e5d4b9',muted:'#687764'},
+  wellness:{background:'#f4f1e9',text:'#253c35',accent:'#728f69',surface:'#e0e7dd',muted:'#667b72'},
+  fashion:{background:'#f6edf1',text:'#30232d',accent:'#a34278',surface:'#eadce3',muted:'#806b78'},
+  travel:{background:'#edf7f7',text:'#133a46',accent:'#187c8b',surface:'#d5e8e8',muted:'#5a7b82'},
+  education:{background:'#f2f3fb',text:'#1d2b59',accent:'#6455b9',surface:'#e0e4f5',muted:'#707996'},
+  finance:{background:'#eaf1f5',text:'#142937',accent:'#206f76',surface:'#d2e4e9',muted:'#5c7d84'},
+  creative:{background:'#f8f4ef',text:'#222129',accent:'#995044',surface:'#ece1d9',muted:'#7c7573'}
+ };
+ const category=/saas|software|dashboard|technology|data.platform|ai\b|cyber|developer|robot/i.test(lower)?'tech':
+  /restaurant|cafe|coffee|food|catering|dining|bakery|menu/i.test(lower)?'food':
+  /wellness|spa|yoga|therapy|fitness|health|retreat/i.test(lower)?'wellness':
+  /fashion|boutique|apparel|clothing|runway|jewelry|jewellery/i.test(lower)?'fashion':
+  /travel|hotel|resort|holiday|tour|destination/i.test(lower)?'travel':
+  /school|education|tutor|academy|university|course/i.test(lower)?'education':
+  /finance|bank|accounting|insurance|investment|fintech/i.test(lower)?'finance':'creative';
+ const chosen={...themes[category]},exact=nxProjUserColors(p);
+ // Vary otherwise unspecified color schemes per brand, while preserving industry
+ // identity. No random or universal terracotta palette for all businesses.
+ const seed=[...(nxProjectExplicitBrand(p)||p.slice(0,85))].reduce((v,c)=>(v*31+c.charCodeAt(0))>>>0,2166136261);
+ if(!exact.values.length&&seed%3===1&&category==='creative'){
+  Object.assign(chosen,{background:'#eff4f3',text:'#193432',accent:'#286f7b',surface:'#dbe6e4',muted:'#647c7b'});
+ }else if(!exact.values.length&&seed%3===2&&category==='creative'){
+  Object.assign(chosen,{background:'#161925',text:'#f4f1f0',accent:'#dab6e6',surface:'#292c3b',muted:'#a9a4b6'});
+ }
+ for(const [role,value] of Object.entries(exact.roles))chosen[role]=value;
+ if(!Object.keys(exact.roles).length&&exact.values.length>=3){
+  chosen.background=exact.values[0];chosen.text=exact.values[1];chosen.accent=exact.values[2];
+ }
+ const names=['home','about','services','service','product','products','security','contact','portfolio','gallery','work','pricing','plans','shop','catalog','menu','team','faq','blog','features','testimonials'];
+ const pageLabels={home:'Home',about:'About',services:'Services',service:'Services',product:'Product',products:'Products',security:'Security',
+  contact:'Contact',portfolio:'Portfolio',gallery:'Gallery',work:'Portfolio',pricing:'Pricing',plans:'Pricing',shop:'Shop',catalog:'Catalog',
+  menu:'Menu',team:'Team',faq:'FAQ',blog:'Blog',features:'Features',testimonials:'Testimonials'};
+ const pageMatch=p.match(/\bpages?\s*:\s*([^\n.]{5,170})/i);
+ let requested=[];
+ if(pageMatch){
+  requested=pageMatch[1].replace(/\band\b/gi,',').split(/[,;]+/).map(x=>x.trim().toLowerCase()).filter(x=>names.includes(x));
+ }
+ if(!requested.length){
+  requested=names.map(x=>({x,i:lower.search(new RegExp('\\b'+x+'\\b','i'))})).filter(o=>o.i>=0).sort((a,b)=>a.i-b.i).map(o=>o.x);
+ }
+ requested=[...new Set(requested.map(x=>pageLabels[x]||x))];
+ const single=/\b(single.page|one.page|landing page only|homepage only)\b/i.test(p);
+ let titles=single?['Home']:['Home',...requested.filter(x=>x!=='Home')];
+ if(!single&&titles.length<3){
+  titles=category==='tech'?['Home','Product','Security','Contact']:category==='food'?['Home','Menu','About','Contact']:
+   category==='fashion'?['Home','Collections','About','Contact']:category==='travel'?['Home','Destinations','About','Contact']:
+   ['Home','Services','Portfolio','Contact'];
+ }
+ titles=titles.slice(0,7);
+ const purpose={
+  Home:['Hero','Primary offering','Featured highlights','Next steps'],
+  Product:['Product overview','Capabilities','Typical workflow','Get started'],
+  Security:['Approach to security','Privacy considerations','Controls overview'],
+  Contact:['Ways to connect','Working together','Next steps'],
+  About:['Story and philosophy','Approach','People and process'],
+  Services:['Service overview','Detailed offerings','How collaboration works'],
+  Portfolio:['Selected projects','Creative approach','Explore'],
+  Pricing:['Service packages','What is included','Frequently asked questions'],
+  Menu:['Selections','Food philosophy','Reservations information'],
+  Gallery:['Featured gallery','Story behind the work','Contact'],
+  Collections:['Collections','Materials and details','Explore'],
+  Destinations:['Featured places','Experience details','Plan a trip']
+ };
+ const layouts=['Offset photography and oversized typography','Modular bento grid and strong visual contrast','Editorial split panels','Horizontal timeline and layered image gallery','Full-bleed showcase','Asymmetric feature matrix','Minimalist text-first composition'];
+ const pages=titles.map((title,i)=>({
+  slug:title==='Home'?'index':nxProjSlug(title),title,purpose:(purpose[title]||['Overview','Details','Next steps']).join('; '),
+  design:layouts[(seed+i*3)%layouts.length]+'; '+(category==='tech'?'high-contrast technical direction':category+' visual identity'),
+  sections:purpose[title]||['Overview','Details','Next steps']
+ }));
+ const brand=nxProjectExplicitBrand(p)||old.brand||'Your Studio';
+ return nxProjectNormalizePlan({brand,industry:category,artDirection:'Distinctive '+category+' art direction directly following the full client brief: '+p.slice(0,650),
+  designSystem:'Create original CSS and layout for each page. Never reuse identical section composition. Honor exact color names and user-provided content.',
+  displayFont:category==='tech'?'Space Grotesk':category==='fashion'?'Bodoni Moda':category==='food'?'Cormorant Garamond':'Manrope',
+  bodyFont:category==='tech'?'Inter':'DM Sans',palette:chosen,pages},p,previous);
+}
 async function nxProjectDirector(env,brief,previous){
  const res=await nxProjectModel(env,'@cf/meta/llama-3.3-70b-instruct-fp8-fast',{
   messages:[{role:'system',content:NX_PROJECT_DIRECTOR},{role:'user',content:nxProjectPlanPrompt(brief,previous)}],
   max_tokens:1900,temperature:.55
  });
- return nxProjectNormalizePlan(nxProjParse(nxProjReply(res)),brief,previous);
+ try{return nxProjectNormalizePlan(nxProjParse(nxProjReply(res)),brief,previous)}
+ catch{return nxProjectFallbackPlan(brief,previous)}
 }
 function nxProjectAssetList(){
  return NX_PROJECT_ASSETS.map(p=>'https://images.unsplash.com/'+p+'?auto=format&fit=crop&w=1400&q=82').join('\n');
