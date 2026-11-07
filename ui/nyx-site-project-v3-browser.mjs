@@ -40,6 +40,9 @@ const dir=await mkdtemp(join(tmpdir(),'nyx-project-'));
 async function run(width){
  const context=await browser.newContext({viewport:{width,height:850},acceptDownloads:true});
  const page=await context.newPage();
+ page.on('pageerror',e=>console.log('BROWSER JS ERROR',e.stack||e.message));
+ page.on('console',m=>{if(m.type()==='error')console.log('BROWSER CONSOLE',m.text().slice(0,500))});
+ page.on('response',r=>{if(r.url().includes('/api/nyx'))console.log('NYX CHAT RESPONSE',r.status(),r.url())});
  await page.route('**/api/auth/me',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({authenticated:true,user:{id:'mock-site-project',name:'Preview Test',email:'test@example.invalid',provider:'password'}})}));
  let revisions=0;
  await page.route('**/api/nyx',route=>{
@@ -57,7 +60,7 @@ async function run(width){
  await page.waitForFunction(()=>!document.body.classList.contains('nx-auth-checking'),{timeout:20000});
  await page.locator('#prompt').fill('Create a modern multi-page website for Studio Helio with Home, About, Services and Contact');
  await page.locator('#send').click();
- await page.waitForSelector('.nx-project-card',{timeout:20000});
+ try{await page.waitForSelector('.nx-project-card',{timeout:9000})}catch(e){const state=await page.evaluate(()=>({messages:document.querySelector('#messages')?.innerText?.slice(-1500),projectCard:document.querySelectorAll('.nx-project-card').length,oldCard:document.querySelectorAll('.nx-site-card').length,errors:document.body.innerText.slice(-500)}));console.log('PROJECT STUDIO UI STATE',JSON.stringify(state));throw e}
  assert.match(await page.locator('.nx-project-card').innerText(),/4 linked pages/);
  await page.locator('.nx-project-card button').first().click();
  await page.waitForSelector('.nx-project-overlay');
