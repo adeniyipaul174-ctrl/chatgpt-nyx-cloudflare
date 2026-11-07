@@ -119,3 +119,10 @@ test('an image request about a website is not mistaken for source-code generatio
  assert.equal(nxProjectIntent('Generate an image of a website homepage',false),false);
  assert.equal(nxProjectIntent('Create a beautiful website with five working pages',false),true);
 });
+
+test('explicitly named brand is preserved rather than rewritten by the design model',()=>{
+ const p=nxProjectNormalizePlan({...base,brand:'Vector Grid - AI Data Platform'},'Create a multi-page site for VECTOR GRID, a modern data platform. Use exact background #08182e text #ffffff accent #2be7fa.');
+ assert.equal(p.brand,'VECTOR GRID');
+ const q=nxProjectNormalizePlan({...base,brand:'Generic Studio'},'Build a site for AURELIA STUDIO, a creative agency.');
+ assert.equal(q.brand,'AURELIA STUDIO');
+});
