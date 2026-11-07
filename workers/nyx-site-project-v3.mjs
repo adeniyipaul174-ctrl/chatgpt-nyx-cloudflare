@@ -184,3 +184,154 @@ export function nxProjectRelink(project){
  }
  return out;
 }
+
+const NX_PROJECT_DIRECTOR='You are a senior agency art director creating a REAL MULTI-PAGE website project, not a one-page mockup. Return only strict JSON {brand,industry,artDirection,designSystem,displayFont,bodyFont,palette:{background,text,accent,surface,muted},pages:[{slug,title,purpose,design,sections:[string]}]}. Create 3-6 DISTINCT pages by default, unless specifically asked for one page. Include separate index/home, about, services/products/work and contact pages when relevant; obey any specifically named pages like pricing, gallery, products, FAQ, portfolio, blog. Each page must have a different purpose, layout and section composition. Every page is a separate .html file, with real navigation. Choose CUSTOM palette and type based on CLIENT BRIEF; DO NOT default to ivory/terracotta or any repeated agency theme. If user provides exact #HEX colors, follow them exactly. The output is a design plan, not website code. No fake awards, reviews, revenue, metrics, contact info, or checkout.';
+const NX_PROJECT_CODER='You are a senior front-end designer writing ONE COMPLETE page of a REAL MULTI-PAGE website. Return just <!doctype html>... </html> with fully original semantic HTML and inline bespoke <style> CSS. Never reuse a preset layout. Honor brand, exact HEX colors, typography, industry and THIS PAGE\'S required content from the plan. OTHER pages exist as separate files, with navigation inserted by the server. Do not put a menu in the returned code. Make an unusual but usable composition for this page; visually different from the other pages, with strong typography, thoughtful spacing, responsive grids, imagery appropriate to the industry, real headings and copy (not lorem ipsum or generic filler). Use at least 3 named <section> blocks within <main>, with working local #anchors where suitable. Full <head>, <html lang="en">, viewport meta, body, footer, and CSS responsive @media(max-width:720px), @media(max-width:400px). Do not write <script>, forms, iframe, svg, style imports, or external JS. The only allowed images are exact Unsplash URLs in the supplied list; no other image hosts. Include no fictional business details, client testimonials or unverified promises. Do not simulate payments or contact delivery. ALL PAGE LINKS are to local .html pages, not /routes. Output 3000-18000 characters of complete, valid, accessible HTML. No markdown fences.';
+const NX_PROJECT_EDIT='You are a careful senior front-end designer editing an EXISTING website page. Return the WHOLE updated HTML document, not advice or a fragment. Keep the exact existing brand, page identity, existing sections, working content, core visual direction and CSS unless the user expressly requests changes. Implement the specific request substantially: new sections must actually exist in the DOM, replaced colors must change CSS, layout changes must affect the correct section. Preserve responsive behavior. No script, forms, external code, fictitious content or broken links. Keep a complete <!doctype html>... </html>. Other pages in this site must NOT be rewritten. Use only approved image URLs supplied.';
+function nxProjectPlanPrompt(brief,previous){
+ const old=previous?.plan?JSON.stringify(previous.plan).slice(0,8000):'None';
+ return 'COMPLETE CLIENT REQUEST:\n'+brief+'\n\nEXISTING PROJECT (if redesigning):\n'+old+
+  '\n\nPlan all requested pages, with distinctive layout notes for EACH page. Required output is strict JSON only. Pay particular attention to exact user colors, page names and navigation. Do not reuse a fixed palette.';
+}
+async function nxProjectDirector(env,brief,previous){
+ const res=await env.AI.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast',{
+  messages:[{role:'system',content:NX_PROJECT_DIRECTOR},{role:'user',content:nxProjectPlanPrompt(brief,previous)}],
+  max_tokens:1900,temperature:.55
+ });
+ return nxProjectNormalizePlan(nxProjParse(nxProjReply(res)),brief,previous);
+}
+function nxProjectAssetList(){
+ return NX_PROJECT_ASSETS.map(p=>'https://images.unsplash.com/'+p+'?auto=format&fit=crop&w=1400&q=82').join('\n');
+}
+async function nxProjectMakePage(env,plan,page,request,oldHtml=null){
+ const serverNav=plan.pages.map(x=>({slug:x.slug,title:x.title}));
+ const task='FULL USER BRIEF:\n'+(plan.brief||request)+
+  '\n\nPAGE TO CREATE OR EDIT:\n'+JSON.stringify(page)+
+  '\n\nCOMPLETE SITE ART DIRECTION:\n'+JSON.stringify({brand:plan.brand,industry:plan.industry,artDirection:plan.artDirection,designSystem:plan.designSystem,displayFont:plan.displayFont,bodyFont:plan.bodyFont,palette:plan.palette})+
+  '\n\nALL EXISTING PAGE FILES (navigation must work):\n'+JSON.stringify(serverNav)+
+  '\n\nLATEST CHANGE REQUEST:\n'+request+
+  '\n\nPREVIOUS VERSION OF THIS PAGE (edit precisely; retain unaffected content):\n'+(oldHtml?oldHtml.slice(0,24000):'This is a new page.')+
+  '\n\nONLY APPROVED IMAGE URLS:\n'+nxProjectAssetList()+
+  '\n\nDo not reuse another page layout. Ensure page-specific sections and exact requested design. Full styled HTML only.';
+ const generate=async(detail='')=>{
+  const result=await env.AI.run('@cf/qwen/qwen2.5-coder-32b-instruct',{
+   messages:[{role:'system',content:oldHtml?NX_PROJECT_EDIT:NX_PROJECT_CODER},{role:'user',content:task+(detail?'\n\nCORRECTIONS REQUIRED:\n'+detail:'')}],
+   max_tokens:5200,temperature:oldHtml?.28:.5
+  });
+  return nxProjReply(result);
+ };
+ let first=await generate(),err='';
+ for(let attempt=0;attempt<2;attempt++){
+  try{
+   const html=nxProjectFinishPage(first,plan,page.slug);
+   if(oldHtml&&html.length<Math.min(3000,oldHtml.length*.48))throw Error('Revision dropped much of the existing page.');
+   return {path:page.slug+'.html',html};
+  }catch(e){err=String(e?.message||e).slice(0,500)}
+  if(attempt===0)first=await generate('The previous attempt FAILED: '+err+'. Rebuild the complete page, preserving the requested design and all necessary sections. Finish the HTML document. Previous output (for error diagnosis):\n'+first.slice(0,9000));
+ }
+ throw Error('Could not complete '+page.title+' page: '+err);
+}
+function nxProjectPageFor(plan,value){
+ const key=nxProjSlug(value||'');
+ return plan.pages.find(p=>p.slug===key||p.title.toLowerCase()===String(value||'').trim().toLowerCase())||
+ plan.pages.find(p=>p.slug.includes(key)&&key.length>2)||null;
+}
+function nxProjectOperationFallback(prompt,project){
+ const p=prompt.toLowerCase();
+ const findTarget=()=>project.plan.pages.find(x=>p.includes(x.slug.replace(/-/g,' '))||p.includes(x.title.toLowerCase()))?.slug||'index';
+ const matched=p.match(/(?:add|create|build|make|design)\s+(?:a\s+|an\s+|the\s+|new\s+|another\s+)*(?:page\s+(?:for|called|named)\s+)?([a-z][\w -]{2,35}?)\s+page/);
+ if(/^(add|create|build|make|design)\s+/.test(p)&&(p.includes(' page')||p.includes('new page'))){
+  const title=matched?.[1]||p.match(/(?:new|another)\s+([a-z][\w-]+)\s+page/)?.[1]||'New Page';
+  return {action:'add_page',target:nxProjSlug(title),title:title.replace(/\b\w/g,c=>c.toUpperCase())};
+ }
+ if(/^(remove|delete)\s+/.test(p)&&/page/.test(p))return {action:'remove_page',target:findTarget()};
+ if(/^(rename)\s+/.test(p)&&/page/.test(p))return {action:'rename_page',target:findTarget(),title:nxProjText(prompt.split(' to ').pop(),50)};
+ if(/^(change|redesign|rebrand|switch|update|make|use)\s+/.test(p)&&/(?:all|whole|entire|every|global|sitewide|whole website|all pages|navigation|navbar|theme|palette)/.test(p))
+  return {action:'global_redesign',target:'all'};
+ return {action:'edit_page',target:findTarget()};
+}
+async function nxProjectOperation(env,prompt,project){
+ const fallback=nxProjectOperationFallback(prompt,project);
+ try{
+  const r=await env.AI.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast',{
+   messages:[{role:'system',content:'You are an exact website project change router. Return ONLY JSON {action,target,title,description}. actions: add_page (only create a NEW standalone linked page), edit_page (change existing page, add section, change layout, insert designs), remove_page, rename_page, global_redesign (sitewide palette, brand, typography, navigation or entire visual redesign). target is existing page slug or new page slug; title is human-readable name for additions/renames. Do not choose add_page when the user wants a new section on an existing page. Do not choose global_redesign for a request targeting one named page. Never rebuild all pages for a small change.'},
+    {role:'user',content:'PROJECT PAGES: '+JSON.stringify(project.plan.pages.map(x=>({slug:x.slug,title:x.title})))+'\nREQUEST: '+prompt}],
+   max_tokens:260,temperature:.1
+  });
+  const o=nxProjParse(nxProjReply(r)),actions=['add_page','edit_page','remove_page','rename_page','global_redesign'];
+  if(!actions.includes(o.action))return fallback;
+  return {action:o.action,target:nxProjSlug(o.target||fallback.target),title:nxProjText(o.title,60)||fallback.title||'New Page',description:nxProjText(o.description,160)};
+ }catch{return fallback}
+}
+async function nxProjectGenerateAll(env,plan,request){
+ const files=new Array(plan.pages.length);
+ for(let i=0;i<plan.pages.length;i+=2){
+  const pages=plan.pages.slice(i,i+2);
+  const pair=await Promise.all(pages.map(p=>nxProjectMakePage(env,plan,p,request)));
+  pair.forEach((f,j)=>{files[i+j]=f});
+ }
+ return files;
+}
+function nxProjectResult(project,action){
+ const paths=project.files.map(x=>x.path);
+ if(paths.length!==project.plan.pages.length||!paths.includes('index.html'))throw Error('The project does not contain all planned website pages.');
+ if(project.files.some(f=>!nxProjectValidateHtml(f.html,project.plan).ok))throw Error('A project page did not pass validation.');
+ const siteSpec={version:3,brand:project.plan.brand,pages:project.plan.pages.map(p=>({slug:p.slug,title:p.title,purpose:p.purpose})),palette:project.plan.palette,lastAction:action,revision:project.revision};
+ return {kind:'website',reply:'Updated your '+project.files.length+'-page website project. The pages link to each other, and your previous pages are preserved when editing one page. Preview, navigate between pages and export the full site as a ZIP. Forms, checkout, databases and domains need real integrations.',siteSpec,siteProject:project};
+}
+export async function nxWebsiteBuildProjectV3(env,prompt,previous=null){
+ if(!env?.AI)throw Error('NyX website AI is unavailable.');
+ if(typeof prompt!=='string'||prompt.trim().length<9||prompt.length>4000)throw Error('Describe the website or edit request in 9–4,000 characters.');
+ const old=nxProjectSafeInput(previous);
+ if(!old){
+  const plan=await nxProjectDirector(env,prompt,null);
+  if(plan.pages.length>7)throw Error('Maximum seven pages per project.');
+  const files=await nxProjectGenerateAll(env,plan,prompt);
+  return nxProjectResult({version:3,plan,files,revision:1},'create_project');
+ }
+ const op=await nxProjectOperation(env,prompt,old);
+ const project={version:3,plan:structuredClone(old.plan),files:old.files.map(x=>({...x})),revision:Math.max(1,old.revision)+1};
+ if(op.action==='add_page'){
+  if(project.plan.pages.length>=7)throw Error('This website already has seven pages. Remove one to add another.');
+  const slug=nxProjSlug(op.target||op.title);
+  if(project.plan.pages.some(p=>p.slug===slug))throw Error('A page with that name already exists. Ask NyX to edit it.');
+  const page={slug,title:nxProjText(op.title,55)||'New Page',purpose:op.description||prompt.slice(0,220),design:'Follow the site design system but use page-specific original composition',sections:['Hero','Main content','Call to action']};
+  project.plan.pages.push(page);
+  project.files.push(await nxProjectMakePage(env,project.plan,page,prompt));
+  return nxProjectResult(nxProjectRelink(project),'add_page');
+ }
+ if(op.action==='remove_page'){
+  const target=nxProjectPageFor(project.plan,op.target);
+  if(!target||target.slug==='index')throw Error('Choose an existing non-home page to remove.');
+  project.plan.pages=project.plan.pages.filter(p=>p.slug!==target.slug);
+  project.files=project.files.filter(f=>f.path!==target.slug+'.html');
+  return nxProjectResult(nxProjectRelink(project),'remove_page');
+ }
+ if(op.action==='rename_page'){
+  const target=nxProjectPageFor(project.plan,op.target),slug=nxProjSlug(op.title);
+  if(!target||target.slug==='index'||project.plan.pages.some(p=>p.slug===slug&&p!==target))throw Error('That page cannot be renamed; choose an existing non-home page and a unique name.');
+  const oldPath=target.slug+'.html';target.slug=slug;target.title=op.title;
+  const entry=project.files.find(f=>f.path===oldPath);if(!entry)throw Error('Could not locate page file.');
+  entry.path=slug+'.html';
+  return nxProjectResult(nxProjectRelink(project),'rename_page');
+ }
+ if(op.action==='global_redesign'){
+  const redesignBrief=project.plan.brief+'\nLATEST SITEWIDE REDESIGN REQUEST: '+prompt;
+  const newPlan=await nxProjectDirector(env,redesignBrief,project);
+  // Keep project page identity and contents, change visual direction across pages.
+  newPlan.pages=project.plan.pages.map(p=>({...p}));
+  newPlan.brand=project.plan.brand;
+  const files=new Array(newPlan.pages.length);
+  for(let i=0;i<newPlan.pages.length;i+=2){
+   const pair=await Promise.all(newPlan.pages.slice(i,i+2).map(p=>nxProjectMakePage(env,newPlan,p,prompt,project.files.find(f=>f.path===p.slug+'.html')?.html)));
+   pair.forEach((f,j)=>{files[i+j]=f});
+  }
+  project.plan=newPlan;project.files=files;
+  return nxProjectResult(nxProjectRelink(project),'global_redesign');
+ }
+ const target=nxProjectPageFor(project.plan,op.target)||project.plan.pages[0];
+ const i=project.files.findIndex(f=>f.path===target.slug+'.html');
+ if(i<0)throw Error('Cannot find '+target.title+' in the website project.');
+ project.files[i]=await nxProjectMakePage(env,project.plan,target,prompt,project.files[i].html);
+ return nxProjectResult(nxProjectRelink(project),'edit_page');
+}
