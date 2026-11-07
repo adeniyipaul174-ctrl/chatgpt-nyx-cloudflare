@@ -1,5 +1,5 @@
 name: NyX multipage live production acceptance
-# Post-release check: free code model, plan recovery and clean production routes.
+# Post-release check: confirm the 2026-11-07 quota recovery release, multipage navigation and ZIP exports.
 on:
   push:
     branches: [feature/openmausbot-integration]
