@@ -1,4 +1,5 @@
 // NyX staged multipage product acceptance: actual UI, fake account/model responses.
+// Reconfirm new natural-language edit handling and free-only backend changes.
 import {chromium} from 'playwright-core';
 import {existsSync,readFileSync} from 'node:fs';
 import {execFileSync} from 'node:child_process';
