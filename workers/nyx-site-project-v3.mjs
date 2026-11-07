@@ -1,3 +1,4 @@
+import {nxRescueBuild} from './nyx-site-rescue-v4.mjs';
 // NyX Site Projects v3. Projects contain real standalone linked HTML pages.
 // There is no shared fixed page template, no forced palette, no fake backend.
 const NX_PROJECT_ASSETS=[
@@ -23,6 +24,7 @@ function nxProjParse(str){
 const nxProjReply=r=>r?.response||r?.choices?.[0]?.message?.content||'';
 
 let NX_PROJECT_AI_QUOTA_UNTIL=0;
+let NX_PROJECT_BACKUP_UNAVAILABLE_UNTIL=0;
 export async function nxProjectModel(env,model,payload,fetchImpl=fetch){
  if(Date.now()>=NX_PROJECT_AI_QUOTA_UNTIL&&env?.AI){
   try{return await env.AI.run(model,payload)}
@@ -501,4 +503,29 @@ export async function nxWebsiteBuildProjectV3(env,prompt,previous=null){
  if(i<0)throw Error('Cannot find '+target.title+' in the website project.');
  project.files[i]=await nxProjectMakePage(env,project.plan,target,prompt,project.files[i].html);
  return nxProjectResult(nxProjectRelink(project),'edit_page');
+}
+
+
+// Recovery uses the existing content model when available and switches to a
+// real multi-file local project builder only when both free providers fail.
+export async function nxWebsiteBuildProjectV3Resilient(env,prompt,previous=null){
+ const deps={
+  safeInput:nxProjectSafeInput,
+  fallbackPlan:nxProjectFallbackPlan,
+  finish:nxProjectFinishPage,
+  result:nxProjectResult,
+  relink:nxProjectRelink,
+  operation:nxProjectOperationFallback,
+  pageFor:nxProjectPageFor
+ };
+ if(typeof prompt!=='string'||prompt.trim().length<9||prompt.length>4000)throw Error('Describe the website or requested edit in 9–4,000 characters.');
+ if(Date.now()<NX_PROJECT_AI_QUOTA_UNTIL&&Date.now()<NX_PROJECT_BACKUP_UNAVAILABLE_UNTIL)
+  return nxRescueBuild(prompt,previous,deps);
+ try{return await nxWebsiteBuildProjectV3(env,prompt,previous)}
+ catch(err){
+  const message=String(err?.message||err||'');
+  if(!/429|quota|allocation|daily|free (?:code|model|website)|provider|capacity|unavailable|timeout|timed out|aborted|incomplete|invalid (?:JSON|HTML)|cut off|not complete|could not complete|exhausted/i.test(message))throw err;
+  NX_PROJECT_BACKUP_UNAVAILABLE_UNTIL=Date.now()+12*60*1000;
+  return nxRescueBuild(prompt,previous,deps);
+ }
 }
