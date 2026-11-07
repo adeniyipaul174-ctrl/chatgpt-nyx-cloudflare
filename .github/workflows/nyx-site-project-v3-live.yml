@@ -1,0 +1,30 @@
+name: NyX v3 real AI multipage and edit verification
+on:
+  push:
+    branches: [feature/openmausbot-integration]
+    paths:
+      - "scripts/nyx-site-project-v3-live-test.mjs"
+      - ".github/workflows/nyx-site-project-v3-live.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+  id-token: write
+jobs:
+  real-ai:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: Generate real multipage website and add a real page via Cloudflare AI
+        run: node scripts/nyx-site-project-v3-live-test.mjs
+      - name: Save actual website pages for visual audit
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nyx-site-v3-real-ai
+          path: nyx-agent-results/vector-v3/
+          if-no-files-found: ignore
+          retention-days: 7
