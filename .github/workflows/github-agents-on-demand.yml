@@ -30,6 +30,7 @@ on:
       - "tasks/nyx-task.md"
       - "scripts/nyx-bespoke-live-test.mjs"
       - "scripts/nyx-site-project-v3-live-test.mjs"
+      - "scripts/nyx-provider-check.mjs"
       - "ui/nyx-site-project-v3-real-visual.mjs"
       - "ui/nyx-bespoke-visual-audit.mjs"
 permissions:
@@ -59,7 +60,7 @@ jobs:
         with:
           node-version: "24"
       - name: Run NyX agents with short-lived OIDC and existing NyX Workers AI
-        if: github.event_name != 'push' || (!contains(github.event.head_commit.message, '[site-v3-test]') && !contains(github.event.head_commit.message, '[site-v2-test]'))
+        if: github.event_name != 'push' || (!contains(github.event.head_commit.message, '[site-v3-test]') && !contains(github.event.head_commit.message, '[site-v2-test]') && !contains(github.event.head_commit.message, '[provider-probe]'))
         env:
           NYX_ACTIONS_URL: https://chatgpt-nyx-v3-test.adeniyipaul174.workers.dev/api/nyx/github-agents/infer
           NYX_TASK: ${{ inputs.task }}
@@ -82,6 +83,9 @@ jobs:
         run: |
           npm install --no-save --ignore-scripts --no-package-lock playwright-core@1.57.0
           node ui/nyx-bespoke-visual-audit.mjs
+      - name: Check the existing OpenRouter free model without charging paid models
+        if: github.event_name == 'push' && contains(github.event.head_commit.message, '[provider-probe]')
+        run: node scripts/nyx-provider-check.mjs
       - name: Upload results
         if: always()
         uses: actions/upload-artifact@v4
