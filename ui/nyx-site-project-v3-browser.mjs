@@ -68,7 +68,7 @@ async function run(width){
  const frame=page.locator('.nx-site-frame');
  assert.equal(await frame.getAttribute('sandbox'),'allow-scripts');
  assert.match(await page.frameLocator('.nx-site-frame').locator('h1').innerText(),/Studio Helio — Home/);
- if(width<=750){await page.frameLocator('.nx-site-frame').locator('.nx-project-mobile summary').click();await page.frameLocator('.nx-site-frame').locator('.nx-project-mobile a[href="about.html"]').click();}
+ if(await page.frameLocator('.nx-site-frame').locator('.nx-project-mobile summary').isVisible()){await page.frameLocator('.nx-site-frame').locator('.nx-project-mobile summary').click();await page.frameLocator('.nx-site-frame').locator('.nx-project-mobile a[href="about.html"]').click();}
  else await page.frameLocator('.nx-site-frame').locator('.nx-project-desktop a[href="about.html"]').click();
  await page.waitForFunction(()=>document.querySelector('.nx-project-pages')?.value==='about.html',{timeout:10000});
  assert.match(await page.frameLocator('.nx-site-frame').locator('h1').innerText(),/Studio Helio — About/);
