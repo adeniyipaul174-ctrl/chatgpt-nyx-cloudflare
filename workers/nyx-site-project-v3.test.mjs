@@ -27,9 +27,9 @@ function fakeAi(plan=base){
   const system=input.messages[0]?.content||'',user=input.messages[1]?.content||'';
   calls.push({model,system,user});
   if(system.includes('website project change router')){
-   if(/new pricing page|pricing page/.test(user))return {response:JSON.stringify({action:'add_page',target:'pricing',title:'Pricing'})};
-   if(/remove about page/.test(user))return {response:JSON.stringify({action:'remove_page',target:'about'})};
-   if(/entire website/.test(user))return {response:JSON.stringify({action:'global_redesign',target:'all'})};
+   if(/new pricing page|pricing page/i.test(user))return {response:JSON.stringify({action:'add_page',target:'pricing',title:'Pricing'})};
+   if(/remove about page/i.test(user))return {response:JSON.stringify({action:'remove_page',target:'about'})};
+   if(/entire website/i.test(user))return {response:JSON.stringify({action:'global_redesign',target:'all'})};
    return {response:JSON.stringify({action:'edit_page',target:'about'})};
   }
   if(model.includes('llama'))return {response:JSON.stringify({...plan,pages:plan.pages})};
