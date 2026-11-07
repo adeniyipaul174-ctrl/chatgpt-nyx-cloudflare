@@ -32,25 +32,37 @@ export async function nxProjectModel(env,model,payload,fetchImpl=fetch){
    NX_PROJECT_AI_QUOTA_UNTIL=Date.now()+30*60*1000;
   }
  }
- // Reuse NyX's EXISTING no-cost OpenRouter connection, never a paid model.
  if(!env?.OPENROUTER_API_KEY)throw Error('Website AI free allocation is exhausted and the free backup is unavailable. Try again after the model allowance resets.');
- let response;
- try{
-  response=await fetchImpl('https://openrouter.ai/api/v1/chat/completions',{
-   method:'POST',
-   headers:{Authorization:'Bearer '+env.OPENROUTER_API_KEY,'Content-Type':'application/json',
-    'HTTP-Referer':'https://chatgpt-nyx-v3-test.adeniyipaul174.workers.dev','X-Title':'NyX Site Studio'},
-   body:JSON.stringify({model:'openrouter/free',messages:(payload.messages||[]).slice(-3).map(m=>({role:m.role,content:String(m.content||'').slice(0,50000)})),
-    max_tokens:Math.min(6500,Math.max(400,Number(payload.max_tokens)||1600)),temperature:payload.temperature??.4,stream:false,provider:{data_collection:'deny'}}),
-   signal:AbortSignal.timeout(110000)
-  });
- }catch{throw Error('The free website generation backup could not be reached. Please try later.')}
- if(!response.ok)throw Error('The free website generation backup is unavailable ('+response.status+'). Try again when model capacity returns.');
- let data;
- try{data=await response.json()}catch{throw Error('The free website backup returned an invalid response.')}
- const result=data?.choices?.[0]?.message?.content;
- if(typeof result!=='string'||!result.trim())throw Error('The free website backup returned an empty response.');
- return {response:result};
+ // Explicitly prefer a verified no-cost code model: automatic model selection
+ // can route long code requests to a reasoning model which returns empty content.
+ const freeModels=['cohere/north-mini-code:free','openrouter/free'];
+ const messages=(payload.messages||[]).slice(-3).map(m=>({role:m.role,content:String(m.content||'').slice(0,50000)}));
+ let lastError='No free model was able to return completed website code.';
+ for(const freeModel of freeModels){
+  let response;
+  try{
+   response=await fetchImpl('https://openrouter.ai/api/v1/chat/completions',{
+    method:'POST',
+    headers:{Authorization:'Bearer '+env.OPENROUTER_API_KEY,'Content-Type':'application/json',
+     'HTTP-Referer':'https://chatgpt-nyx-v3-test.adeniyipaul174.workers.dev','X-Title':'NyX Site Studio'},
+    body:JSON.stringify({model:freeModel,messages,max_tokens:Math.min(6500,Math.max(400,Number(payload.max_tokens)||1600)),
+     temperature:payload.temperature??.4,stream:false,provider:{data_collection:'deny'}}),
+    signal:AbortSignal.timeout(110000)
+   });
+  }catch{lastError='The free website code model could not be reached.';continue}
+  if(!response.ok){
+   lastError='Free website model is unavailable ('+response.status+').';
+   if([401,402,403].includes(response.status))break;
+   continue;
+  }
+  let data;
+  try{data=await response.json()}catch{lastError='The free website model returned invalid JSON.';continue}
+  const content=data?.choices?.[0]?.message?.content;
+  const result=typeof content==='string'?content:Array.isArray(content)?content.filter(x=>x?.type==='text'&&typeof x.text==='string').map(x=>x.text).join('\n'):'';
+  if(result.trim())return {response:result};
+  lastError='The free code model returned an empty response for this website request.';
+ }
+ throw Error(lastError+' Please try again when free-model capacity returns.');
 }
 
 function nxProjUserColors(brief){
