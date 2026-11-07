@@ -1,5 +1,6 @@
 // Real AI execution on private, OIDC-protected staging Worker.
 // Invoked by the existing allowlisted GitHub workflow identity.
+// Retry includes repaired structural HTML and live visual screenshots.
 // Preserves generated HTML files as artifacts for visual review.
 import assert from 'node:assert/strict';
 import {mkdir,writeFile} from 'node:fs/promises';
