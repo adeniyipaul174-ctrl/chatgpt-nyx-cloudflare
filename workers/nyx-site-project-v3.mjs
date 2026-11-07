@@ -113,8 +113,9 @@ export function nxProjectNormalizePlan(raw,brief='',previous=null){
  };
 }
 export function nxProjectIntent(prompt,hasProject=false){
- const p=String(prompt||'').trim().toLowerCase();
- if(!p||p.length>4000)return false;
+ const raw=String(prompt||'').trim().toLowerCase();
+ const p=raw.replace(/^(?:(?:hey\s+nyx[,! ]*|please\s+|can\s+you\s+|could\s+you\s+|would\s+you\s+|i\s+want\s+(?:you\s+)?to\s+|i\s+need\s+(?:you\s+)?to\s+|now\s+|also\s+)+)/,'');
+ if(!p||raw.length>4000)return false;
  if(/^(?:generate|create|draw|render|design|make)\s+(?:an?\s+)?(?:image|picture|photo|screenshot|mockup)\s+(?:of|showing)\s+/.test(p))return false;
  if(hasProject){
   if(/^(?:build|create|design|make|generate)\s+(?:a|an|another|new)\s+(?:(?:completely\s+)?new\s+|completely\s+)?(?:website|web\s*site|landing\s*page)\s+(?:for|about|called)\s+/.test(p))return false;
@@ -302,7 +303,7 @@ function nxProjectPageFor(plan,value){
  plan.pages.find(p=>p.slug.includes(key)&&key.length>2)||null;
 }
 function nxProjectOperationFallback(prompt,project){
- const p=prompt.toLowerCase();
+ const p=String(prompt||'').toLowerCase().replace(/^(?:(?:hey\s+nyx[,! ]*|please\s+|can\s+you\s+|could\s+you\s+|would\s+you\s+|i\s+want\s+(?:you\s+)?to\s+|i\s+need\s+(?:you\s+)?to\s+|now\s+|also\s+)+)/,'');
  const findTarget=()=>project.plan.pages.find(x=>p.includes(x.slug.replace(/-/g,' '))||p.includes(x.title.toLowerCase()))?.slug||'index';
  const matched=p.match(/(?:add|create|build|make|design)\s+(?:a\s+|an\s+|the\s+|new\s+|another\s+)*(?:page\s+(?:for|called|named)\s+)?([a-z][\w -]{2,35}?)\s+page/);
  if(/^(add|create|build|make|design)\s+/.test(p)&&(p.includes(' page')||p.includes('new page'))){
