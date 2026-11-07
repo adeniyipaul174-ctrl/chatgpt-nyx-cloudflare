@@ -94,7 +94,7 @@ async function run(width){
  assert.equal(revisions,1,'follow-up must preserve project state');
  await page.locator('.nx-project-card').last().getByRole('button',{name:'Open website'}).click();
  await page.locator('.nx-project-pages').selectOption('pricing.html');
- assert.match(await page.frameLocator('.nx-site-frame').locator('h1').innerText(),/Studio Helio — Pricing/);
+ await page.frameLocator('.nx-site-frame').locator('h1').filter({hasText:'Studio Helio — Pricing'}).waitFor({timeout:12000});
  const overflow=await page.evaluate(()=>({scroll:document.documentElement.scrollWidth,viewport:innerWidth}));
  assert.ok(overflow.scroll<=overflow.viewport+2,'NyX UI horizontal overflow at '+width);
  console.log('PASS '+width+'px: Home→About, Services, phone, 4-file ZIP, add Pricing, 5-page project');
