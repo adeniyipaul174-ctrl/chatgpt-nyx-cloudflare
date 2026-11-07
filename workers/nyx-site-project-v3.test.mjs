@@ -101,3 +101,21 @@ test('unsafe markup cannot enter site preview or exported pages',()=>{
  const badUrl=good.replace('</main>','<img src="https://attacker.example/exfil"></main>');
  assert.equal(nxProjectValidateHtml(badUrl,plan).ok,false);
 });
+
+test('repair missing body/main/header heading/footer while keeping page navigation functional',()=>{
+ const plan=nxProjectNormalizePlan(base,'Create a multi page website for studio');
+ const page=plan.pages[0];
+ let broken=pageHtml(page,plan);
+ broken=broken.replace('<main data-generation="initial">','').replace('</main>','').replace(/<h1\b[^>]*>[\s\S]*?<\/h1>/i,'').replace(/<footer>[\s\S]*?<\/footer>/i,'');
+ const repaired=nxProjectFinishPage(broken,plan,'index');
+ assert.match(repaired,/<main\b/);
+ assert.match(repaired,/<\/main>/);
+ assert.match(repaired,/<h1\b/);
+ assert.match(repaired,/<footer\b/);
+ assert.match(repaired,/href="about.html"/);
+ assert.equal(nxProjectValidateHtml(repaired,plan).ok,true);
+});
+test('an image request about a website is not mistaken for source-code generation',()=>{
+ assert.equal(nxProjectIntent('Generate an image of a website homepage',false),false);
+ assert.equal(nxProjectIntent('Create a beautiful website with five working pages',false),true);
+});
