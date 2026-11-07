@@ -1,4 +1,5 @@
 name: NyX multipage live production acceptance
+# Post-release check: free code model, plan recovery and clean production routes.
 on:
   push:
     branches: [feature/openmausbot-integration]
