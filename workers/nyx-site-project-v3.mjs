@@ -21,6 +21,38 @@ function nxProjParse(str){
  catch{throw Error('The website plan was invalid. Please retry.')}
 }
 const nxProjReply=r=>r?.response||r?.choices?.[0]?.message?.content||'';
+
+let NX_PROJECT_AI_QUOTA_UNTIL=0;
+export async function nxProjectModel(env,model,payload,fetchImpl=fetch){
+ if(Date.now()>=NX_PROJECT_AI_QUOTA_UNTIL&&env?.AI){
+  try{return await env.AI.run(model,payload)}
+  catch(e){
+   const message=String(e?.message||e);
+   if(!/429|quota|allocation|daily|overload|capacity|503|unavailable|rate limit/i.test(message))throw e;
+   NX_PROJECT_AI_QUOTA_UNTIL=Date.now()+30*60*1000;
+  }
+ }
+ // Reuse NyX's EXISTING no-cost OpenRouter connection, never a paid model.
+ if(!env?.OPENROUTER_API_KEY)throw Error('Website AI free allocation is exhausted and the free backup is unavailable. Try again after the model allowance resets.');
+ let response;
+ try{
+  response=await fetchImpl('https://openrouter.ai/api/v1/chat/completions',{
+   method:'POST',
+   headers:{Authorization:'Bearer '+env.OPENROUTER_API_KEY,'Content-Type':'application/json',
+    'HTTP-Referer':'https://chatgpt-nyx-v3-test.adeniyipaul174.workers.dev','X-Title':'NyX Site Studio'},
+   body:JSON.stringify({model:'openrouter/free',messages:(payload.messages||[]).slice(-3).map(m=>({role:m.role,content:String(m.content||'').slice(0,50000)})),
+    max_tokens:Math.min(6500,Math.max(400,Number(payload.max_tokens)||1600)),temperature:payload.temperature??.4,stream:false,provider:{data_collection:'deny'}}),
+   signal:AbortSignal.timeout(110000)
+  });
+ }catch{throw Error('The free website generation backup could not be reached. Please try later.')}
+ if(!response.ok)throw Error('The free website generation backup is unavailable ('+response.status+'). Try again when model capacity returns.');
+ let data;
+ try{data=await response.json()}catch{throw Error('The free website backup returned an invalid response.')}
+ const result=data?.choices?.[0]?.message?.content;
+ if(typeof result!=='string'||!result.trim())throw Error('The free website backup returned an empty response.');
+ return {response:result};
+}
+
 function nxProjUserColors(brief){
  const values=[...new Set((brief.match(/#[0-9a-f]{6}\b/gi)||[]).map(x=>x.toLowerCase()))].slice(0,8);
  const roles={};
@@ -227,7 +259,7 @@ function nxProjectPlanPrompt(brief,previous){
   '\n\nPlan all requested pages, with distinctive layout notes for EACH page. Required output is strict JSON only. Pay particular attention to exact user colors, page names and navigation. Do not reuse a fixed palette.';
 }
 async function nxProjectDirector(env,brief,previous){
- const res=await env.AI.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast',{
+ const res=await nxProjectModel(env,'@cf/meta/llama-3.3-70b-instruct-fp8-fast',{
   messages:[{role:'system',content:NX_PROJECT_DIRECTOR},{role:'user',content:nxProjectPlanPrompt(brief,previous)}],
   max_tokens:1900,temperature:.55
  });
@@ -247,7 +279,7 @@ async function nxProjectMakePage(env,plan,page,request,oldHtml=null){
   '\n\nONLY APPROVED IMAGE URLS:\n'+nxProjectAssetList()+
   '\n\nDo not reuse another page layout. Ensure page-specific sections and exact requested design. Full styled HTML only.';
  const generate=async(detail='')=>{
-  const result=await env.AI.run('@cf/qwen/qwen2.5-coder-32b-instruct',{
+  const result=await nxProjectModel(env,'@cf/qwen/qwen2.5-coder-32b-instruct',{
    messages:[{role:'system',content:oldHtml?NX_PROJECT_EDIT:NX_PROJECT_CODER},{role:'user',content:task+(detail?'\n\nCORRECTIONS REQUIRED:\n'+detail:'')}],
    max_tokens:5200,temperature:oldHtml?.28:.5
   });
@@ -286,7 +318,7 @@ function nxProjectOperationFallback(prompt,project){
 async function nxProjectOperation(env,prompt,project){
  const fallback=nxProjectOperationFallback(prompt,project);
  try{
-  const r=await env.AI.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast',{
+  const r=await nxProjectModel(env,'@cf/meta/llama-3.3-70b-instruct-fp8-fast',{
    messages:[{role:'system',content:'You are an exact website project change router. Return ONLY JSON {action,target,title,description}. actions: add_page (only create a NEW standalone linked page), edit_page (change existing page, add section, change layout, insert designs), remove_page, rename_page, global_redesign (sitewide palette, brand, typography, navigation or entire visual redesign). target is existing page slug or new page slug; title is human-readable name for additions/renames. Do not choose add_page when the user wants a new section on an existing page. Do not choose global_redesign for a request targeting one named page. Never rebuild all pages for a small change.'},
     {role:'user',content:'PROJECT PAGES: '+JSON.stringify(project.plan.pages.map(x=>({slug:x.slug,title:x.title})))+'\nREQUEST: '+prompt}],
    max_tokens:260,temperature:.1
