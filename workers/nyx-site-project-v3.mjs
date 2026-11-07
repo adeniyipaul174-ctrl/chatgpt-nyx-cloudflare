@@ -166,8 +166,18 @@ export function nxProjectFinishPage(raw,plan,slug){
  html=html.replace(/<nav\b[^>]*>[\s\S]*?<\/nav>/gi,'');
  if(!/<html\b[^>]*lang=/i.test(html))html=html.replace(/<html\b/i,'<html lang="en"');
  if(!/<meta\b[^>]*name=["']viewport["']/i.test(html))html=html.replace(/<\/head>/i,'<meta name="viewport" content="width=device-width,initial-scale=1"></head>');
- if(!/<main\b/i.test(html))html=html.replace(/<body\b[^>]*>/i,x=>x+'<main>').replace(/<footer\b/i,'</main><footer>');
+ if(!/<body\b[^>]*>/i.test(html))html=html.replace(/<\/head>/i,'</head><body>');
+ if(!/<main\b/i.test(html)){
+  html=html.replace(/<body\b[^>]*>/i,x=>x+'<main>');
+  if(/<footer\b/i.test(html))html=html.replace(/<footer\b/i,'</main><footer>');
+  else html=html.replace(/<\/body>/i,'</main></body>');
+ }
+ if(!/<h1\b/i.test(html)){
+  const heading=html.match(/<h2\b([^>]*)>([\s\S]*?)<\/h2>/i)||html.match(/<h3\b([^>]*)>([\s\S]*?)<\/h3>/i);
+  if(heading)html=html.replace(heading[0],'<h1'+heading[1]+'>'+heading[2]+'</h1>');
+ }
  if(!/<footer\b/i.test(html))html=html.replace(/<\/body>/i,'<footer><p>© '+new Date().getUTCFullYear()+' '+nxProjEsc(plan.brand)+'</p></footer></body>');
+ if(!/<\/body>/i.test(html))html=html.replace(/<\/html>/i,'</body></html>');
  html=html.replace(/<\/head>/i,nxProjectSharedStyle(plan)+'</head>');
  html=html.replace(/<body\b[^>]*>/i,x=>x+nxProjectNav(plan,slug));
  html=nxProjectReplaceLinks(html,plan,slug);
