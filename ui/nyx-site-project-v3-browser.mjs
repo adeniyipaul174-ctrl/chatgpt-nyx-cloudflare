@@ -9,7 +9,7 @@ import {join} from 'node:path';
 import assert from 'node:assert/strict';
 import {nxProjectFinishPage,nxProjectNormalizePlan} from '../workers/nyx-site-project-v3.mjs';
 
-const base='https://nyx-site-project-v3-stage.adeniyipaul174.workers.dev';
+const base=process.env.NYX_SITE_PROJECT_URL||'https://nyx-site-project-v3-stage.adeniyipaul174.workers.dev';
 const chrome=[process.env.CHROME_PATH,'/usr/bin/google-chrome','/usr/bin/google-chrome-stable','/usr/bin/chromium'].find(x=>x&&existsSync(x));
 if(!chrome)throw Error('A real Chromium browser is required');
 const browser=await chromium.launch({executablePath:chrome,headless:true,args:['--no-sandbox','--disable-dev-shm-usage']});
