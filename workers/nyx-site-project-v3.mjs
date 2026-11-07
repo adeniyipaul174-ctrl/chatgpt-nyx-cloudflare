@@ -46,7 +46,8 @@ export async function nxProjectModel(env,model,payload,fetchImpl=fetch){
     headers:{Authorization:'Bearer '+env.OPENROUTER_API_KEY,'Content-Type':'application/json',
      'HTTP-Referer':'https://chatgpt-nyx-v3-test.adeniyipaul174.workers.dev','X-Title':'NyX Site Studio'},
     body:JSON.stringify({model:freeModel,messages,max_tokens:Math.min(6500,Math.max(400,Number(payload.max_tokens)||1600)),
-     temperature:payload.temperature??.4,stream:false,provider:{data_collection:'deny'}}),
+     temperature:payload.temperature??.4,stream:false,provider:{data_collection:'deny'},
+     ...(freeModel==='cohere/north-mini-code:free'?{reasoning:{enabled:false}}:{})}),
     signal:AbortSignal.timeout(110000)
    });
   }catch{lastError='The free website code model could not be reached.';continue}
