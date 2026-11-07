@@ -165,3 +165,28 @@ test('natural language follow-up edits stay attached to the current website proj
  }
  assert.equal(nxProjectIntent('Can you create a completely new website for my bakery?',true),false);
 });
+
+test('no-cost code model returns actual text and never selects a paid model',async()=>{
+ const {nxProjectModel}=await import('./nyx-site-project-v3.mjs');
+ const calls=[];
+ const fetchImpl=async(url,req)=>{
+  const body=JSON.parse(req.body);calls.push(body.model);
+  assert.ok(body.model.endsWith(':free')||body.model==='openrouter/free');
+  assert.equal(body.provider.data_collection,'deny');
+  return {ok:true,json:async()=>({choices:[{message:{content:'<!doctype html>complete</html>'}}]})};
+ };
+ const out=await nxProjectModel({OPENROUTER_API_KEY:'test-key'},'unused',{messages:[{role:'user',content:'Make a website'}],max_tokens:900},fetchImpl);
+ assert.match(out.response,/complete/);
+ assert.deepEqual(calls,['cohere/north-mini-code:free']);
+});
+test('empty response from primary free provider retries another free provider',async()=>{
+ const {nxProjectModel}=await import('./nyx-site-project-v3.mjs');
+ const calls=[];
+ const fetchImpl=async(url,req)=>{
+  const model=JSON.parse(req.body).model;calls.push(model);
+  return {ok:true,json:async()=>({choices:[{message:{content:calls.length===1?'':'<html lang="en">Recovered</html>'}}]})};
+ };
+ const out=await nxProjectModel({OPENROUTER_API_KEY:'test-key'},'unused',{messages:[{role:'user',content:'Create website'}]},fetchImpl);
+ assert.match(out.response,/Recovered/);
+ assert.deepEqual(calls,['cohere/north-mini-code:free','openrouter/free']);
+});
