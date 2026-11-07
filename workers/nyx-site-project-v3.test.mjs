@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {nxProjectNormalizePlan,nxProjectIntent,nxProjectFinishPage,nxProjectValidateHtml,nxProjectRelink,nxWebsiteBuildProjectV3} from './nyx-site-project-v3.mjs';
+import {nxProjectNormalizePlan,nxProjectIntent,nxProjectFinishPage,nxProjectValidateHtml,nxProjectRelink,nxWebsiteBuildProjectV3,nxProjectModel} from './nyx-site-project-v3.mjs';
 const base={
  brand:'AURELIA STUDIO',industry:'creative agency',artDirection:'Warm editorial architecture with split imagery',
  designSystem:'Soft asymmetric serif and expressive layers',displayFont:'Cormorant Garamond',bodyFont:'Manrope',
@@ -137,4 +137,24 @@ test('unconnected forms are replaced safely instead of claiming message delivery
  assert.ok(!result.includes('<script>'));
  assert.ok(!result.includes('<svg'));
  assert.match(result,/Contact details can be connected/);
+});
+
+test('website AI quota fallback uses existing no-cost provider only',async()=>{
+ const called=[];
+ const env={AI:{run:async()=>{called.push('cloudflare');throw new Error('HTTP 429 daily free allocation exhausted')}},OPENROUTER_API_KEY:'test-only-not-real'};
+ const fakeFetch=async(url,options)=>{
+  assert.equal(url,'https://openrouter.ai/api/v1/chat/completions');
+  assert.equal(options.method,'POST');
+  const payload=JSON.parse(options.body);
+  assert.equal(payload.model,'openrouter/free');
+  assert.equal(payload.provider.data_collection,'deny');
+  assert.equal(payload.max_tokens,2200);
+  assert.equal(payload.stream,false);
+  assert.equal(options.headers.Authorization,'Bearer test-only-not-real');
+  called.push('free-router');
+  return {ok:true,json:async()=>({choices:[{message:{content:'{"brand":"Distinct Site"}'}}]})};
+ };
+ const result=await nxProjectModel(env,'@cf/meta/llama-3.3-70b-instruct-fp8-fast',{messages:[{role:'user',content:'Make a site'}],max_tokens:2200},fakeFetch);
+ assert.deepEqual(called,['cloudflare','free-router']);
+ assert.match(result.response,/Distinct Site/);
 });
