@@ -6,7 +6,7 @@
 import assert from 'node:assert/strict';
 import {mkdir,writeFile} from 'node:fs/promises';
 import {githubOidcToken} from './nyx-github-agents.mjs';
-const base='https://nyx-site-project-v3-stage.adeniyipaul174.workers.dev/__nyx/project-v3-test';
+const base=process.env.NYX_SITE_TEST_URL||'https://nyx-site-project-v3-stage.adeniyipaul174.workers.dev/__nyx/project-v3-test';
 const token=await githubOidcToken();
 const abort=new AbortController(),timer=setTimeout(()=>abort.abort(),570000);
 const prompt='Create a premium multi-page website for VECTOR GRID, a modern AI data-platform business. Make FOUR separate working pages: Home, Product, Security and Contact. Use exact background #08182e, text #ffffff and vivid cyan accent #2be7fa, with crisp geometric typography, technical data visuals, a bold bento grid, atmospheric dark surfaces and a distinct composition for each page. Working navigation between all pages; no beige, no terracotta and no generic creative-agency design. Every page should include original relevant content with clear product benefits, accurate non-fabricated copy and mobile layouts. No fake customer reviews, prices or statistics.';
