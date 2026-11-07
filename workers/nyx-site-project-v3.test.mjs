@@ -158,3 +158,10 @@ test('website AI quota fallback uses existing no-cost provider only',async()=>{
  assert.deepEqual(called,['cloudflare','free-router']);
  assert.match(result.response,/Distinct Site/);
 });
+
+test('natural language follow-up edits stay attached to the current website project',()=>{
+ for(const request of ['Can you add a Pricing page?','I want you to edit the About page','Could you change the colours of all pages?','Please put a gallery on the home page','Now create a new Contact page']){
+  assert.equal(nxProjectIntent(request,true),true,request);
+ }
+ assert.equal(nxProjectIntent('Can you create a completely new website for my bakery?',true),false);
+});
