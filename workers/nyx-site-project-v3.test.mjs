@@ -191,3 +191,16 @@ test('empty response from primary free provider retries another free provider',a
  assert.match(out.response,/Recovered/);
  assert.deepEqual(calls,['cohere/north-mini-code:free','openrouter/free']);
 });
+
+test('a malformed planning-model response yields a brief-specific real page plan',async()=>{
+ const {nxProjectFallbackPlan}=await import('./nyx-site-project-v3.mjs');
+ const tech=nxProjectFallbackPlan('Create a premium website for VECTOR GRID, a data platform. Make FOUR separate working pages: Home, Product, Security and Contact. Use exact background #08182e, text #ffffff and accent #2be7fa.');
+ assert.equal(tech.brand,'VECTOR GRID');
+ assert.deepEqual(tech.pages.map(p=>p.slug),['index','product','security','contact']);
+ assert.equal(tech.palette.background,'#08182e');
+ assert.equal(tech.palette.accent,'#2be7fa');
+ const fashion=nxProjectFallbackPlan('Create a premium fashion website called MAISON ORCHID featuring Home, Gallery, Shop and Contact pages.');
+ assert.ok(fashion.palette.background!==tech.palette.background);
+ assert.ok(fashion.palette.accent!==tech.palette.accent);
+ assert.ok(fashion.pages.some(p=>p.slug==='gallery'));
+});
