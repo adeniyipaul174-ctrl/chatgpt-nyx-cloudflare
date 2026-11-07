@@ -30,6 +30,7 @@ on:
       - "tasks/nyx-task.md"
       - "scripts/nyx-bespoke-live-test.mjs"
       - "scripts/nyx-site-project-v3-live-test.mjs"
+      - "ui/nyx-site-project-v3-real-visual.mjs"
       - "ui/nyx-bespoke-visual-audit.mjs"
 permissions:
   contents: read
@@ -67,6 +68,11 @@ jobs:
       - name: Verify real AI multipage build and create-page edit on isolated Worker
         if: github.event_name == 'push' && contains(github.event.head_commit.message, '[site-v3-test]')
         run: node scripts/nyx-site-project-v3-live-test.mjs
+      - name: Audit actual multi-page HTML in Chrome at four viewport sizes
+        if: github.event_name == 'push' && contains(github.event.head_commit.message, '[site-v3-test]')
+        run: |
+          npm install --no-save --ignore-scripts --no-package-lock playwright-core@1.57.0
+          node ui/nyx-site-project-v3-real-visual.mjs
       - name: Test real bespoke website build on isolated Cloudflare Worker
         if: github.event_name == 'push' && contains(github.event.head_commit.message, '[site-v2-test]')
         run: node scripts/nyx-bespoke-live-test.mjs
