@@ -1,7 +1,7 @@
 // Guard against accidentally closing the host <script> from inside JS strings.
 import {Script} from 'node:vm';
 import assert from 'node:assert/strict';
-const base='https://nyx-site-project-v3-stage.adeniyipaul174.workers.dev';
+const base=process.env.NYX_SITE_PROJECT_URL||'https://nyx-site-project-v3-stage.adeniyipaul174.workers.dev';
 const r=await fetch(base+'/');
 assert.equal(r.status,200);
 const html=await r.text();
