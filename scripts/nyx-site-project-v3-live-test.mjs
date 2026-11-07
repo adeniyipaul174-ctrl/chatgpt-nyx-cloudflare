@@ -1,5 +1,5 @@
 // Real AI execution on isolated, OIDC-protected staging Worker.
-// Current provider test disables hidden reasoning so HTML fits the output budget.
+// The planning step now builds a brief-specific plan when free model JSON is malformed.
 // Verify the exact live generator and retrieve actionable backend errors.
 // Invoked by the existing allowlisted GitHub workflow identity.
 // Retry includes safe contact-form conversion, precise branding and mobile screenshot audits.
