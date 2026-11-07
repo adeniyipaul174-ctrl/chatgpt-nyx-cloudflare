@@ -32,6 +32,15 @@ function nxProjUserColors(brief){
  })){const m=brief.match(rx);if(m)roles[role]=m[1].toLowerCase()}
  return {values,roles};
 }
+function nxProjectExplicitBrand(brief){
+ const str=String(brief||'');
+ const name='([A-Z][A-Za-z0-9&.\u2019\\x27-]{1,24}(?:\\s+[A-Z][A-Za-z0-9&.\u2019\\x27-]{1,24}){0,5})';
+ for(const prefix of ['(?:called|named|brand name)\\s*[:=]?\\s*','for\\s+']){
+  const rx=new RegExp('\\b'+prefix+'[\"“]?'+name+'[\"”]?(?=\\s*[,.;:]|\\s*$)');
+  const match=rx.exec(str);if(match&&match[1]&&match[1].length<=64)return match[1].trim();
+ }
+ return '';
+}
 export function nxProjectNormalizePlan(raw,brief='',previous=null){
  const o=raw&&typeof raw==='object'&&!Array.isArray(raw)?raw:{};
  const prev=previous?.plan||{};
@@ -61,7 +70,7 @@ export function nxProjectNormalizePlan(raw,brief='',previous=null){
   palette.background=provided.values[0];palette.text=provided.values[1];palette.accent=provided.values[2];
  }
  return {
-  version:3,brand:nxProjText(o.brand,64)||nxProjText(prev.brand,64)||'Untitled Studio',
+  version:3,brand:nxProjectExplicitBrand(brief)||nxProjText(prev.brand,64)||nxProjText(o.brand,64)||'Untitled Studio',
   industry:nxProjText(o.industry,120)||nxProjText(prev.industry,120),
   artDirection:nxProjText(o.artDirection||o.visualConcept,1100)||nxProjText(prev.artDirection,1100),
   designSystem:nxProjText(o.designSystem,900)||nxProjText(prev.designSystem,900),
