@@ -173,6 +173,7 @@ test('no-cost code model returns actual text and never selects a paid model',asy
   const body=JSON.parse(req.body);calls.push(body.model);
   assert.ok(body.model.endsWith(':free')||body.model==='openrouter/free');
   assert.equal(body.provider.data_collection,'deny');
+  assert.equal(body.reasoning?.enabled,false,'free code model must reserve tokens for visible HTML output');
   return {ok:true,json:async()=>({choices:[{message:{content:'<!doctype html>complete</html>'}}]})};
  };
  const out=await nxProjectModel({OPENROUTER_API_KEY:'test-key'},'unused',{messages:[{role:'user',content:'Make a website'}],max_tokens:900},fetchImpl);
