@@ -1,0 +1,27 @@
+name: NyX Site Studio live production browser checks
+# Recheck the 2026-11-07 bespoke site builder release; only reads the public live page.
+on:
+  push:
+    branches:
+      - feature/openmausbot-integration
+    paths:
+      - "ui/nyx-site-studio-browser.mjs"
+      - ".github/workflows/nyx-site-studio-live.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  live:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: Install browser test dependencies
+        run: npm install --no-save --ignore-scripts --no-package-lock playwright-core@1.57.0
+      - name: Verify live website studio UI without real user credentials or model costs
+        env:
+          NYX_SITE_STUDIO_URL: https://chatgpt-nyx-v3-test.adeniyipaul174.workers.dev
+        run: node ui/nyx-site-studio-browser.mjs

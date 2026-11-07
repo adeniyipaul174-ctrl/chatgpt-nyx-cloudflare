@@ -1,0 +1,29 @@
+name: NyX Website Studio build and security tests
+on:
+  push:
+    branches:
+      - feature/openmausbot-integration
+    paths:
+      - "workers/nyx-website-builder.mjs"
+      - "workers/nyx-website-builder.test.mjs"
+      - "ui/nyx-website-studio.js"
+      - "ui/nyx-website-studio.css"
+      - ".github/workflows/nyx-website-studio.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: Validate syntax
+        run: |
+          node --check workers/nyx-website-builder.mjs
+          node --check ui/nyx-website-studio.js
+      - name: Unit and security tests
+        run: node --test workers/nyx-website-builder.test.mjs

@@ -1,0 +1,27 @@
+name: NyX Website Studio production acceptance
+on:
+  push:
+    branches:
+      - feature/openmausbot-integration
+    paths:
+      - ".github/workflows/nyx-live-site-polish-checks.yml"
+      - "ui/nyx-live-site-polish-checks.mjs"
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: Install Chrome test adapter
+        run: npm install --no-save --ignore-scripts --no-package-lock playwright-core@1.57.0
+      - name: Verify production site restoration and website preview
+        env:
+          NYX_SITE_STUDIO_URL: https://chatgpt-nyx-v3-test.adeniyipaul174.workers.dev
+        run: |
+          node ui/nyx-live-site-polish-checks.mjs
+          node ui/nyx-site-studio-browser.mjs

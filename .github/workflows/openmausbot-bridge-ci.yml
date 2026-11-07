@@ -1,0 +1,51 @@
+name: OpenMausBot bridge checks (no deploy)
+on:
+  pull_request:
+    paths:
+      - "src/openmausbot.js"
+      - "src/nyx-native-agents-reference.js"
+      - "workers/nyx-chat-agent-router.mjs"
+      - "workers/nyx-chat-agent-router.test.mjs"
+      - "ui/nyx-agent-picker-snippet.html"
+      - "ui/nyx-agent-picker.test.mjs"
+      - "ui/nyx-mobile-header-fix.css"
+      - "ui/nyx-mobile-header-fix.test.mjs"
+      - "docs/nyx-native-agents-live.md"
+      - "src/index.js"
+      - "public/index.html"
+      - "public/app.js"
+      - "run.mjs"
+      - "docs/openmausbot-integration.md"
+      - ".gitmodules"
+      - "vendor/OpenMausBot"
+      - ".github/workflows/openmausbot-bridge-ci.yml"
+  workflow_dispatch:
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 2
+          submodules: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: Verify imported upstream revision is pinned
+        run: |
+          git ls-tree HEAD vendor/OpenMausBot | grep -F "e8dc6cfccabbb499e4ded16c07b462a466460ecc"
+      - name: Run NyX security and bridge tests
+        run: npm test
+      - name: JavaScript syntax checks
+        run: |
+          npm run check
+          node --check src/openmausbot.js
+          node --check src/nyx-native-agents-reference.js
+          node --test workers/nyx-chat-agent-router.test.mjs
+          node --test ui/nyx-agent-picker.test.mjs
+          node --test ui/nyx-mobile-header-fix.test.mjs
+      - name: Check patches
+        run: git diff --check HEAD~1 HEAD

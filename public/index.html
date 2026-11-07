@@ -17,6 +17,7 @@
 <button class="active" data-page="chat">✦ New chat</button>
 <button data-page="memory">◈ Memory</button>
 <button data-page="tasks">☷ Tasks</button>
+<button data-page="agents">⚡ Agent Team</button>
 <button data-page="studio">✧ Image Studio</button>
 <button data-page="documents">▤ Documents</button>
 <button data-page="settings">⚙ Settings</button>
@@ -45,6 +46,16 @@
 <div class="hero"><h1>Tasks</h1><p>Track work across sessions with account-scoped storage.</p></div>
 <div class="panel"><div class="field"><label>Task</label><input id="taskText" placeholder="What needs to get done?"></div><div class="row"><button class="primary" id="addTask">Add task</button><button id="askPriorities">Ask Nyx to prioritize</button></div></div>
 <div class="list" id="taskList"></div>
+</div>
+<div id="page-agents" class="hidden">
+<div class="hero"><h1>OpenMausBot Agent Team</h1><p>Connect your separate OpenMausBot workspace to NyX. Bots run on your agent server, never inside the Cloudflare Worker.</p></div>
+<div class="panel"><h3>Connection</h3><p id="mausStatus" class="status">Checking OpenMausBot configuration…</p><p class="muted">A paired OpenMausBot server, HTTPS address, and authorized identity are required. No keys are entered in the browser.</p><button id="mausRefresh">Refresh agents</button></div>
+<div class="panel"><h3>Send a task to an agent</h3>
+<div class="field"><label for="mausBot">Agent</label><select id="mausBot"><option value="">No agents loaded</option></select></div>
+<div class="field"><label for="mausPrompt">Instructions for your agent</label><textarea id="mausPrompt" rows="5" maxlength="5000" placeholder="Describe exactly what the agent should do…"></textarea></div>
+<button id="mausSend" class="primary" disabled>Review and send task</button><p class="muted">This may start work on a remote computer. OpenMausBot still manages tool approvals. NyX never approves commands for you.</p>
+<p id="mausReceipt" class="status"></p></div>
+<div class="panel"><div class="row"><h3>Recent text messages</h3><button id="mausMessagesRefresh">Refresh messages</button></div><div id="mausMessages" class="list"><p class="muted">Choose an agent and refresh to read recent text replies.</p></div></div>
 </div>
 <div id="page-studio" class="hidden">
 <div class="hero"><h1>Image Studio</h1><p>Real image generation through the configured Gemini image model, if your API key has access.</p></div>
