@@ -59,6 +59,7 @@ jobs:
         with:
           node-version: "24"
       - name: Run NyX agents with short-lived OIDC and existing NyX Workers AI
+        if: github.event_name != 'push' || (!contains(github.event.head_commit.message, '[site-v3-test]') && !contains(github.event.head_commit.message, '[site-v2-test]'))
         env:
           NYX_ACTIONS_URL: https://chatgpt-nyx-v3-test.adeniyipaul174.workers.dev/api/nyx/github-agents/infer
           NYX_TASK: ${{ inputs.task }}
