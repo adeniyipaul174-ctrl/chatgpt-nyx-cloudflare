@@ -1,0 +1,23 @@
+name: NyX multipage staging browser acceptance
+on:
+  push:
+    branches: [feature/openmausbot-integration]
+    paths:
+      - "ui/nyx-site-project-v3-browser.mjs"
+      - ".github/workflows/nyx-site-project-v3-browser.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: Install headless browser test dependency
+        run: npm install --no-save --ignore-scripts --no-package-lock playwright-core@1.57.0
+      - name: Test real multi-page navigation, edit handoff, ZIP contents and mobile UI
+        run: node ui/nyx-site-project-v3-browser.mjs
