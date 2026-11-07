@@ -1,4 +1,5 @@
 name: NyX Site Studio live production browser checks
+# Recheck the 2026-11-07 bespoke site builder release; only reads the public live page.
 on:
   push:
     branches:
