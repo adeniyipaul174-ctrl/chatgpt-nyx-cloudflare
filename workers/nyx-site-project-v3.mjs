@@ -74,6 +74,7 @@ export function nxProjectNormalizePlan(raw,brief='',previous=null){
 export function nxProjectIntent(prompt,hasProject=false){
  const p=String(prompt||'').trim().toLowerCase();
  if(!p||p.length>4000)return false;
+ if(/^(?:generate|create|draw|render|design|make)\s+(?:an?\s+)?(?:image|picture|photo|screenshot|mockup)\s+(?:of|showing)\s+/.test(p))return false;
  if(hasProject){
   if(/^(?:build|create|design|make|generate)\s+(?:a|an|another|new)\s+(?:(?:completely\s+)?new\s+|completely\s+)?(?:website|web\s*site|landing\s*page)\s+(?:for|about|called)\s+/.test(p))return false;
   return /^(?:please\s+)?(?:add|create|build|design|generate|change|edit|update|replace|remove|delete|rename|redo|revise|rework|improve|fix|make|switch|put|insert|include|move|rearrange|modify|redesign|give|use|turn)\s+/.test(p)||/(?:on|in|to)\s+(?:the\s+)?(?:home|about|services|pricing|contact|portfolio|shop|gallery|products|faq)\s+page/.test(p);
