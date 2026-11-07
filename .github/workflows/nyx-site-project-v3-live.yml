@@ -1,10 +1,5 @@
 name: NyX v3 real AI multipage and edit verification
 on:
-  push:
-    branches: [feature/openmausbot-integration]
-    paths:
-      - "scripts/nyx-site-project-v3-live-test.mjs"
-      - ".github/workflows/nyx-site-project-v3-live.yml"
   workflow_dispatch:
 permissions:
   contents: read
