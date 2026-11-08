@@ -6,12 +6,29 @@
 
 - Worker: `chatgpt-nyx-v3-test`
 - Live site: https://chatgpt-nyx-v3-test.adeniyipaul174.workers.dev/
-- Active Worker version: `5cf7f592-b861-4989-828e-3fbdf85b6c69`
-- Current deployment: `f79a21b8-bb56-414d-82d8-07cc99ad674c`
-- Previous stable version (rollback target): `eaf319f9-4427-4805-824f-faa0ef2480f7`.
+- Active Worker version: `bfa443aa-21e9-4a1d-b021-fad2e8ed9571`
+- Current deployment: `e207036a-34b7-4b6c-aebd-86d0125f5d41`
+- Previous stable version (rollback target): `5cf7f592-b861-4989-828e-3fbdf85b6c69`.
+- Earlier stable version: `eaf319f9-4427-4805-824f-faa0ef2480f7`.
 - Earlier version: `90b5188f-19ad-4ca4-957c-1e529f465f8e` (included an **unrequested** Lite page; **do not redeploy as the normal rollback**).
 - Earlier original version: `686530f3-a15c-49fc-88a2-599869197fc2` (older model selection, no Scout-as-default).
 - The Lite route and its HTML were fully **removed**. `/lite` returns **404**. The existing full NyX interface remains the only homepage.
+
+## Contextual conversation memory and mobile UX (2026-11-08)
+
+- In-chat follow-up references are resolved before invoking the **existing** image generator or web-search tool. A follow-up such as 'make a picture of it' uses earlier user and assistant turns to establish the intended subject, instead of giving the image generator an unexplained pronoun. The current image's resolved prompt is saved in existing chat image metadata for further edits.
+- Llama 4 Scout performs reference resolution when needed and Llama 3.1 8B is the fallback if Scout fails. Ordinary messages without such references do **not** invoke this extra model call. Resolution keeps exact object nouns and character names instead of replacing them with generic categories.
+- In longer conversations, the client selects up to five relevant earlier same-chat user turns from its **existing saved history** and sends a bounded optional context excerpt. No cross-chat personal profile, new settings, database table or new Memory menu is created. This is bounded contextual recall, not unlimited permanent memory; original chat history remains intact.
+- The existing activity bubble now shows contextual progress labels including Generating image, Searching the web, Writing code, Solving math, Analyzing, Reading document and Thinking. Existing streamed search stages are preserved. Labels are not proof of external tool completion.
+- The existing agent picker opens as **Normal**, never automatically Team/Auto. A user's manual mode selection remains active until they start a new chat. New chat resets to Normal. This does **not** disable automatic web search or image creation from the normal conversation.
+- On mobile, tapping the page beside the open chat-history sidebar closes it; tapping inside keeps it open. Escape also closes the sidebar. No new close button or menu is introduced.
+- All **13** Cloudflare bindings were inherited. The existing source for image creation/editing, web search, browser, website builder, agent workflows, authentication and account-history remained present. The original HTML interface and `/lite` removal are unchanged.
+
+**Direct model tests:** Cloudflare Scout expanded ambiguous follow-ups referring to a cat, a pangolin, a yellow robot named Milo and the northern lights into tool-ready requests that preserved the subject.
+
+**Live mobile browser tests:** At 360px width, no horizontal overflow. Normal is selected on initial load; manually selecting Team works; a new chat reverts to Normal. Outside mobile-sidebar pointer taps close it; inside taps do not. Simulated pending-chat UI tests showed the expected labels for image, search, code, math, analysis and normal chat. `/api/health` and capabilities returned 200; unauthenticated chat/search/vision/image/browser/history returned 401; `/lite` returned 404.
+
+**Limits of verification:** These were live UI, route, source-preservation and direct-model checks; UI activity tests used mocked chat responses, not a signed-in user's actual generation. Full signed-in multi-turn chat, real image generation/editing, search results, website building, persistent account-history sync and agent execution were **not** regression-tested end-to-end. This change does not add unlimited long-term cross-chat memory. Keep rollback version `5cf7f592-b861-4989-828e-3fbdf85b6c69` available.
 
 ## Follow-up: capacity and quota repair (2026-11-08)
 
