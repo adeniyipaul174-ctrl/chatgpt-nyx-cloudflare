@@ -6,9 +6,11 @@
 
 - Worker: `chatgpt-nyx-v3-test`
 - Live site: https://chatgpt-nyx-v3-test.adeniyipaul174.workers.dev/
-- Active Worker version: `23ba4d44-34e9-490f-a8c3-1ff0db741132`
-- Current deployment: `7c683d6e-ed33-4ba0-a9e8-c831a572411e`
-- Previous stable version (rollback target): `642eb284-10c5-48c1-8293-8f3206878257` (before introducing Free AI Browser).
+- Active Worker version: `1b9bbf58-f3bc-444b-a3e9-5f93a4845129`
+- Current deployment: `9e3ae8a8-b6c0-4c05-aec6-3bde448f9e1f`
+- Previous stable version (rollback target): `23ba4d44-34e9-490f-a8c3-1ff0db741132` (original full NyX before Chat/Work switch).
+- Intermediate compiled version: `a7e127fd-dc3f-470a-950c-adac111d669e` (Chat/Work UI was present but Work controller failed at runtime due HTML-template escaping; DO NOT use as rollback).
+- Original Free Browser release: `642eb284-10c5-48c1-8293-8f3206878257`.
 - Intermediate version: `d7904ff0-56ab-4dc8-a7ce-8a44df8efd35` (free browser feature before strict JSON action-prompt adjustment).
 - Earlier stable version: `fdaf81da-1396-4dc5-b17a-3ca130f6ade1`.
 - Earlier stable version: `e7da914e-6a9f-4a78-895a-10fe34b38c85`.
@@ -18,6 +20,26 @@
 - Earlier version: `90b5188f-19ad-4ca4-957c-1e529f465f8e` (included an **unrequested** Lite page; **do not redeploy as the normal rollback**).
 - Earlier original version: `686530f3-a15c-49fc-88a2-599869197fc2` (older model selection, no Scout-as-default).
 - The Lite route and its HTML were fully **removed**. `/lite` returns **404**. The existing full NyX interface remains the only homepage.
+
+## Chat / Work app mode & browser-action repair (2026-11-08)
+
+- **Chat is the default after opening NyX**. The top of the EXISTING chat page now has a Chat | Work segmented switch. Chat retains normal messages, automatic web searching and image generation, saved chat history, memory, Settings and all existing tools.
+- **Work is a separate pane in the same NyX page**, not a Settings option. It has a task composer, the existing Agent selector (Team, Auto, Planner, Writer, Coder, Reviewer), Work task results, and a browser task screen. Selecting Work defaults the agent to Team; going back to Chat restores Normal (`agentMode=off`). Other old agent backends remain in place.
+- **Natural-language entry** from Chat: an explicit request such as 'hello, open your browser for me to control here' switches into Work and runs the browser initiation flow after the user explicitly confirms the free daily/session limits. It does not start a paid Browser Use session.
+- The prior **AI Browser · Free** sidebar link is removed to avoid hiding this feature in another menu. The existing `/ai-browser` URL continues to work as a legacy direct link.
+- **Fixed a real browser action parser bug**: Llama 4 Scout responded via Workers AI with a structured object like `{response:{action:'navigate',url:'https://www.goodreads.com'}}`. The old code stringified that as `[object Object]` and repeatedly showed 'AI couldn't choose a safe next step.' The new code accepts native objects, strict JSON strings and fenced JSON.
+- Added a signed-in, no-store browser JPEG screenshot endpoint and manual navigation, tap, typing and scroll controls using the same Browser Run/CDP browser session. Work can show a screenshot directly, pause the agent for manual control, resume or stop it. The external Live View link remains for the complete interactive Chrome view; embedded third-party Live View had shown a loading spinner on Android.
+- Browser commands are origin-checked, require a signed-in NyX user and a preexisting free-browser session. Manual page controls require agent pause. The existing server-side 120-second session limit, 12-step cap, one start per UTC day and the shared free Cloudflare allowance remain. No extra paid provider is invoked.
+- The existing Agent Team, web/search, image creation and editing, projects, memory, signed-in account, settings, site builder, and other endpoints remain present; **13 original Cloudflare bindings** inherited. IDA Pro is a third-party desktop reverse-engineering application and was NOT installed or falsely advertised by this update.
+
+### Verification
+
+- Cloudflare compiled the deployed Worker successfully, with deployment `9e3ae8a8-b6c0-4c05-aec6-3bde448f9e1f` and active version `1b9bbf58-f3bc-444b-a3e9-5f93a4845129` at 100%. All 13 original bindings preserved.
+- Direct real Workers AI test: the actual Llama 4 Scout model produced a **structured** `navigate` action for the Goodreads user task. Unit parser tests passed native action objects, plain JSON, fenced JSON, finish and handoff.
+- Live 360px Cloudflare browser-rendering test: no horizontal overflow, Chat selected by default, Work tab switches correctly, old agent selector moves into Work, Team is selected there, switching back restores Normal Chat, and an agent Work task reaches the existing `/api/nyx` backend and displays its simulated response.
+- Simulated browser-session test: 'open your browser for me to control here' submitted in Chat switched into Work, initiated browser status/start, paused for manual control and rendered a screenshot and full Live View link. No real paid browser was started in these tests.
+- Protected endpoints still require authentication (HTTP 401 for screenshot and protected image/search when anonymous); health/capabilities returned HTTP 200. Full real signed-in browsing, screenshot clicking, agentic Goodreads research and file/email integrations **have not been tested end-to-end** and must not be claimed completed.
+- The first new Chat/Work version had malformed embedded script escaping, detected by the immediate live mobile test. It was superseded by a properly escaped controller. Avoid rolling back to the broken intermediate version.
 
 ## Free AI Browser agent — opt-in Cloudflare Browser Run (2026-11-08)
 
