@@ -6,13 +6,45 @@
 
 - Worker: `chatgpt-nyx-v3-test`
 - Live site: https://chatgpt-nyx-v3-test.adeniyipaul174.workers.dev/
-- Active Worker version: `bfa443aa-21e9-4a1d-b021-fad2e8ed9571`
-- Current deployment: `e207036a-34b7-4b6c-aebd-86d0125f5d41`
-- Previous stable version (rollback target): `5cf7f592-b861-4989-828e-3fbdf85b6c69`.
-- Earlier stable version: `eaf319f9-4427-4805-824f-faa0ef2480f7`.
+- Active Worker version: `fdaf81da-1396-4dc5-b17a-3ca130f6ade1`
+- Current deployment: `d912e6bd-d078-4f26-b928-e97bd0a0fad0`
+- Previous stable version (rollback target): `e7da914e-6a9f-4a78-895a-10fe34b38c85`.
+- Earlier version: `bfa443aa-21e9-4a1d-b021-fad2e8ed9571` (retained before removing the unwanted sidebar close button).
+- Earlier stable version: `5cf7f592-b861-4989-828e-3fbdf85b6c69`.
+- Older stable version: `eaf319f9-4427-4805-824f-faa0ef2480f7`.
 - Earlier version: `90b5188f-19ad-4ca4-957c-1e529f465f8e` (included an **unrequested** Lite page; **do not redeploy as the normal rollback**).
 - Earlier original version: `686530f3-a15c-49fc-88a2-599869197fc2` (older model selection, no Scout-as-default).
 - The Lite route and its HTML were fully **removed**. `/lite` returns **404**. The existing full NyX interface remains the only homepage.
+
+## Image-generation integrity and broad quality audit (2026-11-08)
+
+### Root cause and production corrections
+
+- The ambiguous follow-up **'Generate it for me here'**, after a logo-design discussion, could be scored as ordinary chat by NyX's tool router. The language model could then claim a logo image had been created and sent without returning image bytes. This is a confirmed route-design problem, not evidence of a real image attachment.
+- Added a bounded conversation-aware image-follow-up test before normal chat routing. It requires recent visual-design context and distinguishes images/logos/banners/photos from reports, emails, software, websites and other text work. The user's original conversation and last intent are preserved.
+- For text-only responses, added a safeguard that replaces specific unverified **'I generated and sent/attached your image/logo'** claims with truthful wording. Applied to normal chat, the legacy chat endpoint and agent text replies. It does **not** pretend to create a file or alter genuine image responses.
+- The existing mobile activity bubble now recognizes visual follow-ups and displays **Generating image…** while the request runs.
+- The existing image-generation models remain active. If a selected Cloudflare image model fails with a transient capacity/service error, the existing Cloudflare `@cf/black-forest-labs/flux-1-schnell` model can provide a smaller, clearly labeled **NyX Fast Backup** image. Quota exhaustion, safety restrictions and policy failures are **not** bypassed.
+- Existing UI, authentication, D1 database, web search, browser, vision, image editing, website building, memory, agent modes, Normal default and mobile sidebar behavior were preserved. Strict inherited bindings: **13 of 13**.
+
+### Tests performed
+
+- 10 standalone contextual routing scenarios passed, including a Paulorichie logo follow-up, an Atlas Books logo, an author banner, a photographic request, and exclusions for website, email, coding and text-writing tasks.
+- 6 text-integrity cases passed; the exact problematic image-claim wording was blocked while legitimate statements about image-generation capability were not.
+- Cloudflare accepted the deployed Worker module with no reported compilation error.
+- Direct, REAL Cloudflare inference returned image bytes from both `@cf/leonardo/lucid-origin` and `@cf/black-forest-labs/flux-1-schnell`. These are model tests, **not** signed-in requests to the live image route.
+- A live mobile-browser simulated two-message conversation about a Paulorichie logo: the follow-up displayed **Generating image…**, submitted prior history with Normal mode and auto-tools on, received a simulated image binary, stored an image record including the resolved prompt, and rendered an image figure.
+- Live homepage at 390px had no horizontal overflow and reached DOM-ready at about 163ms in Cloudflare's test browser; this is not device-level AI response latency.
+- Public health, capabilities and authentication routes returned HTTP 200. Protected chat, image, vision, search, browser, usage, account-history, team, agent-reach and research status routes returned HTTP 401 when unauthenticated. POST-only endpoints returned HTTP 405 for GET. Public agent and Reach pages returned HTTP 200; `/lite` remained HTTP 404. A total of 21 URL checks were made.
+- The original Normal Chat default and click-outside mobile drawer behavior still passed live UI checks. Cloudflare confirmed the current deployed version and inherited 13 bindings.
+
+### Important limits
+
+- Full **authenticated end-to-end** generation/editing, website project creation, agent execution, user sync and browser automation have not been comprehensively verified. The mobile image conversation used a mocked server response; direct Cloudflare model generation was tested separately.
+- Image blob storage uses the browser, while account-history synchronization stores message metadata; older images may not automatically transfer between devices. Resolving this requires intentional media storage architecture, not just a prompt change.
+- The runtime contains hundreds of helper functions. Structural/source checks and public routes were inspected, but this is **not** an exhaustive proof that every function behaves perfectly.
+- No new paid APIs were connected and no extra paid-plan commitment was made. Free-tier usage, inference quotas and service/model availability still limit performance.
+- This GitHub root is an older undeployed candidate; never overwrite the production Worker with it. Version URLs for staging have returned 404, so staged-browser smoke checking was unavailable; production was browser-tested after deployment. Rollback to `e7da914e-6a9f-4a78-895a-10fe34b38c85` if a new regression emerges.
 
 ## Contextual conversation memory and mobile UX (2026-11-08)
 
