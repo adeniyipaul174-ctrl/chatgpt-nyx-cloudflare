@@ -1,9 +1,9 @@
 LIVE DEPLOYMENT UPDATE (2026-11-08)
 ==================================
-Production NyX keeps its original interface: Llama 4 Scout primary; Llama 3.3 70B Cloudflare text backup; preconfigured OpenRouter free text overflow ONLY on failure, capped at 5.5 seconds.
-Website-building requests no longer deduct the same chat allowance twice. All 13 existing Cloudflare bindings were preserved. The unrequested /lite page remains removed.
-See LIVE_DEPLOYMENT_2026-11-08.md for live version, checks, limitation and rollback reference.
-DO NOT deploy this OLD GitHub candidate over the live Worker.
+Production NyX now has contextual same-chat memory for references and relevant older turns, active task labels, Normal as the default agent mode for app launches and new chats, and outside-tap dismissal of the mobile sidebar.
+Llama 4 Scout remains primary. Existing search, image creation/editing, browser tools, website studio, agents, authentication and history remain in place. All 13 Cloudflare bindings are preserved.
+No new Memory menu or separate Lite interface was added. See LIVE_DEPLOYMENT_2026-11-08.md for the active version, smoke checks, limitations, and rollback.
+CAUTION: This GitHub root is an OLD candidate; do NOT deploy it over the live Cloudflare Worker.
 
 CRITICAL CURRENT DEPLOYMENT SAFETY NOTICE (2026-10-19)
 ================================================
