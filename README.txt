@@ -1,3 +1,8 @@
+LIVE DEPLOYMENT UPDATE (2026-11-08)
+==================================
+Production NyX now uses Cloudflare-hosted Llama 4 Scout as its primary text model and provides a lightweight /lite page. See LIVE_DEPLOYMENT_2026-11-08.md for exact Worker version, tests, rollback reference, and safety guidance.
+Do NOT deploy this older GitHub candidate over the live Worker; its source is not the current production snapshot.
+
 CRITICAL CURRENT DEPLOYMENT SAFETY NOTICE (2026-10-19)
 ================================================
 The code at repository root is an OLD CANDIDATE, NOT the latest live NyX.
