@@ -1,0 +1,148 @@
+/* NyX Work — task composer redesign. Scoped to Work. No changes to Normal Chat. */
+#nxWorkForm.nx-work-composer-v2{
+ width:min(calc(100% - 28px),820px)!important;
+ margin:10px auto 0!important;
+ padding:16px 17px 14px!important;
+ border-radius:24px!important;
+ border:1px solid #5d4a5c!important;
+ background:radial-gradient(ellipse 52% 85% at 98% 0%,#49304226,transparent 95%),linear-gradient(155deg,#29262d 0%,#211f25 70%,#232027 100%)!important;
+ box-shadow:0 14px 34px #0008,inset 0 1px #ffffff13!important;
+ transition:border-color .17s,box-shadow .17s;
+ overflow:visible;
+}
+#nxWorkForm.nx-work-composer-v2:focus-within{
+ border-color:#b5779c!important;
+ box-shadow:0 16px 38px #0009,0 0 0 2px #e76a9e16,inset 0 1px #ffffff17!important;
+}
+#nxWorkForm .nx-wk-heading{
+ display:flex;align-items:center;gap:8px;
+ font:760 10px/1.2 ui-sans-serif,system-ui,sans-serif;
+ letter-spacing:.13em;color:#d3c2d0;margin:0 2px 8px;
+}
+#nxWorkForm .nx-wk-heading-star{
+ display:grid;place-items:center;width:22px;height:22px;flex:0 0 22px;
+ border:1px solid #a2578250;border-radius:7px;color:#f693bf;
+ background:linear-gradient(145deg,#6c3d5a48,#38263532);
+ font-size:13px;letter-spacing:0;
+}
+#nxWorkForm .nx-wk-heading-hint{
+ margin-left:auto;font:550 10px/1.2 ui-sans-serif,system-ui,sans-serif;
+ letter-spacing:0;color:#827b87;
+}
+#nxWorkForm #nxWorkPrompt{
+ display:block!important;width:100%!important;
+ min-height:54px!important;max-height:160px!important;
+ padding:5px 4px 10px!important;
+ margin:0!important;resize:none!important;overflow-y:auto!important;
+ border:0!important;background:transparent!important;outline:none!important;
+ font:400 16px/1.48 ui-sans-serif,system-ui,sans-serif!important;
+ letter-spacing:-.015em;color:#f6f3f8!important;
+ box-shadow:none!important;
+}
+#nxWorkForm #nxWorkPrompt::placeholder{color:#a49da9!important;opacity:1}
+#nxWorkForm .nx-work-compose-bottom{
+ display:flex!important;align-items:center!important;justify-content:space-between!important;
+ gap:12px!important;min-height:54px!important;
+ margin-top:2px!important;padding-top:12px!important;
+ border-top:1px solid #ffffff17;
+}
+#nxWorkForm .nx-work-agent{
+ display:flex!important;align-items:center!important;gap:8px!important;
+ flex:1 1 auto;min-width:0;
+}
+#nxWorkForm .nx-work-agent>span{
+ font:750 10px/1.3 ui-sans-serif,system-ui,sans-serif!important;
+ letter-spacing:.10em!important;color:#ada4b2!important;
+ flex:0 0 auto;
+}
+#nxWorkForm #nxWorkAgentSlot{display:flex;align-items:center;min-width:0;max-width:100%}
+#nxWorkForm #nxModePicker{max-width:100%;min-width:0}
+#nxWorkForm #nxModeTrigger{
+ position:relative;display:flex!important;align-items:center;
+ height:43px!important;min-height:43px!important;
+ min-width:121px!important;max-width:min(190px,43vw)!important;
+ padding:6px 10px 6px 7px!important;
+ border-radius:13px!important;
+ border:1px solid #68596c!important;
+ background:linear-gradient(150deg,#35303d,#292630)!important;
+ color:#f5eef6!important;
+ box-shadow:inset 0 1px #ffffff0c!important;
+}
+#nxWorkForm #nxModeTrigger:hover{border-color:#9a7b9a!important;background:#3b3442!important}
+#nxWorkForm #nxModeTrigger .nx-mode-mark{
+ flex:0 0 27px!important;width:27px!important;height:27px!important;
+ border-radius:9px!important;background:linear-gradient(145deg,#76496a,#47304c)!important;
+ border-color:#c57ca447!important;color:#ffe7f4!important;
+ box-shadow:inset 0 1px #ffffff1f!important;
+}
+#nxWorkForm #nxModeTrigger .nx-mode-trigger-copy strong{
+ font:760 13px/1.2 ui-sans-serif,system-ui,sans-serif!important;
+ color:#f7f3f9!important;
+}
+#nxWorkForm #nxModeTrigger .nx-mode-chevron{width:12px;flex:0 0 12px}
+#nxWorkForm #nxWorkSend.nx-wk-run-button{
+ flex:0 0 auto!important;display:inline-flex!important;
+ align-items:center!important;justify-content:center!important;gap:10px!important;
+ width:auto!important;min-width:134px!important;max-width:none!important;
+ height:49px!important;min-height:49px!important;
+ margin:0!important;padding:5px 6px 5px 17px!important;
+ color:#fff!important;border:1px solid #ffabd050!important;border-radius:15px!important;
+ background:linear-gradient(115deg,#f178ae 0%,#ed5f9e 56%,#d94489 100%)!important;
+ box-shadow:0 6px 21px #e14d8a52,inset 0 1px #ffffff42!important;
+ cursor:pointer;transform:none;
+ font:760 13px/1.1 ui-sans-serif,system-ui,sans-serif!important;
+ letter-spacing:.008em!important;
+ transition:transform .14s ease,filter .14s ease,box-shadow .14s ease!important;
+}
+#nxWorkForm #nxWorkSend.nx-wk-run-button:hover:not(:disabled){
+ filter:brightness(1.08);transform:translateY(-1px);
+ box-shadow:0 9px 25px #e14d8a66,inset 0 1px #ffffff44!important;
+}
+#nxWorkForm #nxWorkSend.nx-wk-run-button:active:not(:disabled){transform:translateY(1px) scale(.985)}
+#nxWorkForm #nxWorkSend.nx-wk-run-button:focus-visible{outline:2px solid #f9bdde!important;outline-offset:3px}
+#nxWorkForm #nxWorkSend.nx-wk-run-button:disabled{opacity:.60!important;filter:saturate(.74)!important;cursor:wait!important;box-shadow:none!important}
+#nxWorkForm .nx-wk-run-label{display:inline-block;white-space:nowrap}
+#nxWorkForm .nx-wk-run-icon{
+ display:grid;place-items:center;flex:0 0 36px;
+ width:36px;height:36px;
+ background:#ffffff29;border:1px solid #ffffff25;border-radius:11px;
+ box-shadow:inset 0 1px #ffffff20;
+}
+#nxWorkForm .nx-wk-run-icon svg{display:block;width:17px;height:17px}
+#nxWorkForm #nxWorkSend:disabled .nx-wk-run-icon svg{
+ animation:nxWorkSubmitPulse 1.25s ease-in-out infinite;
+}
+@keyframes nxWorkSubmitPulse{0%,100%{opacity:.55;transform:translateY(1px)}50%{opacity:1;transform:translateY(-1px)}}
+@media(prefers-reduced-motion:reduce){#nxWorkForm #nxWorkSend:disabled .nx-wk-run-icon svg{animation:none}}
+/* Subtle polish around the Work landing screen to match the task composer. */
+.nx-work-welcome .nx-work-eyebrow{letter-spacing:.12em;color:#d9c7d4}
+.nx-work-welcome .nx-work-eyebrow span{color:#f580b3}
+.nx-work-welcome h1{font-weight:760;letter-spacing:-.052em}
+.nx-work-starters button{
+ border:1px solid #49424c!important;border-radius:13px!important;
+ background:linear-gradient(145deg,#27242d,#1d1c22)!important;
+ color:#e7dfe8!important;box-shadow:inset 0 1px #ffffff09!important;
+ transition:border-color .15s,background .15s,transform .15s;
+}
+.nx-work-starters button:hover{border-color:#a56b8c!important;background:#342a35!important;transform:translateY(-1px)}
+@media(max-width:700px){
+ #nxWorkForm.nx-work-composer-v2{width:calc(100% - 24px)!important;padding:13px 13px 12px!important;border-radius:23px!important}
+ #nxWorkForm .nx-wk-heading{margin-bottom:7px}
+ #nxWorkForm #nxWorkPrompt{min-height:52px!important;font-size:16px!important}
+ #nxWorkForm .nx-work-compose-bottom{gap:7px!important;padding-top:10px!important}
+ #nxWorkForm #nxWorkSend.nx-wk-run-button{height:46px!important;min-height:46px!important;min-width:118px!important;padding:4px 5px 4px 13px!important;gap:7px!important;border-radius:14px!important;font-size:12px!important}
+ #nxWorkForm .nx-wk-run-icon{width:34px;height:34px;flex-basis:34px}
+ #nxWorkForm #nxModeTrigger{height:42px!important;min-height:42px!important;min-width:111px!important;max-width:42vw!important}
+ #nxWorkForm .nx-work-agent{gap:6px!important}
+}
+@media(max-width:360px){
+ #nxWorkForm.nx-work-composer-v2{width:calc(100% - 18px)!important;padding:12px 11px!important}
+ #nxWorkForm .nx-wk-heading-hint{display:none}
+ #nxWorkForm .nx-work-agent>span{display:none}
+ #nxWorkForm #nxModeTrigger{min-width:114px!important;max-width:46vw!important}
+ #nxWorkForm #nxWorkSend.nx-wk-run-button{min-width:122px!important}
+}
+body.nx-light #nxWorkForm.nx-work-composer-v2{background:linear-gradient(160deg,#fff9fc,#f1eaf3)!important;border-color:#d6bcca!important}
+body.nx-light #nxWorkForm #nxWorkPrompt{color:#2a202a!important}
+body.nx-light #nxWorkForm .nx-wk-heading{color:#755365}
+body.nx-light #nxWorkForm .nx-work-compose-bottom{border-top-color:#dfcbd8}
