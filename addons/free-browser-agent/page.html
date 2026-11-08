@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>NyX · Free AI Browser</title>
+<style>
+:root{color-scheme:dark;font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;background:#0b0b0d;color:#f5f5fa}
+*{box-sizing:border-box}body{margin:0;min-height:100svh;background:linear-gradient(155deg,#0d0c13,#09090b 65%);font-size:14px}
+header{display:flex;align-items:center;justify-content:space-between;padding:16px max(16px,calc((100vw - 1170px)/2));border-bottom:1px solid #2b2b33;background:#111114}
+.brand{font-weight:800;font-size:22px;letter-spacing:-1px}.brand small{font-size:10px;font-weight:600;color:#acaab9;letter-spacing:0}a{color:#ddd;text-decoration:none}a:hover{text-decoration:underline}
+header a{border:1px solid #33333c;border-radius:10px;padding:9px 14px;font-weight:600}
+main{max-width:1180px;margin:auto;padding:22px 16px 44px}
+h1{font-size:clamp(22px,4vw,32px);letter-spacing:-.8px;margin:0 0 8px}h2{font-size:17px;margin:0}
+.intro{color:#b7b6c3;line-height:1.65;max-width:770px;margin:0 0 20px}
+.layout{display:grid;grid-template-columns:minmax(300px,375px) minmax(0,1fr);gap:16px}
+.panel{border:1px solid #31313b;border-radius:18px;background:#19191f;padding:19px}
+label{display:block;font-weight:600;margin-bottom:8px}textarea{width:100%;min-height:116px;resize:vertical;border:1px solid #43434e;border-radius:12px;background:#0e0e13;color:#fff;font:inherit;padding:12px;line-height:1.55;outline:none}
+textarea:focus{border-color:#f068a7;box-shadow:0 0 0 3px #f068a725}
+.note{font-size:12px;color:#b9bac8;line-height:1.55;padding:12px;background:#22212a;border-radius:11px;margin:12px 0}
+.consent{display:flex;align-items:flex-start;gap:9px;font-size:12px;font-weight:500;line-height:1.55;margin-bottom:12px;color:#ece7ee}
+.consent input{accent-color:#e65a97;margin-top:3px;width:16px;height:16px;flex:none}
+button{font:inherit;cursor:pointer;border-radius:11px;padding:11px 13px;font-weight:700;border:1px solid #464650;color:#f2f2f6;background:#282830}
+button:hover:not(:disabled){background:#3d3b47}button:disabled{opacity:.43;cursor:not-allowed}
+.primary{background:#e7549c;color:white;border-color:#ee67aa}.primary:hover:not(:disabled){background:#c73a7d}
+.danger{border-color:#a65368;color:#ffc2d5;background:#2b1c24}
+.buttons{display:flex;flex-wrap:wrap;gap:8px}
+.buttons button{flex:1 1 120px}
+.status{font-size:13px;color:#d7d3e1;border:1px solid #41404b;padding:11px 12px;border-radius:11px;margin:14px 0;line-height:1.5}
+.status[data-type=error]{border-color:#a7455e;color:#ffb8c7}
+.status[data-type=success]{border-color:#477c6b;color:#bdf6d6}
+hr{border:0;border-top:1px solid #33323a;margin:16px 0}
+.stats{color:#acacbd;font-size:12px;line-height:1.75}
+.logs{display:grid;gap:8px;margin-top:11px;max-height:250px;overflow:auto}
+.log{background:#24232b;border:1px solid #393742;border-radius:10px;padding:10px;line-height:1.5;overflow-wrap:anywhere}
+.log b{color:#f4bad9}
+.viewer{display:flex;flex-direction:column;min-height:470px}
+.viewerhead{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:12px}
+.viewerhead a{border:1px solid #494856;border-radius:9px;padding:8px 10px;font-size:12px;white-space:nowrap}
+.viewer iframe{width:100%;height:60vh;min-height:385px;border:1px solid #3c3a45;border-radius:12px;background:#111}
+.placeholder{min-height:420px;display:flex;align-items:center;justify-content:center;text-align:center;flex-direction:column;gap:11px;color:#b5b4c0;background:repeating-linear-gradient(135deg,#16161b,#16161b 25px,#191920 25px,#191920 50px);border:1px dashed #44434f;border-radius:12px;padding:24px}
+.placeholder span{font-size:45px}
+.small{font-size:12px;color:#a4a3b2;line-height:1.6;margin:11px 0 0}
+footer{color:#9795a4;font-size:12px;text-align:center;margin-top:25px}
+[hidden]{display:none!important}
+@media(max-width:750px){.layout{grid-template-columns:1fr}.viewer iframe{height:56vh;min-height:335px}main{padding:18px 12px 40px}.panel{padding:16px}}
+</style></head><body>
+<header><div class="brand">NyX <small>AI</small></div><a href="/">Back to chat</a></header>
+<main>
+<h1>Free AI Browser <span aria-hidden="true">✦</span></h1>
+<p class="intro">Ask NyX to open public webpages, search, read, click and type. Watch the same live Chrome session, pause the AI and take over whenever you want. This uses Cloudflare Browser Run, <strong>not</strong> the paid Browser Use service.</p>
+<div class="layout">
+<section class="panel">
+<label for="task">What should NyX do in the browser?</label>
+<textarea id="task" maxlength="650" placeholder="Open Wikipedia, find recent information about the northern lights and summarize useful sources."></textarea>
+<div class="note">Free cloud usage is limited: Cloudflare provides up to <b>10 browser-minutes per day</b> for the account. To protect that allowance, this beta allows one session up to <b>2 minutes</b> per user per UTC day, with at most 12 AI steps. It is <strong>not unlimited</strong>; a truly uncapped browser needs your own computer/server.</div>
+<label class="consent"><input type="checkbox" id="consent">I understand the free-tier time limits, that visited page content may be sent to NyX's AI model, and that sensitive actions require my manual approval.</label>
+<div class="buttons"><button id="start" class="primary" disabled>Start free browser</button><button id="pause" disabled>Pause NyX</button><button id="resume" disabled>Let NyX continue</button><button id="stop" class="danger" disabled>Stop browser</button></div>
+<p id="status" class="status" role="status" aria-live="polite">Checking browser availability…</p>
+<div id="usage" class="stats"></div>
+<hr><h2>What NyX is doing</h2>
+<div id="logs" class="logs"><div class="log">No active session. Start a free browser task to begin.</div></div>
+<p class="small">NyX won't enter passwords, make payments, purchase items or send messages automatically. For those steps, pause the AI and use the live browser yourself. Browser-view links grant control; keep them private.</p>
+</section>
+<section class="panel viewer">
+<div class="viewerhead"><h2>Live browser</h2><a id="open" href="#" target="_blank" rel="noopener noreferrer" hidden>Open live view</a></div>
+<div id="empty" class="placeholder"><span aria-hidden="true">◉</span><strong>Chrome is ready when you are</strong><div>Start a task to see NyX navigate and work in a real browser.</div></div>
+<iframe id="screen" title="NyX Browser Run live Chrome session" loading="lazy" referrerpolicy="no-referrer" allow="clipboard-read;clipboard-write;fullscreen" hidden></iframe>
+<p class="small">If the live view does not load inside NyX, use <b>Open live view</b>. The browser and NyX share the same session; you can switch between manual control and the AI.</p>
+</section></div>
+<footer>NyX AI · Free Cloudflare Browser Run · No paid-browser session starts from this page.</footer>
+</main>
+<script>
+(()=>{"use strict";
+const get=id=>document.getElementById(id),task=get("task"),consent=get("consent"),status=get("status"),usage=get("usage"),logs=get("logs"),frame=get("screen"),empty=get("empty"),open=get("open");
+const buttons={start:get("start"),pause:get("pause"),resume:get("resume"),stop:get("stop")};
+const params=new URLSearchParams(location.search);if(params.has("task"))task.value=params.get("task").slice(0,650);
+let current=null,busy=false,run=false,failures=0;
+function message(txt,type=""){status.textContent=String(txt);status.dataset.type=type}
+function addLog(kind,description){const item=document.createElement("div");item.className="log";const title=document.createElement("b");title.textContent=kind+" · ";item.append(title,document.createTextNode(String(description||"")));logs.prepend(item);while(logs.children.length>17)logs.lastElementChild.remove()}
+function showLive(url){const safe=typeof url==="string"&&url.startsWith("https://live.browser.run/")?url:null;
+ if(!safe){frame.hidden=true;empty.hidden=false;open.hidden=true;frame.removeAttribute("src");open.removeAttribute("href");return}
+ empty.hidden=true;frame.hidden=false;open.hidden=false;if(frame.getAttribute("src")!==safe)frame.src=safe;open.href=safe}
+function sync(){const s=current?.session,active=!!s?.active;buttons.start.disabled=busy||active||!current?.canStart||!consent.checked||task.value.trim().length<5;buttons.pause.disabled=busy||!active||s?.paused;buttons.resume.disabled=busy||!active||!s?.paused;buttons.stop.disabled=busy||!active;
+ if(current)usage.textContent="Cloudflare browser time used: "+(Number(current.usedBrowserSeconds||0)/60).toFixed(1)+" minutes · Free account allowance: 10 minutes/day";}
+async function call(name,body=null){const isGet=name==="status";const r=await fetch("/api/nyx/ai-browser/"+name,{method:isGet?"GET":"POST",credentials:"same-origin",cache:"no-store",headers:isGet?{}:{"Content-Type":"application/json","X-NyX-Client":"web"},body:isGet?undefined:JSON.stringify(body||{})});let data;try{data=await r.json()}catch{throw Error("NyX couldn't read the browser response.")}if(!r.ok)throw Error(data.error||"Browser action failed");return data}
+function paint(info){current=info;const s=info?.session;showLive(s?.viewUrl);if(s?.history?.length){logs.replaceChildren();s.history.forEach(v=>addLog(v.action||"Action",v.note||v.description||v.url||"Working…"))}sync()}
+async function refresh(){try{paint(await call("status"));message(current.session?"Browser session active.":"Ready. Start a browser task when you want to.",current.session?"success":"")}catch(e){message(e.message,"error")}sync()}
+async function oneStep(){const v=await call("step");if(v.action)addLog(v.action.action||"Working",v.action.note||v.pageUrl||"");if(v.done){run=false;message(v.action?.action==="finish"?"NyX finished this browser task.":"NyX paused for your manual control.",v.action?.action==="finish"?"success":"");await refresh()}return v}
+async function loop(){if(run)return;run=true;failures=0;while(run&&current?.session?.active&&!current?.session?.paused){try{busy=true;sync();message("NyX is working in Chrome…");const v=await oneStep();busy=false;sync();if(v.done)break;await new Promise(r=>setTimeout(r,400))}catch(e){busy=false;run=false;failures++;message(e.message,"error");addLog("Attention",e.message);await refresh();break}}run=false;busy=false;sync()}
+buttons.start.onclick=async()=>{if(busy||!consent.checked)return;busy=true;sync();message("Opening free browser…");try{const data=await call("start",{task:task.value.trim(),confirmFreeLimit:true});consent.checked=false;addLog("Started","Browser session opened.");await refresh();if(data.session?.active)loop()}catch(e){message(e.message,"error")}finally{busy=false;sync()}};
+buttons.pause.onclick=async()=>{run=false;try{await call("pause");await refresh();message("NyX paused. You can take over the live browser.")}catch(e){message(e.message,"error")}};
+buttons.resume.onclick=async()=>{try{await call("resume");await refresh();message("NyX is resuming.");loop()}catch(e){message(e.message,"error")}};
+buttons.stop.onclick=async()=>{run=false;busy=true;sync();try{await call("stop");await refresh();message("Browser stopped. The session is closed.","success")}catch(e){message(e.message,"error")}finally{busy=false;sync()}};
+consent.onchange=sync;task.oninput=sync;refresh();
+})();
+</script></body></html>
