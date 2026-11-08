@@ -45,9 +45,21 @@ async function nxBASnapshot(cmd){
  const obj=JSON.parse(x);if(!Array.isArray(obj?.elements))throw Error("Page is not ready");return obj
 }
 function nxBAPlan(response){
- const text=String(response?.response||response?.choices?.[0]?.message?.content||"").slice(0,2500);
- const match=text.match(/\{[\s\S]*\}/);if(!match)return {action:"handoff",note:"AI couldn't choose a safe next step."};
- try{const plan=JSON.parse(match[0]);return ["navigate","click","type","scroll","finish","handoff"].includes(plan.action)?plan:{action:"handoff",note:"Unknown browser action"}}catch{return {action:"handoff",note:"Could not parse browser plan"}}
+ /* Workers AI Llama 4 Scout already returns structured response objects:
+    {response:{action:"navigate",url:"..."}}. Never stringify that as [object Object]. */
+ let value=response?.response??response?.choices?.[0]?.message?.content??response;
+ if(Array.isArray(value))value=value.find(v=>v&&typeof v==="object"&&v.action)||value[0];
+ if(typeof value==="string"){
+  const candidate=value.trim().replace(/^\x60\x60\x60(?:json)?\s*/i,"").replace(/\x60\x60\x60\s*$/,"");
+  try{value=JSON.parse(candidate)}catch{
+   const match=candidate.match(/\{[\s\S]*?\}/);
+   try{value=match?JSON.parse(match[0]):null}catch{value=null}
+  }
+ }
+ if(!value||typeof value!=="object"||!["navigate","click","type","scroll","finish","handoff"].includes(value.action)){
+  return {action:"handoff",note:"NyX could not interpret the model's proposed browser action."}
+ }
+ return value;
 }
 async function nxBAAct(cmd,plan,snapshot){
  if(plan.action==="navigate"){
@@ -74,6 +86,45 @@ async function nxBAAct(cmd,plan,snapshot){
  if(plan.action==="scroll"){await cmd("Runtime.evaluate",{expression:"window.scrollBy(0,"+(plan.direction==="up"?-520:520)+");void 0"});return {action:"scroll",note:"Scrolled "+(plan.direction==="up"?"up":"down")}}
  return {action:plan.action==="finish"?"finish":"handoff",note:String(plan.note||"Please check the live browser.").slice(0,900)}
 }
+async function nxBAPreview(env,sessionId){
+ return nxBAConnect(env,sessionId,async cmd=>{
+  const cap=await cmd("Page.captureScreenshot",{format:"jpeg",quality:56,fromSurface:true,captureBeyondViewport:false});
+  if(typeof cap?.data!=="string"||cap.data.length<100)return null;
+  const data=Uint8Array.from(atob(cap.data),c=>c.charCodeAt(0));
+  return new Response(data,{headers:{"Content-Type":"image/jpeg","Cache-Control":"private, no-store, max-age=0","X-Content-Type-Options":"nosniff"}})
+ })
+}
+async function nxBAManual(env,row,path,input){
+ return nxBAConnect(env,row.session_id,async cmd=>{
+  if(path.endsWith("/navigate")){
+   const url=nxBAUrl(input?.url);
+   if(!url)return {error:"Use a public HTTPS address."};
+   await cmd("Page.navigate",{url});return {ok:true,note:"Opened "+url.slice(0,180)}
+  }
+  if(path.endsWith("/tap")){
+   const x=Number(input?.x),y=Number(input?.y);
+   if(!(x>=0&&x<=1&&y>=0&&y<=1))return {error:"Invalid tap location."};
+   const metrics=await cmd("Page.getLayoutMetrics");
+   const viewport=metrics.cssVisualViewport||metrics.cssLayoutViewport||metrics.layoutViewport||{};
+   const w=Number(viewport.clientWidth||viewport.width||1280),h=Number(viewport.clientHeight||viewport.height||720);
+   const px=Math.round(x*w),py=Math.round(y*h);
+   await cmd("Input.dispatchMouseEvent",{type:"mousePressed",x:px,y:py,button:"left",clickCount:1});
+   await cmd("Input.dispatchMouseEvent",{type:"mouseReleased",x:px,y:py,button:"left",clickCount:1});
+   return {ok:true,note:"Manual tap"}
+  }
+  if(path.endsWith("/type")){
+   const value=String(input?.text||"").slice(0,350);
+   if(!value)return {error:"Enter the text to type."};
+   await cmd("Input.insertText",{text:value});return {ok:true,note:"Typed into the active field"}
+  }
+  if(path.endsWith("/scroll")){
+   const amt=input?.direction==="up"?-530:530;
+   await cmd("Runtime.evaluate",{expression:"window.scrollBy(0,"+amt+");void 0"});
+   return {ok:true,note:"Scrolled"}
+  }
+  return {error:"Unknown manual action"}
+ })
+}
 async function nxBAStatus(env,actor){
  await nxBADB(env);
  const row=await env.NYX_DB.prepare("SELECT * FROM nyx_free_browser_agent WHERE user_id=?").bind(actor.id).first();
@@ -89,6 +140,13 @@ async function nxBAApi(request,env,path){
  if(!env.BROWSER||!env.AI||!env.NYX_DB)return nxBAJson({error:"NyX browser binding or AI is unavailable"},503);
  const actor=await nyxCurrentSession(env,request);if(!actor)return nxBAJson({error:"Please sign in to NyX"},401);
  if(path==="/api/nyx/ai-browser/status"&&request.method==="GET")return nxBAJson(await nxBAStatus(env,actor));
+ if(path==="/api/nyx/ai-browser/preview"&&request.method==="GET"){
+  await nxBADB(env);
+  const row=await env.NYX_DB.prepare("SELECT * FROM nyx_free_browser_agent WHERE user_id=?").bind(actor.id).first();
+  if(!row?.session_id||row.expires_at<=Date.now())return nxBAJson({error:"No active browser session"},404);
+  try{return await nxBAPreview(env,row.session_id)||nxBAJson({error:"Screenshot not ready yet"},503)}
+  catch{return nxBAJson({error:"Screenshot unavailable. Try the live browser link."},503)}
+ }
  if(request.method!=="POST")return nxBAJson({error:"Unsupported method"},405);
  if(!nyxCheckOrigin(request))return nxBAJson({error:"Untrusted request origin"},403);
  if(Number(request.headers.get("content-length")||0)>2400)return nxBAJson({error:"Browser command is too long"},413);
@@ -119,6 +177,11 @@ async function nxBAApi(request,env,path){
   return nxBAJson({ok:true,stopped:true})
  }
  if(row.expires_at<=now)return nxBAJson({error:"Browser session expired. Stop it and try again tomorrow."},410);
+ if(["/api/nyx/ai-browser/tap","/api/nyx/ai-browser/type","/api/nyx/ai-browser/scroll","/api/nyx/ai-browser/navigate"].includes(path)){
+  if(!row.paused)return nxBAJson({error:"Pause NyX before taking manual control."},409);
+  try{const result=await nxBAManual(env,row,path,input);return nxBAJson(result,result.error?400:200)}
+  catch{return nxBAJson({error:"Manual browser action failed or browser disconnected."},502)}
+ }
  if(path==="/api/nyx/ai-browser/pause"||path==="/api/nyx/ai-browser/resume"){
   const paused=path.endsWith("pause")?1:0;
   await env.NYX_DB.prepare("UPDATE nyx_free_browser_agent SET paused=? WHERE user_id=?").bind(paused,actor.id).run();
