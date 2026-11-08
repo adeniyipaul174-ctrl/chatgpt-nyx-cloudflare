@@ -6,9 +6,10 @@
 
 - Worker: `chatgpt-nyx-v3-test`
 - Live site: https://chatgpt-nyx-v3-test.adeniyipaul174.workers.dev/
-- Active Worker version: `0874dff6-c3a8-4a45-8e98-e8f9dc66a7aa`
-- Current deployment: `799d787d-3730-4186-8144-d45209848d2f`
-- Previous stable version (rollback target): `ebffa61f-9bf3-4623-a0be-dfbe07329a60` (preceding working Chat/Work app before composer UI repair).
+- Active Worker version: `a8756b15-ad7b-4bcf-a970-88f9987a4f85`
+- Current deployment: `08dc3d65-7db7-40e3-97d3-588d1a0dc2ab`
+- Previous stable version (rollback target): `0874dff6-c3a8-4a45-8e98-e8f9dc66a7aa` (working Chat/Work app before premium Work composer redesign).
+- Earlier stable version: `ebffa61f-9bf3-4623-a0be-dfbe07329a60`.
 - First working Chat/Work version: `1b9bbf58-f3bc-444b-a3e9-5f93a4845129`.
 - Earlier full NyX version before Chat/Work: `23ba4d44-34e9-490f-a8c3-1ff0db741132`.
 - Intermediate compiled version: `a7e127fd-dc3f-470a-950c-adac111d669e` (Chat/Work UI was present but Work controller failed at runtime due HTML-template escaping; DO NOT use as rollback).
@@ -22,6 +23,16 @@
 - Earlier version: `90b5188f-19ad-4ca4-957c-1e529f465f8e` (included an **unrequested** Lite page; **do not redeploy as the normal rollback**).
 - Earlier original version: `686530f3-a15c-49fc-88a2-599869197fc2` (older model selection, no Scout-as-default).
 - The Lite route and its HTML were fully **removed**. `/lite` returns **404**. The existing full NyX interface remains the only homepage.
+
+## Premium Work composer redesign (2026-11-08)
+
+- **Live UI correction:** Replaced the Work composer’s basic standalone pink arrow circle with a functional, wider **Run task** gradient button containing a custom inline SVG arrow icon. The button changes its label to **Working…** while disabled during an AI request and restores **Run task** after completion.
+- Added a small NYX WORKSPACE heading, lighter task prompt, compact, non-resizable autogrowing textarea, refined Agent dropdown trigger, footer divider, and more intentional proportions and pink accents. Normal Chat and its existing attachment, microphone and send controls were not replaced or redesigned during this patch.
+- Preserved original **functional DOM IDs**, Work submit event handler, Agent mode selection, previously repaired dropdown portal, browser, image, memory, model routing, web search, and all 13 Cloudflare bindings. No account data or model settings were changed.
+- Source files retained for future work: `addons/work-mode/premium-work-composer.html`, `addons/work-mode/premium-work-composer.css`, and `addons/work-mode/premium-work-composer.js`. GitHub root source is not the deployed production source; DO NOT deploy it over NyX.
+- **Predeployment mobile browser check (390px):** Button was rendered as a 121×46px rounded rectangle with an SVG icon, no horizontal overflow, Agent menu opened above its trigger, switching Agent to Coder worked, and a mocked Work API task returned and reset the button.
+- **Postdeployment mobile browser check (390px):** Verified live version rendered the new button and SVG, Agent selector remained aligned, full dropdown opened above the button, Coder task reached the existing `/api/nyx` Work route, the button displayed **Working…** and then returned to **Run task**, the simulated agent reply displayed, and switching back to Chat restored Normal mode. The authenticated account backend was **mocked for this UI test**, not end-to-end verified.
+- Rollback target: `0874dff6-c3a8-4a45-8e98-e8f9dc66a7aa` (prior live version). Production Worker version `a8756b15-ad7b-4bcf-a970-88f9987a4f85`, deployment `08dc3d65-7db7-40e3-97d3-588d1a0dc2ab`.
 
 ## Chat composer and Work agent dropdown repair (2026-11-08)
 
