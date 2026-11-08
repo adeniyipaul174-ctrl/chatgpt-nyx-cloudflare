@@ -1,0 +1,19 @@
+<section id="nxWorkPane" class="nx-work-pane" aria-label="NyX Work workspace" hidden>
+ <div class="nx-work-scroll" id="nxWorkScroll">
+  <div class="nx-work-welcome" id="nxWorkWelcome"><div class="nx-work-eyebrow">NyX <span>✦</span> Work</div><h1>What should we get done?</h1><p>Use AI agents to research, plan, write, build, or work directly in a real browser. You can watch and take control.</p><div class="nx-work-starters"><button type="button" data-nx-work="browser">Open browser</button><button type="button" data-nx-work="agents">Use agent team</button><button type="button" data-nx-work="code">Build or analyze code</button></div></div>
+  <div id="nxWorkFeed" class="nx-work-feed" aria-live="polite"></div>
+  <div id="nxWorkBrowser" class="nx-work-browser" hidden>
+   <div class="nx-wb-head"><div><strong>Browser in Work</strong><small id="nxWorkBrowserStatus">Connecting…</small></div><a href="#" target="_blank" rel="noopener noreferrer" id="nxWorkLiveLink" hidden>Open live browser</a></div>
+   <div class="nx-wb-preview" id="nxWorkPreviewBox" aria-label="Live screenshot of browser tab"><p id="nxWorkPreviewNote">Connecting to browser…</p><img id="nxWorkScreenshot" alt="Current NyX browser screen" hidden></div>
+   <div class="nx-wb-controls"><button type="button" id="nxWorkTakeover">Take control</button><button type="button" id="nxWorkResume">Let NyX continue</button><button type="button" id="nxWorkRefresh">Refresh view</button><button type="button" id="nxWorkStop">Stop</button></div>
+   <form id="nxWorkGo" class="nx-wb-go"><label for="nxWorkAddress">Open website</label><div><input id="nxWorkAddress" placeholder="https://example.com" inputmode="url" autocomplete="off"><button type="submit">Go</button></div></form>
+   <form id="nxWorkType" class="nx-wb-go"><label for="nxWorkKeyboard">Type into selected field (manual control)</label><div><input id="nxWorkKeyboard" placeholder="Type text after tapping a field" autocomplete="off"><button type="submit">Type</button></div></form>
+   <p class="nx-wb-hint">Tap <b>Take control</b>, then tap the screenshot to click. Open live browser for the full interactive view. Only you can approve sensitive actions. Free Cloudflare browser time is limited to 10 minutes per account daily; NyX limits each session to 2 minutes.</p>
+  </div>
+ </div>
+ <form id="nxWorkForm" class="nx-work-form" aria-label="Work with NyX">
+  <textarea id="nxWorkPrompt" rows="2" maxlength="4000" placeholder="Ask NyX to research, browse, code, or complete a task…" aria-label="Work task"></textarea>
+  <div class="nx-work-compose-bottom"><div class="nx-work-agent"><span>Agents</span><div id="nxWorkAgentSlot"></div></div><button type="submit" id="nxWorkSend" aria-label="Start Work task">↑</button></div>
+ </form>
+ <p class="nx-work-disclaimer">NyX Work uses your existing AI tools. A browser session starts only after your approval and uses a limited free allowance.</p>
+</section>
