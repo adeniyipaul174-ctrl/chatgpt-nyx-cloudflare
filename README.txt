@@ -1,9 +1,9 @@
 LIVE DEPLOYMENT UPDATE (2026-11-08)
 ==================================
-Production NyX now has contextual same-chat memory for references and relevant older turns, active task labels, Normal as the default agent mode for app launches and new chats, and outside-tap dismissal of the mobile sidebar.
-Llama 4 Scout remains primary. Existing search, image creation/editing, browser tools, website studio, agents, authentication and history remain in place. All 13 Cloudflare bindings are preserved.
-No new Memory menu or separate Lite interface was added. See LIVE_DEPLOYMENT_2026-11-08.md for the active version, smoke checks, limitations, and rollback.
-CAUTION: This GitHub root is an OLD candidate; do NOT deploy it over the live Cloudflare Worker.
+The existing NyX AI interface is live with Llama 4 Scout as its main chat model. The latest release fixes ambiguous image follow-ups (for example, after discussing a logo: 'Generate it for me here'), guards text replies against falsely claiming an image was generated/sent, and adds a Cloudflare FLUX-1 fast image backup for recoverable primary-image-model failures.
+Existing search, image creation/editing, browser, website projects, agents, same-chat memory, activity labels, account history, Normal default mode and outside-tap mobile sidebar behavior remain. All 13 bindings were preserved; no new app, menu, or paid third-party API was introduced.
+See LIVE_DEPLOYMENT_2026-11-08.md for the active version, checks, limitations and rollback.
+CAUTION: The GitHub root source is an OLD candidate; DO NOT deploy it over the live Cloudflare Worker.
 
 CRITICAL CURRENT DEPLOYMENT SAFETY NOTICE (2026-10-19)
 ================================================
