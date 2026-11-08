@@ -6,9 +6,11 @@
 
 - Worker: `chatgpt-nyx-v3-test`
 - Live site: https://chatgpt-nyx-v3-test.adeniyipaul174.workers.dev/
-- Active Worker version: `642eb284-10c5-48c1-8293-8f3206878257`
-- Current deployment: `b43f8a2d-9c50-4c6c-8098-d77afe18a14b`
-- Previous stable version (rollback target): `fdaf81da-1396-4dc5-b17a-3ca130f6ade1`.
+- Active Worker version: `23ba4d44-34e9-490f-a8c3-1ff0db741132`
+- Current deployment: `7c683d6e-ed33-4ba0-a9e8-c831a572411e`
+- Previous stable version (rollback target): `642eb284-10c5-48c1-8293-8f3206878257` (before introducing Free AI Browser).
+- Intermediate version: `d7904ff0-56ab-4dc8-a7ce-8a44df8efd35` (free browser feature before strict JSON action-prompt adjustment).
+- Earlier stable version: `fdaf81da-1396-4dc5-b17a-3ca130f6ade1`.
 - Earlier stable version: `e7da914e-6a9f-4a78-895a-10fe34b38c85`.
 - Earlier version: `bfa443aa-21e9-4a1d-b021-fad2e8ed9571` (retained before removing the unwanted sidebar close button).
 - Earlier stable version: `5cf7f592-b861-4989-828e-3fbdf85b6c69`.
@@ -16,6 +18,30 @@
 - Earlier version: `90b5188f-19ad-4ca4-957c-1e529f465f8e` (included an **unrequested** Lite page; **do not redeploy as the normal rollback**).
 - Earlier original version: `686530f3-a15c-49fc-88a2-599869197fc2` (older model selection, no Scout-as-default).
 - The Lite route and its HTML were fully **removed**. `/lite` returns **404**. The existing full NyX interface remains the only homepage.
+
+## Free AI Browser agent — opt-in Cloudflare Browser Run (2026-11-08)
+
+**New live entry point:** https://chatgpt-nyx-v3-test.adeniyipaul174.workers.dev/ai-browser . The active NyX sidebar includes **AI Browser · Free**. Explicit Normal Chat phrases such as 'use AI browser to ...' prompt before opening this page. The existing Normal Chat mode, search, images and other tools are unchanged.
+
+**What it does:** From a user-confirmed task, a Cloudflare Browser Run session connects to a real browser tab using the session-pinned CDP WebSocket. Llama 4 Scout chooses one bounded action at a time from a visible-page snapshot: navigate to a public HTTPS address, click a visible element, type, scroll, finish or request handoff. The original same-origin NyX authentication gates apply. The page offers Cloudflare Live View, Pause, Resume, Stop, and a link to open Live View in a separate tab. Password, payment, purchase, destructive and send-related actions trigger manual handoff instead of automated clicks. Page content is marked untrusted. This is experimental, not a guarantee of perfect autonomous website workflows.
+
+**Free-tier reality:** Cloudflare Workers Free includes 10 browser-minutes per day shared by the account. NyX uses its already-installed `BROWSER` and `AI` bindings; it does **not** launch the paid Browser Use Cloud service. Its own guard limits launches to one session per user per UTC day, a 120-second application session, 12 model-selected steps, and requires sufficient remaining free browser usage. No provider offers an unlimited permanently free hosted session. A separate self-hosted `browser-use`+Ollama example is provided under `addons/free-browser-agent/local_browser.py` for users with their own sufficiently capable PC; it has no hosted browser-minute cap but **is not automatically connected** to hosted NyX.
+
+**Database change:** Added the new isolated D1 table `nyx_free_browser_agent` with session ID, user ID, start/expiry times, paused state, task, bounded action log, and short lock. No existing user/chat tables were modified. SQL creation and all nine column definitions were verified successfully.
+
+**Production changes:** A self-contained browser-agent helper module was added directly before the active Cloudflare Worker export. A responsive browser page is served only to authenticated NyX sessions. An actual (not archived) sidebar item and a narrow chat redirect were added to the active HTML. Cloudflare compiled and deployed the source, inheriting all **13 bindings**. No existing model, search, image, browser reader, original Browser Use integration, or database connection was removed.
+
+**Tests completed:**
+- An isolated, temporary Cloudflare Browser Run Worker launched a session, connected to the **page target**, navigated to https://example.com, read `Example Domain` from the DOM, and successfully obtained a Live View URL. Browser session was closed afterward; probe Worker disabled and deleted.
+- `env.BROWSER.limits()` was verified. The account exposed a working native browser binding. No paid Browser Use session was created.
+- The live NyX home page rendered at 360px width without overflow; the **AI Browser · Free** sidebar link was visible; Normal Chat remained the default; the sidebar still closed when tapping outside.
+- Protected AI Browser status/start endpoints returned HTTP 401 when unauthenticated. Existing health and capabilities returned HTTP 200; search, chat, image, browser and other protected endpoints remained protected.
+- The separate responsive page rendered in an isolated static test at 360px: all Start/Pause/Resume/Stop buttons, live browser frame, task field and consent were present with no horizontal overflow. A 1280px follow-up screenshot was unavailable because the Cloudflare Browser Rendering API returned HTTP 429. The static probe Worker was disabled and deleted.
+- The browser-agent code and page script passed JavaScript syntax checks. Stronger strict-JSON instructions were deployed in the final version for robust action parsing.
+
+**NOT verified:** a real authenticated multi-step NyX browser task in the user's account, cross-origin iframe permissions on the Live View provider, actions on complex forms, and every website's anti-bot challenges. An isolated CDP test and unauthenticated route checks do not prove these workflows. Users should try a public, non-sensitive site first. Never send payment details or passwords to the agent. The two-minute session limit is an app guard, and backend browser inactivity behavior is provider-controlled; use the Stop action explicitly.
+
+**Rollback target:** `642eb284-10c5-48c1-8293-8f3206878257`. The stale GitHub root source MUST NOT replace this live Worker. The addon and companion local script are source files in `addons/free-browser-agent/`, not a complete copy of production.
 
 ## Public web-search resilience (2026-11-08)
 
