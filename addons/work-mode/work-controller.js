@@ -17,7 +17,7 @@ function setStage(next){
  const on=stage==="work";
  chatTab.classList.toggle("active",!on);workTab.classList.toggle("active",on);chatTab.setAttribute("aria-selected",String(!on));workTab.setAttribute("aria-selected",String(on));
  pane.hidden=!on;
- if(on){chatAgent(workAgent);try{document.getElementById("sidebar")?.classList.remove("open")}catch{};if(!session)refreshBrowser(false);input.focus({preventScroll:true});}
+ if(on){chatAgent(workAgent);try{document.getElementById("sidebar")?.classList.remove("open")}catch{};if(!session)refreshBrowser(false);}
  else{if(native&&native.value!=="off")workAgent=native.value;chatAgent("off");}
 }
 window.nxEnterWork=function(task,submit=false){setStage("work");if(typeof task==="string"&&task.trim())input.value=task.trim().slice(0,4000);if(submit&&input.value.trim())workForm.requestSubmit();};
@@ -127,7 +127,7 @@ workForm.addEventListener("submit",async event=>{
  const browserTask=browserIntent(text);
  try{
   if(browserTask)await openBrowserTask(text);
-  else{const pending=note("NyX Agents are working…");try{const answer=await runAgentTask(text);if(answer!==null)pending.finish(answer)}catch(e){pending.finish(e.message,"error")}}
+  else{const pending=note("NyX Agents are working…");try{const answer=await runAgentTask(text);if(answer!==null)pending.finish(answer);else pending.element.remove()}catch(e){pending.finish(e.message,"error")}}
  }catch(e){bubble("error",e.message,false)}
  finally{busy=false;$("nxWorkSend").disabled=false}
 });
