@@ -6,9 +6,10 @@
 
 - Worker: `chatgpt-nyx-v3-test`
 - Live site: https://chatgpt-nyx-v3-test.adeniyipaul174.workers.dev/
-- Active Worker version: `ebffa61f-9bf3-4623-a0be-dfbe07329a60`
-- Current deployment: `02bf7d3d-5a60-4e94-8cbb-831eb397d1c3`
-- Previous stable version (rollback target): `1b9bbf58-f3bc-444b-a3e9-5f93a4845129` (first working Chat/Work release).
+- Active Worker version: `0874dff6-c3a8-4a45-8e98-e8f9dc66a7aa`
+- Current deployment: `799d787d-3730-4186-8144-d45209848d2f`
+- Previous stable version (rollback target): `ebffa61f-9bf3-4623-a0be-dfbe07329a60` (preceding working Chat/Work app before composer UI repair).
+- First working Chat/Work version: `1b9bbf58-f3bc-444b-a3e9-5f93a4845129`.
 - Earlier full NyX version before Chat/Work: `23ba4d44-34e9-490f-a8c3-1ff0db741132`.
 - Intermediate compiled version: `a7e127fd-dc3f-470a-950c-adac111d669e` (Chat/Work UI was present but Work controller failed at runtime due HTML-template escaping; DO NOT use as rollback).
 - Original Free Browser release: `642eb284-10c5-48c1-8293-8f3206878257`.
@@ -21,6 +22,15 @@
 - Earlier version: `90b5188f-19ad-4ca4-957c-1e529f465f8e` (included an **unrequested** Lite page; **do not redeploy as the normal rollback**).
 - Earlier original version: `686530f3-a15c-49fc-88a2-599869197fc2` (older model selection, no Scout-as-default).
 - The Lite route and its HTML were fully **removed**. `/lite` returns **404**. The existing full NyX interface remains the only homepage.
+
+## Chat composer and Work agent dropdown repair (2026-11-08)
+
+- **Fixed on production:** An older mobile `.nx-mode-menu` rule forced the agent list to the top of the viewport, while the Work panel's overflow clipped the remainder into a thin strip. The agent menu is now attached to `document.body` and positioned dynamically **above the Work agent selector**. Existing select/keyboard handlers and close-on-outside-tap behavior are preserved. The menu is hidden again when returning to Chat.
+- Refreshed the **existing Chat composer**, preserving dynamic photo/document attachment, microphone, text area, and send button events. Updated compact widths, borders, pink send control, spacing, focus states and narrow-screen styling. No new attachment or voice backends were created.
+- Refined the **Work composer**: Agent button stays on the lower-left of the prompt; Send remains on the right. The top Chat/Work switch, Normal Chat default, search, image generation, memory, agent tools, and free browser remain intact.
+- **Source files for this patch:** `addons/work-mode/composer-polish.css` and `addons/work-mode/agent-dropdown-anchor.js`. The GitHub root code is still stale and must not be directly deployed over production.
+- **Tests:** Cloudflare accepted the Worker with all **13 existing bindings**. Live browser simulation at **320px** showed attachment/mic/send aligned and inside the viewport, a 415px-high unclipped dropdown above the trigger, Coder selection, Chat restoration to Normal, and no horizontal scrolling. A previous injected CSS/JS test passed at 390px before deployment. Cloudflare's Browser Rendering test service returned HTTP 429 on additional 390px and 768px post-deployment checks; those were not completed.
+- **Limitations:** The DOM layout tests bypassed the unauthenticated screen locally in the test browser, not real account authentication. This change has not been end-to-end regression tested with authenticated image, search, browser or audio tasks. No app data or account bindings were changed. Rollback to `ebffa61f-9bf3-4623-a0be-dfbe07329a60` if a regression appears.
 
 ## Chat / Work app mode & browser-action repair (2026-11-08)
 
