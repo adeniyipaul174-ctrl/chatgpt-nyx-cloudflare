@@ -177,6 +177,13 @@ async function nxBAApi(request,env,path){
   return nxBAJson({ok:true,stopped:true})
  }
  if(row.expires_at<=now)return nxBAJson({error:"Browser session expired. Stop it and try again tomorrow."},410);
+ if(path==="/api/nyx/ai-browser/task"){
+  const nextTask=String(input.task||"").trim().slice(0,650);
+  if(nextTask.length<5)return nxBAJson({error:"Enter a browser task."},400);
+  if(row.steps>=NXBA_STEP_CAP)return nxBAJson({error:"Browser AI step limit reached. Manual control is still available."},409);
+  await env.NYX_DB.prepare("UPDATE nyx_free_browser_agent SET task=?,history=? WHERE user_id=? AND session_id=?").bind(nextTask,JSON.stringify([...JSON.parse(row.history||"[]"),{action:"task",note:"New user task"}].slice(-12)),actor.id,row.session_id).run();
+  return nxBAJson({ok:true,taskUpdated:true});
+ }
  if(["/api/nyx/ai-browser/tap","/api/nyx/ai-browser/type","/api/nyx/ai-browser/scroll","/api/nyx/ai-browser/navigate"].includes(path)){
   if(!row.paused)return nxBAJson({error:"Pause NyX before taking manual control."},409);
   try{const result=await nxBAManual(env,row,path,input);return nxBAJson(result,result.error?400:200)}
