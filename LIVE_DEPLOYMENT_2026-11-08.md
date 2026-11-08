@@ -6,15 +6,47 @@
 
 - Worker: `chatgpt-nyx-v3-test`
 - Live site: https://chatgpt-nyx-v3-test.adeniyipaul174.workers.dev/
-- Active Worker version: `fdaf81da-1396-4dc5-b17a-3ca130f6ade1`
-- Current deployment: `d912e6bd-d078-4f26-b928-e97bd0a0fad0`
-- Previous stable version (rollback target): `e7da914e-6a9f-4a78-895a-10fe34b38c85`.
+- Active Worker version: `642eb284-10c5-48c1-8293-8f3206878257`
+- Current deployment: `b43f8a2d-9c50-4c6c-8098-d77afe18a14b`
+- Previous stable version (rollback target): `fdaf81da-1396-4dc5-b17a-3ca130f6ade1`.
+- Earlier stable version: `e7da914e-6a9f-4a78-895a-10fe34b38c85`.
 - Earlier version: `bfa443aa-21e9-4a1d-b021-fad2e8ed9571` (retained before removing the unwanted sidebar close button).
 - Earlier stable version: `5cf7f592-b861-4989-828e-3fbdf85b6c69`.
 - Older stable version: `eaf319f9-4427-4805-824f-faa0ef2480f7`.
 - Earlier version: `90b5188f-19ad-4ca4-957c-1e529f465f8e` (included an **unrequested** Lite page; **do not redeploy as the normal rollback**).
 - Earlier original version: `686530f3-a15c-49fc-88a2-599869197fc2` (older model selection, no Scout-as-default).
 - The Lite route and its HTML were fully **removed**. `/lite` returns **404**. The existing full NyX interface remains the only homepage.
+
+## Public web-search resilience (2026-11-08)
+
+### Trigger
+
+- Screenshot showed NyX replying twice with **'could not retrieve matching public web evidence'**, including after **'Search for libanogs'**. Public web and GitHub results exist for `libanogs` / `libanogs.so`, a game security library; the failure should not be treated as proof the subject does not exist.
+- NyX has real search providers but used anonymous Bing HTML/DuckDuckGo pages first. Search-provider anti-bot challenges, changed HTML and irrelevant RSS results can cause zero usable results.
+
+### Confirmed provider diagnosis from an isolated temporary Cloudflare Worker
+
+- The **same live GitHub search implementation** fetched six relevant repository results for `libanogs`, including `Lixense/ff-ace-anticheat-analysis`; the six results all passed NyX's own relevance ranker.
+- The **same live DuckDuckGo Lite parser** failed to find extractable results when DuckDuckGo returned an HTTP **202 challenge** (no result-link markup). A separate diagnostic retrieval had earlier returned live DuckDuckGo HTML with relevant links, showing that anonymous page availability changes.
+- Bing web RSS could return HTTP 200 with an unrelated set of Microsoft results; NyX's relevance ranker correctly rejected those, even though the transport succeeded.
+- The isolated diagnostic Worker used **zero credentials and no production bindings**, and was disabled and **deleted** after testing.
+
+### Production changes
+
+- Added `nxSearchTechnicalTopic`: searches for libraries, SDKs, source-code repositories, language tooling, Android/kernel/security/firmware terminology, and `lib...` software-library names now check the **already existing** GitHub public API *in parallel with* Bing and DuckDuckGo. A relevant GitHub result no longer waits for anonymous web pages to fail. No GitHub OAuth key or new paid service was added.
+- Added `nxSearchBackgroundQuery`: suitably evergreen general-knowledge queries can consult the **already existing** Wikipedia search API in the initial parallel search wave. Fresh news, shopping, local, weather and comparison queries remain excluded from this background shortcut.
+- Added `nxSearchFollowupQuery`: if a phrase such as **'Search it then'** remains unresolved after AI reference handling, NyX can reuse the latest concrete subject from the **same chat** instead of sending 'it then' as a search term. No cross-conversation memory mixing.
+- Original source-validation, ranking, link allow-checks, Bing, DuckDuckGo, research streaming, content citations, images, agents, Normal default, mobile sidebar, account history and authentication are preserved.
+- Failure wording now distinguishes providers unable to verify a match from a definitive claim that a subject doesn't exist.
+
+### Tests and limitations
+
+- Fifteen standalone search-classification, background-eligibility and follow-up-memory test scenarios passed before deploy.
+- Cloudflare accepted the new Worker version with **all 13 original bindings inherited** and deployed it to 100% traffic. Verified current source contains the new technical, encyclopedia and follow-up search paths.
+- Live **360px mobile browser**: no horizontal overflow; Normal still selected by default; the hamburger opens the sidebar and tapping outside closes it; the removed close button remains absent.
+- Live endpoint smoke checks: health, capabilities and auth capabilities returned HTTP 200; protected chat, image, search, vision, browser, account history and usage endpoints returned HTTP 401 unauthenticated; `/lite` remains HTTP 404.
+- **Not yet verified:** signed-in end-to-end web searches from the user's session, all search categories and service responses under every regional network condition. A successful isolated provider test plus public route checks are **not** a guarantee that authenticated chat will always find sources or never time out.
+- No database schema or user data was changed. If a new regression appears, rollback to the prior live Worker version `fdaf81da-1396-4dc5-b17a-3ca130f6ade1`. The repository root remains stale and must never be deployed directly over this live app.
 
 ## Image-generation integrity and broad quality audit (2026-11-08)
 
