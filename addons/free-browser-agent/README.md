@@ -49,4 +49,4 @@ The open-source browser-use library supports local Ollama models: https://github
 
 The Free Browser Agent uses only existing authentication and requires same-origin checks for POST actions. For stronger production guarantees, add authenticated browser-session regression tests, robust provider error handling, cleanup scheduling, consent audits, anti-prompt-injection testing, and per-account quota telemetry.
 
-Rollback reference for this release: Cloudflare Worker version `642eb284-10c5-48c1-8293-8f3206878257`. Active version at time of release: `d7904ff0-56ab-4dc8-a7ce-8a44df8efd35`.
+Rollback reference for this release: Cloudflare Worker version `642eb284-10c5-48c1-8293-8f3206878257`. Active version at time of final release: `23ba4d44-34e9-490f-a8c3-1ff0db741132`.
