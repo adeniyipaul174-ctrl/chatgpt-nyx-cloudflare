@@ -1,44 +1,44 @@
-# NyX live Cloudflare deployment — 2026-11-08
+# NyX live Cloudflare deployment — verified update, 2026-11-08
 
-> **Safety notice:** The source files in this repository are an old candidate. They are **not** a complete snapshot of the live Worker. **Never deploy this repository root over production** without first reconciling the full live source and safely testing an isolated staging version. Existing account, browser, image, and site features must be preserved.
+> **Source-of-truth warning:** The GitHub root code is a previous prototype, **not** the complete current NyX Worker. Never run the existing Wrangler project against the live Worker until a complete source reconciliation, isolated staging rollout, and authenticated regression test are done. Do not overwrite the live database.
 
-## Production
+## Current production
 
-- Live Worker: `chatgpt-nyx-v3-test`
-- Live application: https://chatgpt-nyx-v3-test.adeniyipaul174.workers.dev/
-- Active Cloudflare Worker version (2026-11-08): `90b5188f-19ad-4ca4-957c-1e529f465f8e`
-- Prior version for emergency rollback: `686530f3-a15c-49fc-88a2-599869197fc2`
-- Deployment: `5be26e7d-888c-4b75-9503-4e159d0f324a`
+- Worker: `chatgpt-nyx-v3-test`
+- Live site: https://chatgpt-nyx-v3-test.adeniyipaul174.workers.dev/
+- Active Worker version: `eaf319f9-4427-4805-824f-faa0ef2480f7`
+- Current deployment: `a6781812-0d8f-42ea-b975-ab251116c558`
+- Previous version: `90b5188f-19ad-4ca4-957c-1e529f465f8e` (included an **unrequested** Lite page; **do not redeploy as the normal rollback**).
+- Earlier original version: `686530f3-a15c-49fc-88a2-599869197fc2` (older model selection, no Scout-as-default).
+- The Lite route and its HTML were fully **removed**. `/lite` returns **404**. The existing full NyX interface remains the only homepage.
 
-## Model changes deployed
+## Primary model and speed changes
 
-- Primary model for **normal and detailed text chat**: `@cf/meta/llama-4-scout-17b-16e-instruct` on Cloudflare Workers AI.
-- Main `/api/chat` also uses Llama 4 Scout first.
-- Legacy Llama 3.3 70B references in the live Worker were updated to Llama 4 Scout across applicable agent and builder paths.
-- Llama 3.1 8B remains for certain inexpensive routing tasks and contingency fallback. When Llama 4 Scout is unavailable, the main writer can try the configured external free provider before the 8B fallback.
-- Vision functionality already used Scout and remains available.
+- Llama 4 Scout (`@cf/meta/llama-4-scout-17b-16e-instruct`) is the primary text-chat model for `/api/nyx` and `/api/chat`, plus image understanding. Existing builder and other agent model calls were also switched to Scout in the earlier rollout.
+- Normal text-chat fallback is Cloudflare-hosted Llama 3.3 70B FP8 Fast (`@cf/meta/llama-3.3-70b-instruct-fp8-fast`), rather than a potentially **25-second** OpenRouter free-provider wait and an 8B answer fallback.
+- Expensive general-answer prompt history is bounded to the 10 most recent messages, up to 6,500 characters each, to lower latency and inference cost on long chats. This is server-side context trimming, **not** chat history deletion.
+- Small 8B Llama still supports certain inexpensive routing/classification steps; it is **not** the primary user-answer model.
+- Inference happens on Cloudflare; phones and PCs do not download model weights. Free inference is rate-limited across users.
 
-## Low-data mobile and desktop interface
+## Smoke tests successfully completed
 
-- Lightweight text-chat page: https://chatgpt-nyx-v3-test.adeniyipaul174.workers.dev/lite
-- Uses the same authenticated `/api/chat` endpoint; it does **not** download or execute Llama model weights on phones, tablets, or PCs.
-- Simple HTML/CSS/JavaScript; no large client-side ML runtime. Chat history in the Lite tab is temporary and the full app remains unchanged for full functionality.
-- Cloudflare delivers compressible text content with negotiated compression when applicable. Device RAM and network use still depend on the browser and other app features.
+1. Cloudflare accepted the staged Worker version with no compile errors, preserving all 13 existing bindings through strict inheritance (AI, browser, D1, secrets and rate limits).
+2. Cloudflare reported the correct active deployed Worker version after activation.
+3. Live homepage rendered with NyX title, settings, chat interface, mobile-responsive style rules, and sign-in elements.
+4. Live `/api/health` returned HTTP 200 and reported the configured Llama 4 Scout ID.
+5. Live `/api/nyx/capabilities` returned HTTP 200.
+6. Without a signed-in account, `/api/chat`, `/api/nyx`, `/api/vision`, `/api/image`, `/api/search`, `/api/browser`, `/api/nyx/account-history`, and `/api/nyx/agent-team/status` returned HTTP 401 as expected.
+7. Live `/lite` correctly returned HTTP 404.
+8. Cloudflare Workers AI directly returned successful Scout text responses for arithmetic, multi-turn context, and code; Scout vision described a tiny white PNG correctly.
+9. The existing Cloudflare FLUX image-generation model returned image bytes.
+10. In isolated direct-inference tests, Scout responses completed in approximately 0.36–2.54 seconds, dependent on tokens and prompt. This is **not** a measurement of full authenticated app latency.
 
-## What was verified
+## Not yet verified
 
-1. Cloudflare Workers AI REST inference completed successfully using the Scout model.
-2. The new Worker version passed Cloudflare compile validation.
-3. All 13 existing Worker bindings were preserved through strict binding inheritance, including the D1 database, OAuth secrets, AI, browser tools, and rate limits.
-4. The deployment was confirmed as active through the Cloudflare API.
-5. Cloudflare Browser Rendering successfully opened the live `/lite` page and found the expected Scout UI and chat form.
+**Full authenticated workflows are not proven:** authenticated user chat, user account save/load, multi-step website builder, connected browsing, image editing, all agent modes, and browser automations. These require an authenticated test session and dedicated regression tests. A successful static route check or direct model call is not sufficient to claim full app functionality.
 
-End-to-end authenticated chat, account history, and all builder functionality were not exhaustively regression-tested in this change.
+The previous GitHub candidate tests also do not validate the current live Worker source. This documented limitation must be resolved before claiming all features work.
 
-## Free-tier expectations
+## Safety for future deploys
 
-Cloudflare Workers AI grants a shared free daily Neuron allocation, not unlimited free inference. Higher usage may require a paid plan. Smaller devices benefit because model inference remains remote; local model compression is unnecessary.
-
-## Future source-of-truth maintenance
-
-Before the next functional deployment, export and review the **full current live Worker** into a private/staged source workflow, reconcile that snapshot with GitHub, run the test suite and authenticated smoke checks, and preserve all platform bindings. The older Gemini candidate in `src/index.js` must not be deployed over this live version.
+Preserve the live source and existing secrets, database and authentication logic. Export a full live-source snapshot to an isolated private branch or staging Worker, use an isolated D1 database for destructive tests, run a complete test suite including signed-in browser tests, and only then consider further changes to the production UI/agent runtime. Never deploy the stale root project over production.
