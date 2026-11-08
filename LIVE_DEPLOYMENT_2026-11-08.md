@@ -6,9 +6,10 @@
 
 - Worker: `chatgpt-nyx-v3-test`
 - Live site: https://chatgpt-nyx-v3-test.adeniyipaul174.workers.dev/
-- Active Worker version: `a8756b15-ad7b-4bcf-a970-88f9987a4f85`
-- Current deployment: `08dc3d65-7db7-40e3-97d3-588d1a0dc2ab`
-- Previous stable version (rollback target): `0874dff6-c3a8-4a45-8e98-e8f9dc66a7aa` (working Chat/Work app before premium Work composer redesign).
+- Active Worker version: `d9c66347-e46d-4134-af59-db65983c772c`
+- Current deployment: `c431be3b-3ed2-407e-b8da-51c1465b76be`
+- Previous stable version (rollback target): `a8756b15-ad7b-4bcf-a970-88f9987a4f85` (premium Work composer before unified Work history and semantic titles).
+- Earlier Work composer version: `0874dff6-c3a8-4a45-8e98-e8f9dc66a7aa`.
 - Earlier stable version: `ebffa61f-9bf3-4623-a0be-dfbe07329a60`.
 - First working Chat/Work version: `1b9bbf58-f3bc-444b-a3e9-5f93a4845129`.
 - Earlier full NyX version before Chat/Work: `23ba4d44-34e9-490f-a8c3-1ff0db741132`.
@@ -23,6 +24,17 @@
 - Earlier version: `90b5188f-19ad-4ca4-957c-1e529f465f8e` (included an **unrequested** Lite page; **do not redeploy as the normal rollback**).
 - Earlier original version: `686530f3-a15c-49fc-88a2-599869197fc2` (older model selection, no Scout-as-default).
 - The Lite route and its HTML were fully **removed**. `/lite` returns **404**. The existing full NyX interface remains the only homepage.
+
+## Unified Work history and semantic chat titles (2026-11-08)
+
+- **Issue:** NyX Work kept separate messages only in `sessionStorage` under `nyx_work_chat_v1_...`; its conversations never joined the normal sidebar/history array or existing account sync. Normal Chat named a conversation by simply copying its first message (e.g., `Hi`).
+- **Live fix:** Work now saves user and assistant messages into the **same existing `chats[]` data model**, calls the original `persist()` account-sync wrapper, and creates `work-...` chat IDs. Work chats appear alongside Chat in Recent/Archived/Search. Selecting a Work item automatically switches to Work and restores messages. Switching between Work and Chat keeps their separate current conversations. New chat does not delete prior Work history. Existing D1 history API stays unchanged.
+- **Smart names:** An initial greeting is titled **New conversation** (or **New Work conversation**) instead of `Hi`. A later substantive prompt generates an immediate human-readable fallback title and may be refined asynchronously through authenticated `/api/nyx/chat-title`, using the existing low-cost Cloudflare Llama 3.1 8B model. The title endpoint limits requests to 20 per account/day via a small D1 usage counter. Manual renames are preserved and no unrelated chats are merged.
+- **Legacy Work migration:** A previous session-only Work transcript is imported into the shared history when still present in the same signed-in browser session and no prior synced Work chat exists. Work transcripts that have already been erased from expired sessions cannot be recovered by this patch.
+- **Files:** `addons/work-mode/unified-history-title.js` and `addons/work-mode/semantic-title-api.js` document this update. The GitHub root is still a stale prototype, **not** the production Worker.
+- **Tested:** Four direct real Workers AI title-inference samples returned topic summaries. Unit tests confirmed greeting naming, renaming when a substantive topic arrives, Work transcript persistence, Work restoration and manual-rename protection. Cloudflare accepted the live Worker with all **13 bindings**. A live **390px mobile browser simulation** demonstrated: greeting `Hi` → `New conversation`; subsequent website request → semantic title; Work team research task → sidebar item and localStorage persistence; Work selection restores the proper Work tab and messages; Normal Chat selection restores the original Chat conversation; New Chat preserves the older Work transcript; no horizontal overflow. The test mocked AI reply/title network responses.
+- **Limits:** Cross-device account synchronization and the live title route were not end-to-end tested using a signed-in user's session. The backend is connected to the existing authenticated D1 sync service, but that does not by itself prove successful sync across devices. The new title feature is best-effort and reverts to a local descriptive fallback if the model or quota is unavailable.
+- **Active version:** `d9c66347-e46d-4134-af59-db65983c772c`, deployment `c431be3b-3ed2-407e-b8da-51c1465b76be`. **Rollback:** `a8756b15-ad7b-4bcf-a970-88f9987a4f85`.
 
 ## Premium Work composer redesign (2026-11-08)
 
