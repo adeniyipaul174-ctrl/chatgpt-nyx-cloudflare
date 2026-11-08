@@ -6,11 +6,25 @@
 
 - Worker: `chatgpt-nyx-v3-test`
 - Live site: https://chatgpt-nyx-v3-test.adeniyipaul174.workers.dev/
-- Active Worker version: `eaf319f9-4427-4805-824f-faa0ef2480f7`
-- Current deployment: `a6781812-0d8f-42ea-b975-ab251116c558`
-- Previous version: `90b5188f-19ad-4ca4-957c-1e529f465f8e` (included an **unrequested** Lite page; **do not redeploy as the normal rollback**).
+- Active Worker version: `5cf7f592-b861-4989-828e-3fbdf85b6c69`
+- Current deployment: `f79a21b8-bb56-414d-82d8-07cc99ad674c`
+- Previous stable version (rollback target): `eaf319f9-4427-4805-824f-faa0ef2480f7`.
+- Earlier version: `90b5188f-19ad-4ca4-957c-1e529f465f8e` (included an **unrequested** Lite page; **do not redeploy as the normal rollback**).
 - Earlier original version: `686530f3-a15c-49fc-88a2-599869197fc2` (older model selection, no Scout-as-default).
 - The Lite route and its HTML were fully **removed**. `/lite` returns **404**. The existing full NyX interface remains the only homepage.
+
+## Follow-up: capacity and quota repair (2026-11-08)
+
+- Normal text chat now attempts Cloudflare Llama 4 Scout first and never waits for an external provider if Scout succeeds.
+- Cloudflare Llama 3.3 70B remains the transient-capacity backup. When Cloudflare's free neuron allocation is exhausted, NyX skips a redundant Cloudflare 70B attempt and tries the already-configured OpenRouter `openrouter/free` text provider, if available, with a 5.5-second timeout. This does not guarantee extra capacity or equivalent quality. External fallback sends the user's text prompt and relevant recent history to that provider, subject to its privacy practices; the request specifies `data_collection: deny`.
+- Repeated OpenRouter timeouts/unavailability temporarily pause its use for 60 seconds within the Worker isolate.
+- Removed duplicate website-builder debit: the central authenticated `/api/nyx` POST gate already charges one daily chat request. D1 data and prior usage totals were not changed.
+- Existing search already races Bing and DuckDuckGo with multiple other fallback sources. Existing D1 quotas are atomic; additional KV counters or paid search/queue products were unnecessary.
+- UI, authentication, AI image and editing, search, browser, agents and account history code remained in place. All 13 Cloudflare bindings were inherited unchanged.
+
+**Validated:** Six simulated routing cases passed: Scout success, 70B rescue, exhausted-allowance external rescue, missing external key, nonretryable input error, and total provider failure. Cloudflare compiled the new version successfully. Live homepage rendered at mobile width without horizontal overflow; health and capabilities returned HTTP 200; protected chat, image, vision, search, browser, account history and usage endpoints returned HTTP 401 without authentication. Lite stays HTTP 404. Live Cloudflare source confirmed.
+
+**Not yet verified:** A staged version-specific URL returned HTTP 404, so preview-browser testing was unavailable. Authenticated chat, the actual saved OpenRouter key, website builder output, real image editing, search-answer quality, agents and account persistence require authenticated regression testing. These changes are not a promise of unlimited free usage or universally faster replies.
 
 ## Primary model and speed changes
 
