@@ -1,9 +1,9 @@
 LIVE DEPLOYMENT UPDATE (2026-11-08)
 ==================================
-NyX keeps Llama 4 Scout as its main chat model and the same existing full interface. The latest release improves public web search reliability: the existing GitHub public API is now used early for libraries/SDKs/technical searches, Wikipedia earlier for suitable evergreen topics, and vague follow-ups like 'Search it then' can recover their topic from the current conversation. Existing Bing and DuckDuckGo retrieval is preserved; results still require a relevance match.
-The prior image follow-up, false-image-claim, fast image backup, same-chat memory, activity statuses, Normal chat default and tap-outside sidebar fixes remain. Account login, browsing, images, website builder, agents and user history remain. All 13 bindings unchanged; no new services or menus added.
-See LIVE_DEPLOYMENT_2026-11-08.md for precise deployed version, public tests, testing limits, and rollback.
-CRITICAL: This GitHub root is an old, undeployed candidate; NEVER deploy it over the live NyX Cloudflare Worker.
+NyX now includes an opt-in Free AI Browser at /ai-browser, linked in the ACTIVE chat sidebar and accessible from explicit Normal Chat commands such as 'use AI browser to ...'. It uses the existing Cloudflare Browser Run binding for browser-agent steps, live viewing, manual pause/takeover and resume. No paid Browser Use API call is used.
+CRITICAL LIMIT: this is NOT an unlimited hosted browser. Cloudflare Workers Free offers 10 browser-minutes/day shared by the account; NyX deliberately limits this experimental agent to one 2-minute launch per user/day and 12 AI actions. Starting it requires user confirmation. A local browser agent can avoid a hosted provider quota if run on your OWN computer; see addons/free-browser-agent/README.md. The local helper is NOT automatically paired with NyX hosted chat.
+All earlier NyX chat, images, search, memory, agents, account data and Normal Chat default remain; 13 original Cloudflare bindings retained. A separate empty D1 table is used for agent-session control.
+See LIVE_DEPLOYMENT_2026-11-08.md for live version, tests and limitations. DO NOT deploy the stale GitHub root project over live NyX.
 
 CRITICAL CURRENT DEPLOYMENT SAFETY NOTICE (2026-10-19)
 ================================================
