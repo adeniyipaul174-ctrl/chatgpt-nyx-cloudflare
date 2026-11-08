@@ -1,0 +1,59 @@
+
+/* NyX Chat + Work: a true alternate workspace, not a Settings menu. */
+.nx-chatwork-switch{display:flex;align-items:center;gap:3px;padding:4px;background:#303037;border-radius:25px;flex:0 0 auto;box-shadow:inset 0 1px 3px #0005}
+.top .nx-chatwork-switch .nx-cw-tab{display:inline-flex!important;align-items:center;justify-content:center;min-width:74px;padding:9px 17px!important;font:750 14px/1.2 system-ui;border:0!important;border-radius:21px!important;color:#ddd;background:transparent!important;box-shadow:none;cursor:pointer}
+.top .nx-chatwork-switch .nx-cw-tab.active{color:#fff;background:#18181b!important;box-shadow:0 2px 8px #0006}
+.top .nx-chatwork-switch .nx-cw-tab:focus-visible{outline:2px solid #f68fbb;outline-offset:1px}
+.top #nxModePicker{display:none}
+#nxWorkPane[hidden],#nxWorkBrowser[hidden],#nxWorkScreenshot[hidden],#nxWorkLiveLink[hidden]{display:none!important}
+.nx-work-pane{display:flex;flex-direction:column;flex:1;min-height:0;overflow:hidden;background:#08080a}
+body[data-nx-stage="work"] #home,body[data-nx-stage="work"] #messages,body[data-nx-stage="work"] #form,body[data-nx-stage="work"] .main>.notice{display:none!important}
+.nx-work-scroll{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;padding:18px 18px 12px;display:flex;flex-direction:column;gap:14px}
+.nx-work-welcome{margin:auto;max-width:650px;text-align:center;padding:16px}
+.nx-work-eyebrow{color:#d8d3dc;letter-spacing:.09em;font-size:12px;font-weight:800;margin-bottom:12px}
+.nx-work-eyebrow span{color:#ee70ae}
+.nx-work-welcome h1{margin:0 0 12px;font-weight:760;font-size:clamp(27px,5vw,40px);letter-spacing:-.05em;line-height:1.17;color:#f6f5f7}
+.nx-work-welcome p{font-size:14px;color:#a7a4af;line-height:1.7;margin:0 auto;max-width:530px}
+.nx-work-starters{display:flex;justify-content:center;flex-wrap:wrap;gap:9px;margin-top:22px}
+.nx-work-starters button{background:#222128;border:1px solid #3e3d46;border-radius:14px;color:#e3e1e7;padding:11px 13px;font:600 12px system-ui}
+.nx-work-starters button:hover{background:#34313a}
+.nx-work-feed{max-width:760px;width:100%;margin:0 auto;display:grid;align-content:start;gap:11px}
+.nx-wmessage{max-width:100%;border-radius:17px;padding:13px 15px;background:#18171c;border:1px solid #302f38;color:#e9e8ec;line-height:1.65;white-space:pre-wrap;overflow-wrap:anywhere}
+.nx-wmessage.user{justify-self:end;background:#2b2a31;border-color:#41414c;max-width:88%}
+.nx-wmessage.status{color:#b8b4be;border-style:dashed}
+.nx-wmessage.error{color:#ffbccf;border-color:#915167}
+.nx-wmessage img{width:min(100%,600px);border-radius:12px;display:block}
+.nx-wmessage a{color:#f5a4cb;display:block;margin:5px 0;text-decoration:underline}
+.nx-work-browser{max-width:840px;width:100%;margin:2px auto 15px;border:1px solid #41404a;border-radius:17px;background:#17171d;padding:13px;display:flex;flex-direction:column;gap:12px}
+.nx-wb-head{display:flex;align-items:center;justify-content:space-between;gap:7px}
+.nx-wb-head>div{display:flex;flex-direction:column;gap:4px}
+.nx-wb-head strong{font-size:15px}
+.nx-wb-head small{font-size:12px;color:#bdb8c4;max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nx-wb-head a{color:#fff;background:#34303a;border:1px solid #695166;padding:9px 12px;border-radius:11px;white-space:nowrap;font-size:12px;font-weight:700}
+.nx-wb-preview{min-height:155px;display:flex;align-items:center;justify-content:center;background:#0e0e11;border:1px solid #31303b;border-radius:12px;overflow:hidden}
+.nx-wb-preview p{color:#9895a2;font-size:12px;text-align:center;padding:12px}
+.nx-wb-preview img{display:block;width:100%;height:auto;max-width:100%;cursor:crosshair;object-fit:contain}
+.nx-wb-controls{display:flex;flex-wrap:wrap;gap:7px}
+.nx-wb-controls button{background:#28272f;color:#e7e2e9;border:1px solid #484651;border-radius:10px;padding:9px 11px;font:650 12px system-ui;flex:1 1 110px}
+.nx-wb-controls button:disabled{opacity:.4;cursor:not-allowed}
+.nx-wb-go{display:flex;flex-direction:column;gap:5px}
+.nx-wb-go label{font-size:11px;color:#b7b2bd;font-weight:700}
+.nx-wb-go>div{display:flex;gap:7px}
+.nx-wb-go input{flex:1;min-width:0;background:#101014;border:1px solid #41414a;color:#fff;border-radius:9px;padding:9px 11px;font:13px system-ui}
+.nx-wb-go button{background:#32313a;color:#fff;border:1px solid #57515e;padding:8px 13px;border-radius:9px}
+.nx-wb-hint{font-size:11px;color:#a8a2ae;line-height:1.6;margin:1px}
+.nx-work-form{width:min(calc(100% - 28px),820px);margin:3px auto 0;background:#222126;border:1px solid #45434a;border-radius:22px;box-shadow:0 8px 30px #0006;padding:12px 14px}
+.nx-work-form:focus-within{border-color:#a76085}
+.nx-work-form textarea{width:100%;min-height:43px;max-height:155px;border:0;outline:0;background:transparent;color:#fff;font:15px/1.5 system-ui;resize:vertical;padding:7px 3px}
+.nx-work-compose-bottom{display:flex;align-items:center;justify-content:space-between;gap:9px}
+.nx-work-agent{display:flex;align-items:center;gap:9px;min-width:0}
+.nx-work-agent>span{font:700 12px system-ui;color:#bdb8c4}
+.nx-work-agent #nxModePicker{display:block!important}
+.nx-work-agent .nx-mode-picker .nx-mode-trigger{min-width:125px;height:39px;font-size:12px}
+.nx-work-agent .nx-mode-mark{width:26px;height:26px}
+.nx-work-agent .nx-mode-menu{bottom:calc(100% + 12px);top:auto;left:0;right:auto;max-height:min(420px,55vh)}
+#nxWorkSend{width:42px;height:42px;background:#ef63a3;border:0;border-radius:50%;color:white;font-size:24px;flex:0 0 auto}
+#nxWorkSend:disabled{opacity:.5}
+.nx-work-disclaimer{font-size:11px;text-align:center;color:#87848f;margin:7px 14px 12px;line-height:1.45}
+@media(max-width:700px){.top #settingsTop{display:none!important}.top{gap:5px!important}.top .nx-chatwork-switch .nx-cw-tab{min-width:61px;padding:9px 12px!important;font-size:13px}.nx-work-scroll{padding:12px 10px}.nx-work-form{width:calc(100% - 20px);padding:11px 13px}.nx-work-welcome{padding:15px 4px}.nx-work-starters{gap:6px}.nx-work-starters button{font-size:11px;padding:9px 10px}.nx-work-browser{padding:9px}.nx-work-disclaimer{font-size:10px}.nx-work-agent>span{font-size:11px}}
+@media(max-width:365px){.top>div:first-child>strong,.top>div:first-child>small{display:none!important}.top .nx-chatwork-switch .nx-cw-tab{min-width:65px}}
