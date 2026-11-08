@@ -43,14 +43,14 @@ function titleEligible(chat){
  const title=String(chat?.title||"").trim();
  return !title||title===first.slice(0,45)||title===first.slice(0,55)||title===first.slice(0,60)
   ||/^(?:New conversation|New Work conversation|Untitled chat)$/i.test(title)
-  ||(chat.nxAutoTitle===true&&chat.nxTitleFinal!==true);
+  ||(chat.nxAutoTitle===true&&chat.nxTitleFinal!==true&&chat.title===chat.nxLastAutoTitle);
 }
 function updateTitles(){
  for(const c of chats){
   if(!c||typeof c.id!=="string"||!Array.isArray(c.messages)||!titleEligible(c))continue;
   const subject=meaningfulTopic(c);
   const preferred=subject?draftTitle(subject,isWorkId(c.id)):baseTitle(c.id);
-  if(c.title!==preferred){c.title=preferred;c.nxAutoTitle=true;}
+  if(c.title!==preferred){c.title=preferred;c.nxAutoTitle=true;c.nxLastAutoTitle=preferred;}
   if(subject&&!finishedTitles.has(c.id)&&!pendingTitles.has(c.id)&&!titleTimers.has(c.id))scheduleTitle(c.id);
  }
 }
@@ -74,7 +74,7 @@ function scheduleTitle(id){
    if(!currentChat||currentChat.title!==expectedTitle||!titleEligible(currentChat))return;
    const final=String(data.title||"").replace(/[\r\n]/g," ").trim();
    if(!final||final.length>85)return;
-   currentChat.title=final;
+   currentChat.title=final;currentChat.nxLastAutoTitle=final;
    currentChat.nxTitleFinal=true;currentChat.nxAutoTitle=true;finishedTitles.add(id);
    renaming=true;try{persist()}finally{renaming=false}render();
   }catch{}finally{pendingTitles.delete(id)}
