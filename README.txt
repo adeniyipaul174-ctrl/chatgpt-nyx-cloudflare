@@ -1,7 +1,9 @@
 LIVE DEPLOYMENT UPDATE (2026-11-08)
 ==================================
-NyX's existing full interface runs on Cloudflare with Llama 4 Scout as its main text model. The unrequested /lite page has been removed. The normal-chat fallback now uses Cloudflare Llama 3.3 70B Fast, avoiding a 25-second external-provider wait. See LIVE_DEPLOYMENT_2026-11-08.md for active version, tests, rollback history, and limitations.
-Do NOT deploy this older GitHub candidate over the live Worker; its source is not the current production snapshot.
+Production NyX keeps its original interface: Llama 4 Scout primary; Llama 3.3 70B Cloudflare text backup; preconfigured OpenRouter free text overflow ONLY on failure, capped at 5.5 seconds.
+Website-building requests no longer deduct the same chat allowance twice. All 13 existing Cloudflare bindings were preserved. The unrequested /lite page remains removed.
+See LIVE_DEPLOYMENT_2026-11-08.md for live version, checks, limitation and rollback reference.
+DO NOT deploy this OLD GitHub candidate over the live Worker.
 
 CRITICAL CURRENT DEPLOYMENT SAFETY NOTICE (2026-10-19)
 ================================================
