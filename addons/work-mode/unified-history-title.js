@@ -29,8 +29,9 @@ function draftTitle(text,isWork){
  s=s.replace(/^(?:please\s+|i(?:'d| would)?\s+(?:like|want|need)\s+(?:you\s+)?to\s+|help\s+me\s+(?:to\s+)?)/i,"");
  const what=s.match(/^(?:what(?:'s| is| are| was)|who(?:'s| is| are)|explain|tell me about)\s+(?:a|an|the)?\s*(.{3,100})/i);
  const how=s.match(/^how\s+(?:can|do|would|should)\s+(?:i|we|you)\s+(.{4,100})/i);
- let result=what?"Understanding "+what[1]:how?"How to "+how[1]:s;
- result=result.replace(/^(?:make|create|build|design|write|generate|draft|search|find|research|compare|plan|prepare|fix|review|list|open)\s+(?:me\s+)?(?:a\s+|an\s+|the\s+)?/i,(m)=>m.trim().split(/\s+/)[0]+" ");
+ const action=s.match(/^(make|create|build|design|write|generate|draft|search|find|research|compare|plan|prepare|fix|review|list|open)\s+(.+)/i);
+ const actions={make:"Making",create:"Creating",build:"Building",design:"Designing",write:"Writing",generate:"Generating",draft:"Drafting",search:"Searching",find:"Finding",research:"Researching",compare:"Comparing",plan:"Planning",prepare:"Preparing",fix:"Fixing",review:"Reviewing",list:"Listing",open:"Opening"};
+ let result=what?"Understanding "+what[1]:how?"How to "+how[1]:action?(actions[action[1].toLowerCase()]||"Working on")+" "+action[2].replace(/^(?:me\s+)?(?:a\s+|an\s+|the\s+)/i,""):s;
  result=result.replace(/\s+(?:for me|please|right now|here|with nyx|with your agents)\s*$/i,"").replace(/[?!,.:\s]+$/,"").trim();
  const words=result.split(/\s+/).filter(Boolean).slice(0,7);
  result=capitalize(words.join(" "));
