@@ -145,5 +145,5 @@ document.querySelectorAll("[data-nx-work]").forEach(button=>button.addEventListe
  else if(role==="agents"){chatAgent("team");input.value="Use your agent team to plan and complete this task: ";input.focus()}
  else{chatAgent("coder");input.value="Use the coding agent to ";input.focus()}
 }));
-const params=new URLSearchParams(location.search);if(params.get("work")==="1")setStage("work");
+const params=new URLSearchParams(location.search);setStage(params.get("work")==="1"?"work":"chat");
 })();
