@@ -6,9 +6,10 @@
 
 - Worker: `chatgpt-nyx-v3-test`
 - Live site: https://chatgpt-nyx-v3-test.adeniyipaul174.workers.dev/
-- Active Worker version: `1b9bbf58-f3bc-444b-a3e9-5f93a4845129`
-- Current deployment: `9e3ae8a8-b6c0-4c05-aec6-3bde448f9e1f`
-- Previous stable version (rollback target): `23ba4d44-34e9-490f-a8c3-1ff0db741132` (original full NyX before Chat/Work switch).
+- Active Worker version: `ebffa61f-9bf3-4623-a0be-dfbe07329a60`
+- Current deployment: `02bf7d3d-5a60-4e94-8cbb-831eb397d1c3`
+- Previous stable version (rollback target): `1b9bbf58-f3bc-444b-a3e9-5f93a4845129` (first working Chat/Work release).
+- Earlier full NyX version before Chat/Work: `23ba4d44-34e9-490f-a8c3-1ff0db741132`.
 - Intermediate compiled version: `a7e127fd-dc3f-470a-950c-adac111d669e` (Chat/Work UI was present but Work controller failed at runtime due HTML-template escaping; DO NOT use as rollback).
 - Original Free Browser release: `642eb284-10c5-48c1-8293-8f3206878257`.
 - Intermediate version: `d7904ff0-56ab-4dc8-a7ce-8a44df8efd35` (free browser feature before strict JSON action-prompt adjustment).
@@ -37,6 +38,7 @@
 - Cloudflare compiled the deployed Worker successfully, with deployment `9e3ae8a8-b6c0-4c05-aec6-3bde448f9e1f` and active version `1b9bbf58-f3bc-444b-a3e9-5f93a4845129` at 100%. All 13 original bindings preserved.
 - Direct real Workers AI test: the actual Llama 4 Scout model produced a **structured** `navigate` action for the Goodreads user task. Unit parser tests passed native action objects, plain JSON, fenced JSON, finish and handoff.
 - Live 360px Cloudflare browser-rendering test: no horizontal overflow, Chat selected by default, Work tab switches correctly, old agent selector moves into Work, Team is selected there, switching back restores Normal Chat, and an agent Work task reaches the existing `/api/nyx` backend and displays its simulated response.
+- Final polish in `ebffa61f-9bf3-4623-a0be-dfbe07329a60`: selecting Work no longer opens the phone's keyboard automatically. Completed Work image/source tasks clear the pending activity bubble. A second 360px mobile smoke test passed Chat default, Work switching, Team agent placement, Chat restoration, simulated agent responses and removal of stale progress text; no horizontal overflow.
 - Simulated browser-session test: 'open your browser for me to control here' submitted in Chat switched into Work, initiated browser status/start, paused for manual control and rendered a screenshot and full Live View link. No real paid browser was started in these tests.
 - Protected endpoints still require authentication (HTTP 401 for screenshot and protected image/search when anonymous); health/capabilities returned HTTP 200. Full real signed-in browsing, screenshot clicking, agentic Goodreads research and file/email integrations **have not been tested end-to-end** and must not be claimed completed.
 - The first new Chat/Work version had malformed embedded script escaping, detected by the immediate live mobile test. It was superseded by a properly escaped controller. Avoid rolling back to the broken intermediate version.
