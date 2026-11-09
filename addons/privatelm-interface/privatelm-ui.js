@@ -13,6 +13,16 @@ const shapes={
  cloud:svg('<path d="M7 18a5 5 0 0 1-.5-10 6.2 6.2 0 0 1 11.8 2A4 4 0 0 1 18 18H7Z"/>')
 };
 app.classList.add("pl-ui");
+/* The earlier NyX PrivateLM-style shell also creates a second tab bar and
+   model card. Remove those display-only duplicates, keep actual app controls. */
+for(const selector of ["#nxpl-bottomnav",".nxpl-model-card",".nx-home-note"]){
+  for(const element of app.querySelectorAll(selector))element.remove();
+}
+const oldGreetingMark=home.querySelector(".nxpl-greeting-mark");
+if(oldGreetingMark){
+  oldGreetingMark.innerHTML=svg('<path d="m12 2 1.9 7.1L21 11l-7.1 1.9L12 20l-1.9-7.1L3 11l7.1-1.9L12 2Z"/><path d="m19 17 .6 2.4L22 20l-2.4.6L19 23l-.6-2.4L16 20l2.4-.6L19 17Z"/>');
+}
+
 const menu=document.getElementById("menu"),newTop=document.getElementById("newTop"),newSide=document.getElementById("newSide"),sidebar=document.getElementById("sidebar");
 if(menu){menu.innerHTML=shapes.menu;menu.setAttribute("aria-label","Chats");}
 if(newTop){newTop.innerHTML=shapes.edit;newTop.setAttribute("aria-label","New chat");}
@@ -35,7 +45,7 @@ sidebar?.addEventListener("click",event=>{if(event.target?.closest?.("#newSide,.
 document.addEventListener("keydown",event=>{if(event.key==="Escape")closeSidebar()});
 function stage(){return document.body.dataset.nxStage==="work"?"work":"chat"}
 function active(key){for(const btn of nav.querySelectorAll("button")){const sel=btn.dataset.plPage===key;btn.classList.toggle("active",sel);btn.setAttribute("aria-current",sel?"page":"false")}const title=document.getElementById("plTitleMain"),sub=document.getElementById("plTitleSub");if(title)title.textContent=key==="chat"?"NyX":key==="work"||key==="browser"?"NyX Work":"NyX";if(sub)sub.innerHTML=key==="chat"?'<span class="pl-status-dot"></span>Cloud · Llama 4 Scout':key==="work"||key==="browser"?'<span class="pl-status-dot"></span>Agents · Browser · Code':'<span class="pl-status-dot"></span>Preferences';}
-nav.addEventListener("click",event=>{const b=event.target?.closest?.("[data-pl-page]");if(!b)return;const k=b.dataset.plPage;closeSidebar();if(k==="chat"){document.getElementById("nxTabChat")?.click();active("chat");}else if(k==="work"){document.getElementById("nxTabWork")?.click();active("work");}else if(k==="browser"){document.getElementById("nxTabWork")?.click();const field=document.getElementById("nxWorkPrompt");if(field){field.value="Open your browser for me to control";field.dispatchEvent(new Event("input",{bubbles:true}));}active("browser");}else if(k==="settings"){document.getElementById("settingsTop")?.click();active("settings");}});
+nav.addEventListener("click",event=>{const b=event.target?.closest?.("[data-pl-page]");if(!b)return;const k=b.dataset.plPage;closeSidebar();if(k==="chat"){document.getElementById("nxTabChat")?.click();active("chat");}else if(k==="work"){document.getElementById("nxTabWork")?.click();active("work");}else if(k==="browser"){document.getElementById("nxTabWork")?.click();if(typeof window.nxEnterWork==="function")window.nxEnterWork("Open your browser for me to control",true);else{const field=document.getElementById("nxWorkPrompt");if(field){field.value="Open your browser for me to control";field.dispatchEvent(new Event("input",{bubbles:true}));}}active("browser");}else if(k==="settings"){document.getElementById("settingsTop")?.click();active("settings");}});
 new MutationObserver(()=>{const current=stage();const selected=nav.querySelector(".pl-nav-item.active")?.dataset.plPage;if(selected!==current&&selected!=="browser")active(current);if(selected==="browser"&&current!=="work")active(current)}).observe(document.body,{attributes:true,attributeFilter:["data-nx-stage"]});
 active(stage());
 const settingsModal=document.getElementById("nxSettings");settingsModal?.addEventListener("close",()=>active(stage()));
