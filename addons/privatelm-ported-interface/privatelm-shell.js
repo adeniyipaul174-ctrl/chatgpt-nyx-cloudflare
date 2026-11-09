@@ -20,6 +20,14 @@
  sidehead.querySelector("strong").textContent="Chats";
  sidehead.appendChild(newSide);
  newSide.innerHTML=pencil;newSide.setAttribute("aria-label","New chat");
+ const about=byId("about");
+ if(about&&!about.querySelector("#nxpl-source-credit")){
+  const credit=document.createElement("p");credit.id="nxpl-source-credit";
+  credit.appendChild(document.createTextNode("Interface adapted from PrivateLM (MIT) · "));
+  const a=document.createElement("a");a.href="https://github.com/orailnoor/cross-platform-llm-client";
+  a.textContent="Source and license";a.target="_blank";a.rel="noopener noreferrer";
+  credit.appendChild(a);about.appendChild(credit);
+ }
  const icon={
    chat:'<path d="M21 11.4a8.8 8.8 0 0 1-9.3 8.5 9.8 9.8 0 0 1-3.5-.8L3 21l1.9-5a8.5 8.5 0 1 1 16.1-4.6Z"/>',
    work:'<rect x="3" y="6" width="18" height="15" rx="2"/><path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 11h18M10 11v2h4v-2"/>',
@@ -36,13 +44,13 @@
    button.setAttribute("aria-label",label);
    button.setAttribute("aria-selected",key==="chat"?"true":"false");
    button.addEventListener("click",()=>{
-     if(key==="chat")byId("nxTabChat")?.click();
-     if(key==="work")byId("nxTabWork")?.click();
+     if(key==="chat"){activeWorkSection="work";byId("nxTabChat")?.click();}
+     if(key==="work"){activeWorkSection="work";byId("nxTabWork")?.click();}
      if(key==="browser"){
-       byId("nxTabWork")?.click();
+       byId("nxTabWork")?.click();activeWorkSection="browser";
        if(typeof window.nxEnterWork==="function")window.nxEnterWork("Open your browser for me to control",true);
      }
-     if(key==="settings")byId("settingsTop")?.click();
+     if(key==="settings"){settingsOpen=true;byId("settingsTop")?.click();}
      refresh();
    });
    nav.appendChild(button);
@@ -62,8 +70,9 @@
  h.textContent=time+"\nwhat's on your mind?";
  const prompt=byId("prompt");if(prompt)prompt.placeholder="Ask anything";
  const workPrompt=byId("nxWorkPrompt");if(workPrompt)workPrompt.placeholder="Ask anything";
+ let activeWorkSection="work";let settingsOpen=false;
  const refresh=()=>{
-   const stage=document.body.dataset.nxStage==="work"?"work":"chat";
+   const stage=settingsOpen?"settings":document.body.dataset.nxStage==="work"?activeWorkSection:"chat";
    for(const button of nav.querySelectorAll("button")){
      const selected=button.dataset.section===stage;
      button.setAttribute("aria-selected",selected?"true":"false");
@@ -71,6 +80,7 @@
  };
  const observer=new MutationObserver(refresh);observer.observe(document.body,{attributes:true,attributeFilter:["data-nx-stage"]});
  byId("nxTabChat")?.addEventListener("click",refresh);
+ byId("settings")?.addEventListener("close",()=>{settingsOpen=false;refresh()});
  byId("nxTabWork")?.addEventListener("click",refresh);
  refresh();
 })();
