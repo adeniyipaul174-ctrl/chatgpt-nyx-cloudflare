@@ -1,0 +1,511 @@
+/*
+ NyX PrivateLM interface port — source reference:
+ https://github.com/orailnoor/cross-platform-llm-client
+ MIT copyright (c) 2026 cross-platform-llm-client contributors.
+ Original MIT license text is preserved in the NyX UI attribution file.
+ Recreates the PrivateLM ChatView / ChatDrawer / HomeView / ChatBubble
+ visual structure in the existing NyX web interface without changing
+ NyX backend, agent, browser, image, history, or account code.
+*/
+body:not(.nx-light) {
+ --nxpl-bg:#000000;
+ --nxpl-card:#1c1c1e;
+ --nxpl-card-hi:#2c2c2e;
+ --nxpl-drawer:#0e0e10;
+ --nxpl-muted:#8e8e93;
+ --nxpl-border:#ffffff14;
+ --nxpl-blue:#0a84ff;
+ --nxpl-text:#ffffff;
+ background:var(--nxpl-bg)!important;
+ color:var(--nxpl-text)!important;
+ font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;
+ letter-spacing:-.008em!important;
+}
+body:not(.nx-light) .app,
+body:not(.nx-light) .main,
+body:not(.nx-light) #messages,
+body:not(.nx-light) .home,
+body:not(.nx-light) .nx-work-pane,
+body:not(.nx-light) .nx-work-scroll {
+ background:#000!important;
+ color:#fff!important;
+}
+.app .main {position:relative;min-height:0}
+body:not(.nx-light) .app .top {
+ height:55px!important;
+ min-height:55px!important;
+ flex:0 0 55px!important;
+ border-bottom:1px solid var(--nxpl-border)!important;
+ background:#000!important;
+ box-shadow:none!important;
+ padding:0 12px!important;
+ gap:4px!important;
+}
+.app .top>div:first-child {
+ display:flex!important;align-items:center!important;
+ flex:1 1 auto!important;min-width:0!important;gap:0!important;
+}
+.app .top strong{
+ font-family:Inter,system-ui,sans-serif!important;
+ font-size:18px!important;font-weight:700!important;
+ letter-spacing:-.5px!important;color:#fff!important;
+ margin-left:2px!important;
+}
+.app .top small{display:none!important}
+.app .top #menu{
+ width:42px!important;height:44px!important;
+ min-width:42px!important;min-height:44px!important;
+ display:grid!important;place-items:center!important;
+ border:0!important;background:transparent!important;
+ padding:0!important;margin:0 6px 0 -3px!important;
+ border-radius:10px!important;box-shadow:none!important;color:#fff!important;
+}
+.app .top #menu:hover{background:#ffffff0c!important;transform:none!important}
+.nxpl-sidebar-glyph{display:flex;flex-direction:column;justify-content:center;gap:5px;width:22px;height:22px;align-items:flex-start}
+.nxpl-sidebar-glyph>span{height:2px;background:currentColor;border-radius:2px}
+.nxpl-sidebar-glyph>span:first-child{width:18px}
+.nxpl-sidebar-glyph>span:last-child{width:11px}
+body:not(.nx-light) .app .top #nxChatWorkSwitch{
+ display:none!important;
+}
+body:not(.nx-light) .app .top>div:last-child{
+ flex:0 0 auto!important;display:flex!important;align-items:center!important;
+ gap:6px!important;
+}
+body:not(.nx-light) .app .top button:not(.nx-cw-tab){
+ border:none!important;background:transparent!important;
+ box-shadow:none!important;border-radius:10px!important;
+ width:40px!important;height:42px!important;min-height:42px!important;
+ min-width:40px!important;padding:0!important;color:#fff!important;
+ display:grid!important;place-items:center!important;transition:background .13s!important;
+}
+body:not(.nx-light) .app .top button:not(.nx-cw-tab):hover{
+ background:#ffffff0b!important;transform:none!important;
+}
+body:not(.nx-light) .app .top #settingsTop{display:none!important}
+body:not(.nx-light) .app .top #newTop svg{width:21px;height:21px}
+body:not(.nx-light) .app .top .nx-mode-picker{display:none!important}
+/* Chat Drawer — matches Flutter drawer 84% width up to 340 px. */
+body:not(.nx-light) .app .sidebar{
+ width:min(84vw,340px)!important;
+ max-width:340px!important;
+ padding:0 0 12px!important;
+ gap:0!important;
+ background:#0e0e10!important;
+ color:#fff!important;
+ border-right:1px solid #ffffff12!important;
+ box-shadow:none!important;
+}
+body:not(.nx-light) .app .sidehead{
+ min-height:75px!important;padding:16px 16px 10px 20px!important;
+ display:flex!important;align-items:center!important;justify-content:space-between!important;
+ gap:7px!important;
+}
+body:not(.nx-light) .app .sidehead strong{
+ font:700 24px/1.2 Inter,system-ui,sans-serif!important;
+ letter-spacing:-.6px!important;color:#fff!important;
+}
+body:not(.nx-light) .app #newSide{
+ flex:0 0 38px!important;display:grid!important;place-items:center!important;
+ width:38px!important;height:38px!important;min-height:38px!important;
+ padding:0!important;border:0!important;border-radius:11px!important;
+ background:transparent!important;color:#0a84ff!important;
+ box-shadow:none!important;font-size:0!important;
+}
+body:not(.nx-light) .app #newSide:hover{background:#ffffff10!important}
+body:not(.nx-light) .app #newSide svg{width:21px;height:21px}
+body:not(.nx-light) .app .nx-toolbar{
+ margin:0 16px 8px!important;
+ background:transparent!important;padding:0!important;border:0!important;
+}
+body:not(.nx-light) .app .nx-search{
+ background:#202023!important;
+ height:38px!important;min-height:38px!important;
+ border:0!important;border-radius:10px!important;
+ color:#fff!important;padding-top:8px!important;padding-bottom:8px!important;
+ font-size:15px!important;
+ box-shadow:none!important;
+}
+body:not(.nx-light) .app .nx-search::placeholder{color:#8e8e93!important}
+body:not(.nx-light) .app .nx-toolbar:before,
+body:not(.nx-light) .app .nx-toolbar:after {opacity:.8}
+body:not(.nx-light) .app .nx-filter{
+ padding:7px 9px!important;
+ border:0!important;background:transparent!important;
+ border-radius:10px!important;
+ color:#8e8e93!important;font-size:12px!important;font-weight:600!important;
+ box-shadow:none!important;
+}
+body:not(.nx-light) .app .nx-filter.active{
+ color:#0a84ff!important;background:#0a84ff17!important;
+}
+body:not(.nx-light) .app .chats{
+ flex:1;overflow:auto!important;
+ padding:4px 12px 10px!important;
+}
+body:not(.nx-light) .app .chatrow{
+ display:flex!important;align-items:center!important;
+ margin:1px 0!important;border-radius:10px!important;
+ min-height:46px!important;padding:0 2px!important;
+ background:transparent!important;
+ box-shadow:none!important;
+}
+body:not(.nx-light) .app .chatrow.active{
+ background:#ffffff14!important;
+}
+body:not(.nx-light) .app .chatrow:hover{
+ background:#ffffff10!important;
+}
+body:not(.nx-light) .app .chatrow button{
+ padding:10px 9px!important;border:0!important;
+ color:#f0f0f2!important;background:transparent!important;
+ font:500 14px/1.35 Inter,system-ui,sans-serif!important;
+ box-shadow:none!important;
+}
+body:not(.nx-light) .app .chatrow button.del{
+ color:#8e8e93!important;min-width:30px!important;flex:0 0 30px!important;
+}
+body:not(.nx-light) .app .sidebottom{
+ border-top:1px solid #ffffff14!important;
+ padding:8px 14px!important;background:#0e0e10!important;
+}
+body:not(.nx-light) .app .sidebottom .sidebtn{
+ background:transparent!important;
+ font-size:13px!important;color:#a3a3a8!important;
+ border:0!important;padding:10px!important;min-height:38px!important;
+}
+body:not(.nx-light) .app .sidebottom .sidebtn:hover{
+ background:#ffffff0a!important;
+}
+/* PrivateLM: charcoal user pill, assistant full-width reply without a bubble. */
+body:not(.nx-light) .app #messages{
+ padding:8px max(16px,calc((100% - 760px)/2)) 12px!important;
+ background:#000!important;
+ line-height:1.6!important;
+}
+body:not(.nx-light) .app #messages .bubble{
+ font:400 15.5px/1.6 Inter,system-ui,sans-serif!important;
+ letter-spacing:-.08px!important;
+ color:#fff!important;
+ box-shadow:none!important;
+ overflow-wrap:anywhere!important;
+ white-space:pre-wrap!important;
+}
+body:not(.nx-light) .app #messages .bubble.user{
+ max-width:80%!important;width:fit-content!important;
+ background:#1e1e21!important;
+ border:0!important;border-radius:20px!important;
+ padding:10px 16px!important;
+ margin:14px 0 4px auto!important;
+ color:#f9f9fa!important;
+}
+body:not(.nx-light) .app #messages .bubble.assistant{
+ max-width:100%!important;
+ background:transparent!important;border:0!important;
+ border-radius:0!important;
+ padding:10px 2px 4px!important;
+ margin:0!important;
+ color:#f9f9fa!important;
+}
+/* PrivateLM flat black composer with understated 1C1C1E field. */
+body:not(.nx-light) .app #form.composer{
+ width:min(calc(100% - 24px),790px)!important;
+ margin:6px auto 0!important;
+ padding:7px 9px!important;gap:0!important;
+ min-height:52px!important;
+ background:#1c1c1e!important;
+ border:1px solid #ffffff15!important;
+ border-radius:23px!important;
+ box-shadow:none!important;
+ transition:border-color .12s ease!important;
+}
+body:not(.nx-light) .app #form.composer:focus-within{
+ border-color:#0a84ff80!important;
+ box-shadow:none!important;
+}
+body:not(.nx-light) .app #form .nx-compose-main{
+ display:flex!important;align-items:center!important;
+ gap:5px!important;min-height:40px!important;
+}
+body:not(.nx-light) .app #form .nx-compose-main textarea{
+ min-height:40px!important;max-height:150px!important;
+ background:transparent!important;border:0!important;outline:none!important;
+ padding:8px 5px!important;
+ color:#fff!important;
+ font:400 15px/1.45 Inter,system-ui,sans-serif!important;
+ letter-spacing:0!important;
+ resize:none!important;
+}
+body:not(.nx-light) .app #form .nx-compose-main textarea::placeholder{
+ color:#8e8e93!important;
+}
+body:not(.nx-light) .app #form #nxAttach{
+ flex:0 0 36px!important;
+ min-width:36px!important;width:36px!important;height:40px!important;
+ display:grid!important;place-items:center!important;
+ background:transparent!important;border:0!important;
+ color:#bebec4!important;border-radius:9px!important;
+ box-shadow:none!important;
+}
+body:not(.nx-light) .app #form #nxAttach:hover{background:#ffffff0a!important}
+body:not(.nx-light) .app #form #nxMic{
+ flex:0 0 32px!important;
+ width:32px!important;min-width:32px!important;height:40px!important;
+ color:#c8c8cc!important;background:transparent!important;
+ border:0!important;border-radius:9px!important;box-shadow:none!important;
+}
+body:not(.nx-light) .app #form #send{
+ width:36px!important;min-width:36px!important;flex:0 0 36px!important;
+ height:36px!important;min-height:36px!important;
+ padding:0!important;margin:0!important;
+ display:grid!important;place-items:center!important;
+ color:white!important;background:#0a84ff!important;
+ border:0!important;border-radius:50%!important;
+ font-size:21px!important;box-shadow:none!important;
+ transition:opacity .12s ease!important;
+}
+body:not(.nx-light) .app #form #send:hover:not(:disabled){
+ background:#268fff!important;transform:none!important;filter:none!important;
+}
+body:not(.nx-light) .app #form #send:disabled{
+ opacity:.35!important;background:#404044!important;color:#bbb!important;
+ box-shadow:none!important;
+}
+body:not(.nx-light) .app .main>.notice{
+ font-size:11px!important;color:#636368!important;
+ padding:8px 14px 7px!important;line-height:1.4!important;
+ background:#000!important;
+}
+/* PrivateLM's home: model status on top, calm greeting, prompt starters below. */
+body:not(.nx-light) .app #home{
+ padding:8px 20px 12px!important;
+ gap:0!important;
+ justify-content:flex-start!important;
+ align-items:stretch!important;
+ text-align:center!important;
+ background:#000!important;
+ min-height:0!important;
+ overflow:auto!important;
+}
+body:not(.nx-light) .app #home .nxpl-model-card{
+ margin:0 auto!important;width:min(100%,600px)!important;
+ padding:15px 16px!important;
+ border:1px solid #ffffff22!important;
+ border-radius:16px!important;
+ background:transparent!important;
+ display:flex!important;align-items:center!important;gap:12px!important;
+ color:#f4f4f5!important;text-align:left!important;
+ flex:0 0 auto!important;
+}
+.nxpl-model-symbol{
+ flex:0 0 38px;width:38px;height:38px;
+ border-radius:12px;background:#0a84ff16;
+ display:grid;place-items:center;color:#0a84ff;
+}
+.nxpl-model-meta{display:grid;gap:3px;min-width:0;flex:1}
+.nxpl-model-meta strong{
+ font:600 14px/1.2 Inter,system-ui,sans-serif!important;
+ color:#f6f6f8!important;letter-spacing:-.15px!important;
+}
+.nxpl-model-meta span{
+ font:400 12px/1.2 Inter,system-ui,sans-serif!important;
+ color:#8e8e93!important;
+}
+.nxpl-model-status{font:600 12px system-ui!important;color:#30d158!important}
+body:not(.nx-light) .app #home .logo,
+body:not(.nx-light) .app #home h1:not(.nxpl-greeting-title){
+ display:none!important;
+}
+body:not(.nx-light) .app #home .nxpl-greeting{
+ display:grid;place-items:center;gap:18px;
+ flex:1 1 auto!important;min-height:140px!important;
+ margin:12px auto!important;
+ color:#e9e9eb!important;
+}
+.nxpl-greeting-mark{
+ width:42px;height:42px;
+ border-radius:13px;
+ background:linear-gradient(145deg,#18181a,#2c2c2e);
+ border:1px solid #ffffff16;
+ display:grid;place-items:center;color:#f9f9fa;
+ font:750 24px/1 Inter,system-ui,sans-serif;letter-spacing:-.08em;
+}
+.nxpl-greeting-title{
+ margin:0!important;white-space:pre-line!important;
+ color:#e5e5e8!important;
+ font:400 clamp(24px,6vw,28px)/1.25 Inter,system-ui,sans-serif!important;
+ letter-spacing:-.7px!important;
+}
+body:not(.nx-light) .app #home .suggest{
+ flex:0 0 auto!important;
+ width:min(100%,600px)!important;
+ margin:0 auto!important;
+ padding-bottom:6px!important;
+ display:flex!important;gap:9px!important;justify-content:center!important;
+}
+body:not(.nx-light) .app #home .suggest button{
+ color:#d6d6d9!important;
+ background:transparent!important;
+ border:1px solid #ffffff22!important;
+ border-radius:16px!important;padding:11px 14px!important;
+ box-shadow:none!important;min-height:43px!important;
+ font:500 13px/1.3 Inter,system-ui,sans-serif!important;
+}
+body:not(.nx-light) .app #home .suggest button:hover{
+ background:#1e1e21!important;border-color:#ffffff36!important;
+}
+/* Work maintains NyX's real agent controls inside the same native-looking UI. */
+body:not(.nx-light) .app .nx-work-pane,
+body:not(.nx-light) .app .nx-work-scroll{background:#000!important}
+body:not(.nx-light) .app .nx-work-welcome h1{font:600 clamp(25px,6vw,32px)/1.2 Inter,system-ui,sans-serif!important;letter-spacing:-.65px!important;color:#ececee!important}
+body:not(.nx-light) .app .nx-work-eyebrow{color:#8e8e93!important;font-size:12px!important}
+body:not(.nx-light) .app .nx-work-eyebrow span{color:#0a84ff!important}
+body:not(.nx-light) .app .nx-work-welcome p{color:#8e8e93!important}
+body:not(.nx-light) .app .nx-work-starters button{
+ color:#d2d2d7!important;background:transparent!important;
+ border:1px solid #ffffff20!important;border-radius:16px!important;
+ box-shadow:none!important;
+}
+body:not(.nx-light) .app .nx-wmessage{
+ color:#f0f0f3!important;background:transparent!important;
+ border:0!important;box-shadow:none!important;
+ font:400 15.5px/1.6 Inter,system-ui,sans-serif!important;
+ padding:10px 2px 4px!important;
+}
+body:not(.nx-light) .app .nx-wmessage.user{
+ color:#f6f6f8!important;background:#1e1e21!important;
+ border:0!important;border-radius:20px!important;
+ padding:10px 16px!important;
+ max-width:80%!important;
+}
+body:not(.nx-light) .app .nx-wmessage.status{
+ color:#8e8e93!important;background:#151517!important;
+ border-radius:12px!important;border:1px solid #ffffff14!important;
+ padding:10px 12px!important;font-size:13px!important;
+}
+body:not(.nx-light) .app .nx-wmessage.error{
+ color:#ff807a!important;background:#ff3b3012!important;
+ border:1px solid #ff3b3035!important;border-radius:12px!important;
+ padding:10px 12px!important;
+}
+body:not(.nx-light) .app #nxWorkForm.nx-work-form{
+ background:#1c1c1e!important;
+ border:1px solid #ffffff15!important;border-radius:23px!important;
+ box-shadow:none!important;
+ width:min(calc(100% - 24px),790px)!important;
+ padding:12px!important;margin:6px auto 0!important;
+}
+body:not(.nx-light) .app #nxWorkForm.nx-work-form:focus-within{
+ border-color:#0a84ff88!important;box-shadow:none!important;
+}
+body:not(.nx-light) .app #nxWorkForm .nx-wk-heading{
+ color:#8e8e93!important;letter-spacing:.06em!important;
+ margin-bottom:3px!important;
+}
+body:not(.nx-light) .app #nxWorkForm .nx-wk-heading-star{
+ color:#0a84ff!important;background:#0a84ff16!important;
+ border-color:#0a84ff24!important;
+}
+body:not(.nx-light) .app #nxWorkForm .nx-wk-heading-hint{color:#77777d!important}
+body:not(.nx-light) .app #nxWorkForm #nxWorkPrompt{
+ color:#f6f6f8!important;
+ font:400 15px/1.5 Inter,system-ui,sans-serif!important;
+ padding:6px 4px 9px!important;
+}
+body:not(.nx-light) .app #nxWorkForm #nxWorkPrompt::placeholder{color:#8e8e93!important}
+body:not(.nx-light) .app #nxWorkForm .nx-work-compose-bottom{
+ border-top:1px solid #ffffff13!important;
+}
+body:not(.nx-light) .app #nxWorkForm .nx-work-agent>span{color:#8e8e93!important}
+body:not(.nx-light) .app #nxWorkForm #nxModeTrigger{
+ background:#2c2c2e!important;border:1px solid #ffffff14!important;
+ border-radius:12px!important;color:#f6f6f8!important;
+ box-shadow:none!important;
+}
+body:not(.nx-light) .app #nxWorkForm #nxModeTrigger .nx-mode-mark{
+ background:#0a84ff22!important;border-color:#0a84ff33!important;
+ color:#0a84ff!important;box-shadow:none!important;
+}
+body:not(.nx-light) .app #nxWorkForm #nxWorkSend.nx-wk-run-button{
+ color:#fff!important;background:#0a84ff!important;
+ border:0!important;border-radius:13px!important;
+ box-shadow:none!important;filter:none!important;
+}
+body:not(.nx-light) .app #nxWorkForm .nx-wk-run-icon{
+ background:#ffffff15!important;border:0!important;
+ border-radius:9px!important;box-shadow:none!important;
+}
+body:not(.nx-light) #nxModeMenu{
+ background:#1c1c1e!important;border:1px solid #ffffff26!important;
+ border-radius:16px!important;box-shadow:0 16px 40px #0009!important;
+}
+/* App-level navigation recreates PrivateLM's four-item native bottom bar. */
+body:not(.nx-light) .app .nxpl-bottomnav{
+ flex:0 0 54px!important;height:54px!important;
+ width:100%!important;min-height:54px!important;
+ display:flex!important;align-items:stretch!important;
+ background:#000!important;
+ border-top:1px solid #ffffff14!important;
+ box-shadow:none!important;position:relative;z-index:2;
+ padding:0!important;margin:0!important;
+}
+.nxpl-bottomnav button{
+ appearance:none;border:0;background:transparent;color:#7c7c80;
+ flex:1 1 0;display:flex;align-items:center;justify-content:center;
+ flex-direction:column;gap:3px;min-width:0;padding:4px 0;
+ font:500 10.5px/1.15 Inter,system-ui,sans-serif;
+ letter-spacing:.1px;cursor:pointer;border-radius:0;
+}
+.nxpl-bottomnav button svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.85;stroke-linecap:round;stroke-linejoin:round}
+.nxpl-bottomnav button[aria-selected=true]{
+ color:#0a84ff!important;font-weight:600!important;
+}
+.nxpl-bottomnav button:focus-visible{outline:2px solid #0a84ff;outline-offset:-3px}
+.nxpl-bottomnav button:active{background:#ffffff0a}
+/* PrivateLM settings and modal surface. */
+body:not(.nx-light) dialog,
+body:not(.nx-light) .nx-dialog{
+ background:#1c1c1e!important;border:1px solid #ffffff15!important;
+ color:#fff!important;border-radius:16px!important;box-shadow:none!important;
+}
+body:not(.nx-light) dialog::backdrop{background:#000a!important}
+body:not(.nx-light) dialog button{background:#2c2c2e!important;border:0!important;border-radius:12px!important}
+body:not(.nx-light) input:focus-visible,
+body:not(.nx-light) button:focus-visible{
+ outline-color:#0a84ff!important;
+}
+@media(max-width:700px){
+ body:not(.nx-light) .app .sidebar{
+   position:absolute!important;z-index:35!important;left:0!important;
+   top:0!important;bottom:0!important;max-height:100dvh!important;
+   transform:translateX(-102%);transition:transform .2s ease!important;
+ }
+ body:not(.nx-light) .app .sidebar.open{transform:translateX(0)!important}
+ body:not(.nx-light) .app #messages{padding:8px 16px 12px!important}
+ body:not(.nx-light) .app #messages .bubble.user{max-width:80%!important}
+ body:not(.nx-light) .app .top{padding:0 9px!important}
+ body:not(.nx-light) .app #home{padding:8px 20px 10px!important}
+ body:not(.nx-light) .app .nx-work-scroll{padding:8px 15px 10px!important}
+ body:not(.nx-light) .app #form.composer{width:calc(100% - 24px)!important}
+ body:not(.nx-light) .app #nxWorkForm.nx-work-form{width:calc(100% - 24px)!important}
+ body:not(.nx-light) .app .main>.notice{padding:7px 10px 7px!important}
+}
+@media(min-width:701px){
+ body:not(.nx-light) .app .sidebar{width:290px!important}
+}
+@media(max-width:360px){
+ body:not(.nx-light) .app #home{padding-left:15px!important;padding-right:15px!important}
+ body:not(.nx-light) .app #form.composer{width:calc(100% - 16px)!important}
+ body:not(.nx-light) .app #nxWorkForm.nx-work-form{width:calc(100% - 16px)!important}
+ body:not(.nx-light) .app .top{padding:0 5px!important}
+}
+@media(prefers-reduced-motion:reduce){
+ .nxpl-bottomnav button{transition:none!important}
+}
+/* Keep alternate light theme coherent with original PrivateLM white theme. */
+body.nx-light .app .nxpl-bottomnav{
+ display:flex!important;flex:0 0 54px;height:54px;
+ background:white!important;border-top:1px solid #00000014!important;
+}
+body.nx-light .nxpl-bottomnav button{color:#8e8e93}
+body.nx-light .nxpl-bottomnav button[aria-selected=true]{color:#007aff}
