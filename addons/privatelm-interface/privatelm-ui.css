@@ -191,3 +191,14 @@
  .app.pl-ui #home .pl-welcome-symbol{height:37px!important;flex-basis:37px!important}
  .app.pl-ui #home .pl-welcome h1{font-size:23px!important}
 }
+
+
+/* NyX brand header — remove model selector/card, show only original blue NyX symbol. */
+.app.pl-ui .top .pl-title{display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:flex-start!important;gap:0!important;min-width:0!important}
+.app.pl-ui .top .pl-title-brand{display:flex;align-items:center;gap:9px;min-width:0}
+.app.pl-ui .top .pl-title-logo{display:grid;place-items:center;flex:0 0 28px;width:28px;height:32px;color:#0a84ff}
+.app.pl-ui .top .pl-title-logo svg{display:block;width:27px;height:27px;stroke-width:1.85}
+.app.pl-ui .top .pl-title-main{font-size:21px!important;line-height:1.15!important;font-weight:750!important;letter-spacing:-.045em!important}
+.app.pl-ui .top .pl-title-sub,.app.pl-ui #home .pl-model-card{display:none!important}
+.app.pl-ui #home{padding-top:18px!important}
+@media(max-width:700px){.app.pl-ui #home{padding-top:15px!important}.app.pl-ui .top .pl-title-logo{width:27px;flex-basis:27px}}
