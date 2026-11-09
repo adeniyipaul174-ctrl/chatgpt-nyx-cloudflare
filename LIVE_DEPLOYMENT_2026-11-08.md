@@ -6,9 +6,11 @@
 
 - Worker: `chatgpt-nyx-v3-test`
 - Live site: https://chatgpt-nyx-v3-test.adeniyipaul174.workers.dev/
-- Active Worker version: `d9c66347-e46d-4134-af59-db65983c772c`
-- Current deployment: `c431be3b-3ed2-407e-b8da-51c1465b76be`
-- Previous stable version (rollback target): `a8756b15-ad7b-4bcf-a970-88f9987a4f85` (premium Work composer before unified Work history and semantic titles).
+- Active Worker version: `ddf5d90b-2666-4be1-a089-f90b3c4beeb6`
+- Current deployment: `9421efbb-c660-4854-8213-df3393fd9ff7`
+- Previous tested version (rollback target): `f213d3bd-0215-454a-8044-17f8831bd42e` (Work origin, faster startup and account reset).
+- Earlier version before the 9 November repairs: `d9c66347-e46d-4134-af59-db65983c772c`.
+- Older premium Work composer version: `a8756b15-ad7b-4bcf-a970-88f9987a4f85`.
 - Earlier Work composer version: `0874dff6-c3a8-4a45-8e98-e8f9dc66a7aa`.
 - Earlier stable version: `ebffa61f-9bf3-4623-a0be-dfbe07329a60`.
 - First working Chat/Work version: `1b9bbf58-f3bc-444b-a3e9-5f93a4845129`.
@@ -24,6 +26,20 @@
 - Earlier version: `90b5188f-19ad-4ca4-957c-1e529f465f8e` (included an **unrequested** Lite page; **do not redeploy as the normal rollback**).
 - Earlier original version: `686530f3-a15c-49fc-88a2-599869197fc2` (older model selection, no Scout-as-default).
 - The Lite route and its HTML were fully **removed**. `/lite` returns **404**. The existing full NyX interface remains the only homepage.
+
+## Critical regression repairs — 9 November 2026
+
+- **Production version:** `ddf5d90b-2666-4be1-a089-f90b3c4beeb6`, deployment `9421efbb-c660-4854-8213-df3393fd9ff7`; **immediate rollback** `f213d3bd-0215-454a-8044-17f8831bd42e`. Two intermediate uploaded versions (`3da6f9d0-9e62-453b-8767-e8d8668b97e1`, `36c0a5f7-4b04-4b82-96ce-3e58f12e3b34`) have a **client script parsing regression** and MUST NOT be deployed or used as rollback targets.
+- **Critical Work browser error:** Work POSTs to the authenticated AI browser now supply `X-NyX-Client: web`, matching server-side `nyxCheckOrigin`. This fixes the previously reliable `Untrusted request origin` rejection for same-origin browser commands; successful signed-in navigation still needs an authenticated user test.
+- **Webpage inspection:** Chat requests containing a direct HTTPS URL and `review`, `inspect`, `audit`, `analyze` or `feedback` route to the existing safe webpage reader. Explicit search and browse tools take priority over the text-only agent path, including when Agent Team is selected.
+- **Intent routing in Work:** An explicit instruction to open/control Chrome or visit a website triggers the interactive free browser; a text-only review with a URL is routed through `/api/nyx` instead. Browser intent logic was checked against five known cases and the *rendered Work JavaScript* passed JavaScript syntax validation.
+- **Privacy:** Work and shared-history in-memory state are reset when an account signs in or out; the visible draft, transcript, previous browser preview and active Work session reference are cleared. Legacy Work history migration occurs *after* the account ID is available. Anonymous Work session storage no longer automatically populates an authenticated user's Work transcript.
+- **Speed:** Removed the artificial 3-second/5-second pre-authentication splash delay. Network, server quota and multi-agent processing can still take longer.
+- **Search fallback:** When basic public search providers fail, the Cloudflare Browser reader can be tried if account/browser bindings are available and the shared free Browser Rendering consumption is below a conservative threshold. This may help some searches but is **not** a guaranteed replacement for missing Tavily/Serper keys or unlimited browsing.
+- **Repeated Work messages:** Identical failed Work tasks are no longer continually added as duplicate user bubbles when retried before an assistant reply. Verified source URLs are saved in Work's transcript for later viewing.
+- **Preservation:** All 13 production bindings retained. Normal Chat, Work, web search, images, memory, source history, agents and browser handlers remained present. The latest validated browser controller is saved at `addons/work-mode/work-controller.js`. **Never deploy the stale GitHub root Wrangler project directly over production.**
+- **Testing:** Cloudflare Worker compilation succeeded; the Work script was independently rendered from the deployed HTML template and passed JavaScript syntax validation; runtime browser intent unit cases confirmed `Open your browser` → Work browser and `Review this website` → normal site-reader path. A previous live 360px mobile test on version `f213...` confirmed browser request headers, manual handoff, account UI reset, and no overflow, using simulated server responses. The newest deployment's signed-in end-to-end tests and external browsing were **not** completed: Cloudflare Browser Rendering tests intermittently failed with HTTP 422 / connection closed and HTTP 429 service limits. A separate Browser Rendering markdown test successfully retrieved the user's public Lovable website but the Goodreads test was rate-limited.
+- **Unresolved:** No Tavily/Serper/SearXNG credentials; Cloudflare's free browser allocation and per-session time/step limits; Work image binaries are not fully preserved across devices; no implemented password recovery/email verification; GitHub root still differs from live Worker; Cloudflare observability not configured. These require further integrations and/or account configuration; do not claim complete parity with ChatGPT Work.
 
 ## Unified Work history and semantic chat titles (2026-11-08)
 
