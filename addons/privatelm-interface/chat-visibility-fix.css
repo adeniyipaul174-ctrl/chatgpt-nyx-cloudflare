@@ -1,0 +1,11 @@
+/* Fix PrivateLM-layout home screen remaining visible over active NyX conversations.
+   NyX render() controls visibility with #home.style.display and #messages.style.display;
+   the prior .app.pl-ui #home {display:flex!important} overrode that state. */
+.app.pl-ui #home[style*="display: none"],
+.app.pl-ui #home[hidden] {
+  display: none !important;
+}
+.app.pl-ui #messages[style*="display: none"],
+.app.pl-ui #messages[hidden] {
+  display: none !important;
+}
