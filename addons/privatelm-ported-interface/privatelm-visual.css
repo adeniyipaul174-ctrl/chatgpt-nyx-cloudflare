@@ -509,3 +509,50 @@ body.nx-light .app .nxpl-bottomnav{
 }
 body.nx-light .nxpl-bottomnav button{color:#8e8e93}
 body.nx-light .nxpl-bottomnav button[aria-selected=true]{color:#007aff}
+
+/* PrivateLM light mode mirrors white background and F2F2F7 native surfaces. */
+body.nx-light{font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;background:#fff!important;color:#0b0b0c!important}
+body.nx-light .app,body.nx-light .main,body.nx-light .home,body.nx-light #messages,body.nx-light .nx-work-pane,body.nx-light .nx-work-scroll{background:white!important;color:#0b0b0c!important}
+body.nx-light .app .top{height:55px!important;min-height:55px!important;flex:0 0 55px!important;border-bottom:1px solid #00000014!important;background:#fff!important;box-shadow:none!important;padding:0 12px!important}
+body.nx-light .app .top>div:first-child{display:flex!important;align-items:center!important;flex:1 1 auto!important;min-width:0!important}
+body.nx-light .app .top strong{font-size:18px!important;letter-spacing:-.5px!important;color:#0b0b0c!important}
+body.nx-light .app .top small{display:none!important}
+body.nx-light .app .top #menu,body.nx-light .app .top #newTop{border:0!important;background:transparent!important;color:#0b0b0c!important;width:42px!important;min-width:42px!important;height:44px!important;min-height:44px!important;padding:0!important;display:grid!important;place-items:center!important}
+body.nx-light .app .top #nxChatWorkSwitch,body.nx-light .app .top #settingsTop{display:none!important}
+body.nx-light .app .sidebar{width:min(84vw,340px)!important;max-width:340px!important;padding:0 0 12px!important;background:#f7f7f8!important;border-right:1px solid #00000012!important;box-shadow:none!important}
+body.nx-light .app .sidehead{padding:16px 16px 10px 20px!important;min-height:75px!important}
+body.nx-light .app .sidehead strong{font-size:24px!important;letter-spacing:-.6px!important;color:#0b0b0c!important}
+body.nx-light .app #newSide{background:transparent!important;color:#007aff!important;border:0!important;width:38px!important;height:38px!important;padding:0!important;display:grid!important;place-items:center!important}
+body.nx-light .app .nx-toolbar{margin:0 16px 8px!important;padding:0!important}
+body.nx-light .app .nx-search{background:#efeff0!important;border:0!important;color:#0b0b0c!important;border-radius:10px!important;height:38px!important;min-height:38px!important}
+body.nx-light .app .chatrow.active{background:#00000010!important}
+body.nx-light .app .chatrow button{color:#252529!important}
+body.nx-light .app .chats{padding:4px 12px 10px!important}
+body.nx-light .app .sidebottom{background:#f7f7f8!important;border-top:1px solid #00000012!important}
+body.nx-light .app #messages .bubble.user{background:#f0f0f2!important;color:#0b0b0c!important;border:0!important;box-shadow:none!important;border-radius:20px!important;padding:10px 16px!important;max-width:80%!important}
+body.nx-light .app #messages .bubble.assistant{background:transparent!important;color:#0b0b0c!important;border:0!important;box-shadow:none!important;border-radius:0!important;padding:10px 2px 4px!important}
+body.nx-light .app #form.composer{background:#f2f2f7!important;border:1px solid #00000013!important;border-radius:23px!important;box-shadow:none!important;padding:7px 9px!important;width:min(calc(100% - 24px),790px)!important;margin:6px auto 0!important}
+body.nx-light .app #form #prompt{color:#0b0b0c!important;font-size:15px!important}
+body.nx-light .app #form #nxAttach,body.nx-light .app #form #nxMic{background:transparent!important;border:0!important;color:#6e6e73!important;box-shadow:none!important}
+body.nx-light .app #form #send{background:#007aff!important;color:white!important;border-radius:50%!important;box-shadow:none!important;width:36px!important;min-width:36px!important;flex-basis:36px!important;height:36px!important;min-height:36px!important}
+body.nx-light .app #home{gap:0!important;justify-content:flex-start!important;align-items:stretch!important;padding:8px 20px 10px!important}
+body.nx-light .app #home .logo,body.nx-light .app #home h1:not(.nxpl-greeting-title){display:none!important}
+body.nx-light .app #home .nxpl-model-card{width:min(100%,600px)!important;display:flex!important;align-items:center!important;padding:15px!important;background:transparent!important;border:1px solid #0000001a!important;border-radius:16px!important;color:#0b0b0c!important;text-align:left!important;gap:12px!important;margin:0 auto!important}
+body.nx-light .nxpl-model-meta strong,body.nx-light .nxpl-greeting-title{color:#0b0b0c!important}
+body.nx-light .nxpl-model-meta span{color:#6e6e73!important}
+body.nx-light .nxpl-model-symbol{background:#007aff12;color:#007aff}
+body.nx-light .app #home .nxpl-greeting{display:grid;place-items:center;flex:1 1 auto;min-height:140px;margin:15px auto}
+body.nx-light .nxpl-greeting-mark{background:#f2f2f7!important;color:#0b0b0c!important;border-color:#0000000c!important}
+body.nx-light .app #home .suggest{width:min(100%,600px)!important;display:flex!important;gap:9px!important;margin:0 auto 6px!important}
+body.nx-light .app #home .suggest button{background:transparent!important;color:#49494f!important;border:1px solid #0000001b!important;border-radius:16px!important;padding:11px 14px!important;box-shadow:none!important}
+body.nx-light .app #nxWorkForm.nx-work-form{width:min(calc(100% - 24px),790px)!important;background:#f2f2f7!important;border:1px solid #00000015!important;border-radius:23px!important;box-shadow:none!important}
+body.nx-light .app #nxWorkForm #nxWorkPrompt{color:#0b0b0c!important;font-size:15px!important}
+body.nx-light .app #nxWorkForm .nx-wk-heading-star{color:#007aff!important;background:#007aff16!important}
+body.nx-light .app #nxWorkForm #nxModeTrigger{background:#e5e5ea!important;color:#0b0b0c!important;border:1px solid #00000015!important}
+body.nx-light .app #nxWorkForm #nxWorkSend.nx-wk-run-button{background:#007aff!important;color:#fff!important;box-shadow:none!important}
+body.nx-light .app .nx-wmessage.user{background:#f0f0f2!important;color:#0b0c0d!important;border:0!important}
+body.nx-light .app .nx-wmessage:not(.user){background:transparent!important;color:#0b0b0c!important;border:0!important}
+body.nx-light .app .nxpl-bottomnav{color:#6e6e73!important;background:#fff!important;border-top:1px solid #00000014!important;display:flex!important}
+body.nx-light .app .nxpl-bottomnav button[aria-selected=true]{color:#007aff!important}
+@media(max-width:700px){body.nx-light .app .sidebar{position:absolute!important;left:0!important;top:0!important;bottom:0!important;z-index:35!important;transform:translateX(-102%)}body.nx-light .app .sidebar.open{transform:translateX(0)!important}}
+.nxpl-model-symbol svg{width:21px;height:21px;stroke-width:1.9}
