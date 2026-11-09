@@ -9,8 +9,8 @@ if(picker&&slot)slot.appendChild(picker);
 const browser=$("nxWorkBrowser"),screenshot=$("nxWorkScreenshot"),shotNote=$("nxWorkPreviewNote"),browserStatus=$("nxWorkBrowserStatus"),take=$("nxWorkTakeover"),resume=$("nxWorkResume"),stop=$("nxWorkStop"),refresh=$("nxWorkRefresh"),liveLink=$("nxWorkLiveLink"),address=$("nxWorkAddress"),browserGo=$("nxWorkGo"),keyboard=$("nxWorkKeyboard"),keyboardForm=$("nxWorkType");
 let stage="chat",busy=false,stopping=false,session=null,workAgent="team",workHistory=[],imageUrl=null,screenshotBusy=false;
 const storage="nyx_work_chat_v1_"+String(window.nyxAccount?.id||"device");
-try{const data=JSON.parse(sessionStorage.getItem(storage)||"[]");if(Array.isArray(data))workHistory=data.filter(x=>["user","assistant"].includes(x.role)&&typeof x.content==="string").slice(-20)}catch{}
-function save(){try{sessionStorage.setItem(storage,JSON.stringify(workHistory.slice(-20)))}catch{}}
+try{const data=window.nyxAccount?.id?JSON.parse(sessionStorage.getItem(storage)||"[]"):[];if(Array.isArray(data))workHistory=data.filter(x=>["user","assistant"].includes(x.role)&&typeof x.content==="string").slice(-20)}catch{}
+function save(){try{sessionStorage.setItem(storage,JSON.stringify(workHistory.slice(-20)))}catch{};window.nxUnifiedHistoryBridge?.saveWork(workHistory)}
 function chatAgent(mode){if(!native)return;native.value=mode;native.dispatchEvent(new Event("change",{bubbles:true}))}
 function setStage(next){
  stage=next==="work"?"work":"chat";document.body.dataset.nxStage=stage;
@@ -19,6 +19,7 @@ function setStage(next){
  pane.hidden=!on;
  if(on){chatAgent(workAgent);try{document.getElementById("sidebar")?.classList.remove("open")}catch{};if(!session)refreshBrowser(false);}
  else{if(native&&native.value!=="off")workAgent=native.value;chatAgent("off");}
+ window.nxUnifiedHistoryBridge?.activate(stage);
 }
 window.nxEnterWork=function(task,submit=false){setStage("work");if(typeof task==="string"&&task.trim())input.value=task.trim().slice(0,4000);if(submit&&input.value.trim())workForm.requestSubmit();};
 chatTab.addEventListener("click",()=>setStage("chat"));workTab.addEventListener("click",()=>setStage("work"));
@@ -28,22 +29,29 @@ const escapeURL=value=>{try{const u=new URL(value);return u.protocol==="https:"?
 function bubble(role,value,record=true){
  const div=document.createElement("div");div.className="nx-wmessage "+(role==="user"?"user":role==="error"?"error":role==="status"?"status":"assistant");div.textContent=String(value||"");
  feed.appendChild(div);welcome.hidden=true;scroll.scrollTop=scroll.scrollHeight;
- if(record&&(role==="user"||role==="assistant")){workHistory.push({role,content:String(value||"")});workHistory=workHistory.slice(-20);save()}
+ if(record&&(role==="user"||role==="assistant")){workHistory.push({role,content:String(value||"")});workHistory=workHistory.slice(-150);save()}
  return div;
 }
-function note(text){const element=bubble("status",text,false);return {element,finish(message,role="assistant"){element.className="nx-wmessage "+role;element.textContent=message;if(role==="assistant"){workHistory.push({role:"assistant",content:message});workHistory=workHistory.slice(-20);save()}scroll.scrollTop=scroll.scrollHeight}}}
-workHistory.forEach(msg=>{const div=document.createElement("div");div.className="nx-wmessage "+msg.role;div.textContent=msg.content;feed.appendChild(div)});
-if(workHistory.length)welcome.hidden=true;
+function note(text){const element=bubble("status",text,false);return {element,finish(message,role="assistant"){element.className="nx-wmessage "+role;element.textContent=message;if(role==="assistant"){workHistory.push({role:"assistant",content:message});workHistory=workHistory.slice(-150);save()}scroll.scrollTop=scroll.scrollHeight}}}
+window.nxWorkHistoryAPI={load(messages){
+ workHistory=Array.isArray(messages)?messages.slice(-150).filter(m=>m&&["user","assistant"].includes(m.role)&&typeof m.content==="string").map(m=>({role:m.role,content:m.content})):[];
+ feed.replaceChildren();
+ for(const msg of workHistory){const div=document.createElement("div");div.className="nx-wmessage "+msg.role;div.textContent=msg.content;feed.appendChild(div)}
+ welcome.hidden=workHistory.length>0;scroll.scrollTop=scroll.scrollHeight;
+},read(){return workHistory.slice()},stage:setStage,resetAccount(){workHistory=[];feed.replaceChildren();welcome.hidden=false;input.value="";session=null;stopping=true;running=false;busy=false;if(imageUrl){URL.revokeObjectURL(imageUrl);imageUrl=null}imageUrl=null;screenshot.hidden=true;screenshot.removeAttribute("src");browser.hidden=true;liveLink.hidden=true;pane.hidden=true;stage="chat";document.body.dataset.nxStage="chat";chatTab.classList.add("active");workTab.classList.remove("active");chatTab.setAttribute("aria-selected","true");workTab.setAttribute("aria-selected","false");chatAgent("off");}};
+window.nxWorkHistoryAPI.load(workHistory);
 function browserIntent(q){
- const value=String(q||"").toLowerCase();
- return /\b(?:browser|chrome|visit|navigate|click|browse|webpage|web page|website|web site|open (?:a |the |your )?(?:tab|site|page|url))\b/.test(value)
- || /^\s*(?:open|go to)\s+(?!a file|my file|my notes|the settings)\S+/i.test(value)
- || /\b(?:find|search|look up|research)\b.{0,80}\b(?:online|on the web|on a website|in browser|on a site)\b/.test(value)
- || /\b(?:https:\/\/|www\.)\S+/.test(value);
+ const value=String(q||"").trim().toLowerCase();
+ if(!value)return false;
+ if(/\b(?:open|launch|start|control|use|show)\b[\s\S]{0,55}\b(?:browser|chrome|browser tab)\b/i.test(value))return true;
+ if(/\b(?:browse|navigate|visit|click|type)\b[\s\S]{0,75}\b(?:in your browser|on the website|in the browser|in chrome|on a page)\b/i.test(value))return true;
+ if(/^\s*(?:open|visit|go to|navigate to)\s+(?:https?:\/\/|www\.|[a-z0-9.-]+\.(?:com|org|net|app|io|dev|edu)\b|goodreads\b|google\b|github\b|wikipedia\b)/i.test(value))return true;
+ if(/\b(?:browse the web and click|in your browser|using your browser|take over the browser|take over chrome)\b/i.test(value))return true;
+ return false;
 }
 function wantsManual(q){return /\b(?:for me to control|take over|manual(?:ly)?|i will control|let me control|let me browse|just open (?:a|the|your) browser|open your browser for me)\b/i.test(q)}
 async function call(path,payload,method="POST"){
- const opts={method,credentials:"same-origin",cache:"no-store",headers:method==="GET"?{}:{"Content-Type":"application/json"},body:method==="GET"?undefined:JSON.stringify(payload||{})};
+ const opts={method,credentials:"same-origin",cache:"no-store",headers:method==="GET"?{}:{"Content-Type":"application/json","X-NyX-Client":"web"},body:method==="GET"?undefined:JSON.stringify(payload||{})};
  const response=await fetch("/api/nyx/ai-browser/"+path,opts);
  let body;try{body=await response.json()}catch{throw Error("NyX could not read the browser service response.")}
  if(!response.ok)throw Error(body.error||("Browser request failed: "+response.status));
@@ -112,18 +120,18 @@ async function runAgentTask(task){
  const mode=native?.value&&native.value!=="off"?native.value:"team";
  const history=workHistory.filter(x=>["user","assistant"].includes(x.role)).slice(-15).map(m=>({role:m.role,content:m.content}));
  if(history.length===0||history.at(-1).role!=="user")history.push({role:"user",content:task});
- const response=await fetch("/api/nyx",{method:"POST",credentials:"same-origin",cache:"no-store",headers:{"Content-Type":"application/json"},body:JSON.stringify({messages:history,agentMode:mode,autoTools:true,style:"detailed",showSources:true,quality:"realistic"})});
+ const response=await fetch("/api/nyx",{method:"POST",credentials:"same-origin",cache:"no-store",headers:{"Content-Type":"application/json","X-NyX-Client":"web"},body:JSON.stringify({messages:history,agentMode:mode,autoTools:true,style:"detailed",showSources:true,quality:"realistic"})});
  if(!response.ok){let body={};try{body=await response.json()}catch{}throw Error(body.error||"Work AI request failed")}
  const type=response.headers.get("content-type")||"";
  if(type.startsWith("image/")){const blob=await response.blob(),url=URL.createObjectURL(blob),div=bubble("assistant","NyX generated an image. Tap to view.",true),img=document.createElement("img");img.src=url;img.alt="Work-generated image";div.appendChild(img);return null}
  const result=await response.json();
  const reply=typeof result.reply==="string"?result.reply:typeof result.error==="string"?result.error:result.kind==="website"?"NyX created website project data. Open the original Chat workspace to view or edit the full website project.":JSON.stringify(result).slice(0,3000);
- if(Array.isArray(result.sources)&&result.sources.length){const box=bubble("assistant",reply,true);for(const src of result.sources.slice(0,6)){const target=escapeURL(src.url);if(!target)continue;const a=document.createElement("a");a.href=target;a.target="_blank";a.rel="noopener noreferrer";a.textContent=src.title||target;box.appendChild(a)}return null}
+ if(Array.isArray(result.sources)&&result.sources.length){const box=bubble("assistant",reply,true);const links=[];for(const src of result.sources.slice(0,6)){const target=escapeURL(src.url);if(!target)continue;const title=String(src.title||target).slice(0,170);links.push({title,url:target});const a=document.createElement("a");a.href=target;a.target="_blank";a.rel="noopener noreferrer";a.textContent=title;box.appendChild(a)}if(links.length){const last=workHistory.at(-1);if(last?.role==="assistant"){last.content+="\n\nSources:\n"+links.map((l,i)=>"["+(i+1)+"] "+l.title+"\n"+l.url).join("\n");save()}}return null}
  return reply;
 }
 workForm.addEventListener("submit",async event=>{
  event.preventDefault();const text=input.value.trim();if(!text||busy)return;busy=true;$("nxWorkSend").disabled=true;
- bubble("user",text,true);input.value="";
+ if(!(workHistory.at(-1)?.role==="user"&&workHistory.at(-1)?.content===text))bubble("user",text,true);input.value="";
  const browserTask=browserIntent(text);
  try{
   if(browserTask)await openBrowserTask(text);
@@ -145,5 +153,5 @@ document.querySelectorAll("[data-nx-work]").forEach(button=>button.addEventListe
  else if(role==="agents"){chatAgent("team");input.value="Use your agent team to plan and complete this task: ";input.focus()}
  else{chatAgent("coder");input.value="Use the coding agent to ";input.focus()}
 }));
-const params=new URLSearchParams(location.search);setStage(params.get("work")==="1"?"work":"chat");
+const params=new URLSearchParams(location.search);if(params.get("work")==="1")setStage("work");
 })();
