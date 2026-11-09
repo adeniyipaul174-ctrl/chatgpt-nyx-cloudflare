@@ -10,7 +10,7 @@ const shapes={
  work:svg('<rect x="3" y="3.5" width="7" height="7" rx="1.8"/><rect x="14" y="3.5" width="7" height="7" rx="1.8"/><rect x="3" y="14" width="7" height="7" rx="1.8"/><rect x="14" y="14" width="7" height="7" rx="1.8"/>'),
  browser:svg('<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c4.2 4.2 4.2 13.8 0 18M12 3c-4.2 4.2-4.2 13.8 0 18"/>'),
  settings:svg('<path d="M12 3l2.1 1.4 2.3-.5 1.1 2.2 2.2 1.1-.5 2.3L20.6 12l-1.4 2.1.5 2.3-2.2 1.1-1.1 2.2-2.3-.5L12 20.6l-2.1-1.4-2.3.5-1.1-2.2-2.2-1.1.5-2.3L3.4 12l1.4-2.1-.5-2.3 2.2-1.1 1.1-2.2 2.3.5L12 3Z"/><circle cx="12" cy="12" r="3"/>'),
- cloud:svg('<path d="M7 18a5 5 0 0 1-.5-10 6.2 6.2 0 0 1 11.8 2A4 4 0 0 1 18 18H7Z"/>')
+ brand:svg('<path d="m12 2 1.9 7.1L21 11l-7.1 1.9L12 20l-1.9-7.1L3 11l7.1-1.9L12 2Z"/><path d="m19 17 .6 2.4L22 20l-2.4.6L19 23l-.6-2.4L16 20l2.4-.6L19 17Z"/>')
 };
 app.classList.add("pl-ui");
 /* The earlier NyX PrivateLM-style shell also creates a second tab bar and
@@ -27,13 +27,11 @@ const menu=document.getElementById("menu"),newTop=document.getElementById("newTo
 if(menu){menu.innerHTML=shapes.menu;menu.setAttribute("aria-label","Chats");}
 if(newTop){newTop.innerHTML=shapes.edit;newTop.setAttribute("aria-label","New chat");}
 if(newSide){newSide.innerHTML=shapes.edit;newSide.setAttribute("aria-label","New chat");}
-const headTitle=document.createElement("div");headTitle.className="pl-title";headTitle.innerHTML='<span class="pl-title-main" id="plTitleMain">NyX</span><span class="pl-title-sub" id="plTitleSub"><span class="pl-status-dot"></span>Cloud · Llama 4 Scout</span>';
+const headTitle=document.createElement("div");headTitle.className="pl-title";headTitle.innerHTML='<span class="pl-title-brand"><span class="pl-title-logo" aria-hidden="true">'+shapes.brand+'</span><span class="pl-title-main" id="plTitleMain">NyX</span></span>';
 top.querySelector("div")?.appendChild(headTitle);
 const nav=document.createElement("nav");nav.id="plNativeNav";nav.className="pl-bottom-nav";nav.setAttribute("aria-label","Main navigation");
 nav.innerHTML=[["chat","Chat",shapes.chat],["work","Work",shapes.work],["browser","Browser",shapes.browser],["settings","Settings",shapes.settings]].map(([key,label,icon])=>'<button class="pl-nav-item" type="button" data-pl-page="'+key+'" aria-label="'+label+'" aria-current="'+(key==="chat"?"page":"false")+'">'+icon+'<span>'+label+'</span></button>').join("");
 main.appendChild(nav);
-const model=document.createElement("div");model.className="pl-model-card";model.innerHTML='<span class="pl-model-icon">'+shapes.cloud+'</span><span class="pl-model-copy"><strong>Llama 4 Scout</strong><small>Connected · Cloud model</small></span><span class="pl-model-indicator" aria-label="Cloud AI"></span>';
-home.insertBefore(model,home.firstChild);
 const largeLogo=home.querySelector(".logo");if(largeLogo)largeLogo.setAttribute("aria-hidden","true");
 const heading=home.querySelector("h1");
 if(heading&&!home.querySelector(".pl-welcome")){
@@ -51,7 +49,7 @@ menu?.addEventListener("click",()=>requestAnimationFrame(()=>scrim.classList.tog
 sidebar?.addEventListener("click",event=>{if(event.target?.closest?.("#newSide,.chatrow button:first-child"))requestAnimationFrame(closeSidebar)});
 document.addEventListener("keydown",event=>{if(event.key==="Escape")closeSidebar()});
 function stage(){return document.body.dataset.nxStage==="work"?"work":"chat"}
-function active(key){for(const btn of nav.querySelectorAll("button")){const sel=btn.dataset.plPage===key;btn.classList.toggle("active",sel);btn.setAttribute("aria-current",sel?"page":"false")}const title=document.getElementById("plTitleMain"),sub=document.getElementById("plTitleSub");if(title)title.textContent=key==="chat"?"NyX":key==="work"||key==="browser"?"NyX Work":"NyX";if(sub)sub.innerHTML=key==="chat"?'<span class="pl-status-dot"></span>Cloud · Llama 4 Scout':key==="work"||key==="browser"?'<span class="pl-status-dot"></span>Agents · Browser · Code':'<span class="pl-status-dot"></span>Preferences';}
+function active(key){for(const btn of nav.querySelectorAll("button")){const sel=btn.dataset.plPage===key;btn.classList.toggle("active",sel);btn.setAttribute("aria-current",sel?"page":"false")}const title=document.getElementById("plTitleMain");if(title)title.textContent=key==="work"||key==="browser"?"NyX Work":"NyX";}
 nav.addEventListener("click",event=>{const b=event.target?.closest?.("[data-pl-page]");if(!b)return;const k=b.dataset.plPage;closeSidebar();if(k==="chat"){document.getElementById("nxTabChat")?.click();active("chat");}else if(k==="work"){document.getElementById("nxTabWork")?.click();active("work");}else if(k==="browser"){document.getElementById("nxTabWork")?.click();if(typeof window.nxEnterWork==="function")window.nxEnterWork("Open your browser for me to control",true);else{const field=document.getElementById("nxWorkPrompt");if(field){field.value="Open your browser for me to control";field.dispatchEvent(new Event("input",{bubbles:true}));}}active("browser");}else if(k==="settings"){document.getElementById("settingsTop")?.click();active("settings");}});
 new MutationObserver(()=>{if(document.getElementById("nxSettings")?.open){active("settings");return;}const current=stage();const selected=nav.querySelector(".pl-nav-item.active")?.dataset.plPage;if(selected!==current&&selected!=="browser")active(current);if(selected==="browser"&&current!=="work")active(current)}).observe(document.body,{attributes:true,attributeFilter:["data-nx-stage"]});
 active(stage());
