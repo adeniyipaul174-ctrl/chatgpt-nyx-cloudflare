@@ -35,7 +35,14 @@ main.appendChild(nav);
 const model=document.createElement("div");model.className="pl-model-card";model.innerHTML='<span class="pl-model-icon">'+shapes.cloud+'</span><span class="pl-model-copy"><strong>Llama 4 Scout</strong><small>Connected · Cloud model</small></span><span class="pl-model-indicator" aria-label="Cloud AI"></span>';
 home.insertBefore(model,home.firstChild);
 const largeLogo=home.querySelector(".logo");if(largeLogo)largeLogo.setAttribute("aria-hidden","true");
-const heading=home.querySelector("h1");if(heading){const h=new Date().getHours();heading.textContent=(h<5?"Up late?":h<12?"Good morning,":h<17?"Good afternoon,":"Good evening,")+"\nwhat's on your mind?";}
+const heading=home.querySelector("h1");
+if(heading&&!home.querySelector(".pl-welcome")){
+ const welcome=document.createElement("div");welcome.className="pl-welcome";
+ const symbol=document.createElement("span");symbol.className="pl-welcome-symbol";symbol.setAttribute("aria-hidden","true");
+ symbol.innerHTML=svg('<path d="m12 2 1.9 7.1L21 11l-7.1 1.9L12 20l-1.9-7.1L3 11l7.1-1.9L12 2Z"/><path d="m19 17 .6 2.4L22 20l-2.4.6L19 23l-.6-2.4L16 20l2.4-.6L19 17Z"/>');
+ heading.parentElement?.insertBefore(welcome,heading);welcome.append(symbol,heading);
+ const h=new Date().getHours();heading.textContent=(h<5?"Up late?":h<12?"Good morning,":h<17?"Good afternoon,":"Good evening,")+"\nwhat's on your mind?";
+}
 const sidehead=sidebar?.querySelector(".sidehead strong");if(sidehead)sidehead.textContent="Chats";
 const scrim=document.createElement("div");scrim.className="pl-scrim";scrim.setAttribute("aria-hidden","true");main.appendChild(scrim);
 function closeSidebar(){sidebar?.classList.remove("open");scrim.classList.remove("active")}
@@ -49,5 +56,13 @@ nav.addEventListener("click",event=>{const b=event.target?.closest?.("[data-pl-p
 new MutationObserver(()=>{if(document.getElementById("nxSettings")?.open){active("settings");return;}const current=stage();const selected=nav.querySelector(".pl-nav-item.active")?.dataset.plPage;if(selected!==current&&selected!=="browser")active(current);if(selected==="browser"&&current!=="work")active(current)}).observe(document.body,{attributes:true,attributeFilter:["data-nx-stage"]});
 active(stage());
 const settingsModal=document.getElementById("nxSettings");settingsModal?.addEventListener("close",()=>active(stage()));
-/* Existing nxpl-provider-credit in About retains the original PrivateLM MIT attribution. */
+const aboutPane=document.querySelector('#nxSettings [data-nx-pane="about"]')||document.getElementById("about");
+if(aboutPane&&!aboutPane.querySelector("#plAttribution")){
+ const note=document.createElement("p");note.id="plAttribution";
+ note.style.cssText="font-size:12px;color:#8e8e93;line-height:1.6;padding:6px 0";
+ const link=document.createElement("a");link.href="https://github.com/orailnoor/cross-platform-llm-client";
+ link.target="_blank";link.rel="noopener noreferrer";link.textContent="PrivateLM (MIT)";
+ note.append("Interface adaptation based on ",link,". © Original contributors.");
+ aboutPane.appendChild(note);
+}
 })();
