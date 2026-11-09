@@ -2,13 +2,24 @@
 
 > **Source-of-truth warning:** The GitHub root code is a previous prototype, **not** the complete current NyX Worker. Never run the existing Wrangler project against the live Worker until a complete source reconciliation, isolated staging rollout, and authenticated regression test are done. Do not overwrite the live database.
 
+## 9 November 2026 — Public search speed and unresolved external limits
+
+- **Production deployed version:** `dd7da766-fa88-4660-b2d3-2eb5392fa329`, deployment `fc48b21d-5651-431d-9279-d175360f1e8e` (100%). **Rollback:** `ddf5d90b-2666-4be1-a089-f90b3c4beeb6`.
+- **Fixed:** The final round of cheap public search fallbacks now runs concurrently with `Promise.any` instead of checking them one after another. Existing early provider selection, Bing/RSS rescue, relevance validation, source metadata, and public cache were retained.
+- **Free-tier safety:** Cloudflare Browser Run remains a separately guarded last-resort search provider and is skipped after the configured shared daily-browser-time guard. This change does not claim unlimited or guaranteed browsing.
+- **Preservation:** Worker staging/compilation succeeded and all 13 existing Cloudflare bindings were inherited. The active rendered Work controller passed a JavaScript compilation test after the deployment. Chat, image generation, account history, Work, Agent Team, and browser backend code remain present.
+- **Provider check:** Cloudflare Browser Rendering returned a Google unusual-traffic/automated-request challenge; a Bing browser test hit the provider's HTTP 429 limit. The Tavily, Serper, and SearXNG settings are not configured. Therefore no-key generalized web search remains unreliable for difficult queries, particularly Goodreads authors and zero-review filters.
+- **Incomplete fixes:** Work image persistence, cross-device binary media sync, authenticated end-to-end browser control, account-verified cross-device chat sync, and password recovery were **not** fully repaired or verified. Several candidate changes to Work media handling failed browser JavaScript syntax checks and were intentionally **not deployed**.
+- **Do not deploy the stale GitHub root:** It remains different from Cloudflare production. A private, reconciled production source repository and authenticated smoke tests should precede any broad refactor or new dependencies. No existing user chats or Cloudflare database records were altered.
+
 ## Current production
 
 - Worker: `chatgpt-nyx-v3-test`
 - Live site: https://chatgpt-nyx-v3-test.adeniyipaul174.workers.dev/
-- Active Worker version: `ddf5d90b-2666-4be1-a089-f90b3c4beeb6`
-- Current deployment: `9421efbb-c660-4854-8213-df3393fd9ff7`
-- Previous tested version (rollback target): `f213d3bd-0215-454a-8044-17f8831bd42e` (Work origin, faster startup and account reset).
+- Active Worker version: `dd7da766-fa88-4660-b2d3-2eb5392fa329`
+- Current deployment: `fc48b21d-5651-431d-9279-d175360f1e8e`
+- Previous tested version (rollback target): `ddf5d90b-2666-4be1-a089-f90b3c4beeb6` (previous stable Work/search implementation).
+- Earlier verified version: `f213d3bd-0215-454a-8044-17f8831bd42e` (Work origin, faster startup and account reset).
 - Earlier version before the 9 November repairs: `d9c66347-e46d-4134-af59-db65983c772c`.
 - Older premium Work composer version: `a8756b15-ad7b-4bcf-a970-88f9987a4f85`.
 - Earlier Work composer version: `0874dff6-c3a8-4a45-8e98-e8f9dc66a7aa`.
