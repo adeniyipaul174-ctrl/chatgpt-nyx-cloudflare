@@ -1,0 +1,117 @@
+/* PrivateLM interface port for NyX (2026-11-09).
+   Reference: orailnoor/cross-platform-llm-client (MIT), copyright its authors.
+   Platform-adapted CSS; all NyX actions, server routes and session handlers retained.
+   https://github.com/orailnoor/cross-platform-llm-client */
+.app.pl-ui{--pl-bg:#000;--pl-surface:#1c1c1e;--pl-raised:#2c2c2e;--pl-line:#38383a;--pl-text:#f5f5f7;--pl-muted:#8e8e93;--pl-accent:#0a84ff;background:#000!important;color:#f5f5f7!important;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,system-ui,sans-serif!important;letter-spacing:-.012em!important}
+.app.pl-ui *{box-sizing:border-box}
+.app.pl-ui button{font-family:inherit}
+.app.pl-ui .main{min-height:0;background:#000!important}
+.app.pl-ui .top{height:58px!important;min-height:58px!important;flex:0 0 58px!important;padding:0 13px!important;background:#000!important;border:0!important;border-bottom:1px solid #ffffff10!important;gap:12px}
+.app.pl-ui .top>div:first-child{display:flex!important;align-items:center!important;gap:12px!important;flex:1 1 auto;min-width:0}
+.app.pl-ui .top>div:first-child>strong,.app.pl-ui .top>div:first-child>small{display:none!important}
+.app.pl-ui .top>div:last-child{display:flex!important;align-items:center!important;justify-content:flex-end!important;gap:0!important;flex:0 0 auto}
+.app.pl-ui .top #nxChatWorkSwitch,.app.pl-ui .top #settingsTop{display:none!important}
+.app.pl-ui .top #menu{display:grid!important;place-items:center!important;flex:0 0 38px!important;width:38px!important;height:43px!important;min-width:38px!important;padding:0!important;border:0!important;color:#f5f5f7!important;background:transparent!important;border-radius:10px!important}
+.app.pl-ui .top #menu svg{width:23px;height:23px}
+.app.pl-ui .top #newTop{display:grid!important;place-items:center!important;flex:0 0 42px!important;width:42px!important;height:42px!important;min-width:42px!important;padding:0!important;border:0!important;color:#f5f5f7!important;background:transparent!important;border-radius:12px!important;font-size:0!important}
+.app.pl-ui .top #newTop svg{width:22px;height:22px}
+.app.pl-ui .top #newTop:hover,.app.pl-ui .top #menu:hover{background:#ffffff11!important}
+.app.pl-ui .pl-title{display:flex;flex-direction:column;justify-content:center;min-width:0;flex:1;gap:1px}
+.app.pl-ui .pl-title-main{font-size:17px;line-height:1.2;color:#f5f5f7;font-weight:700;letter-spacing:-.035em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.app.pl-ui .pl-title-sub{font-size:12px;line-height:1.2;color:#8e8e93;font-weight:450;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.app.pl-ui .pl-status-dot{display:inline-block;vertical-align:middle;width:6px;height:6px;border-radius:50%;background:#30d158;margin-right:6px}
+/* Native-style chat drawer */
+.app.pl-ui #sidebar{width:min(84vw,340px)!important;flex:0 0 min(84vw,340px);padding:0!important;gap:0!important;border-right:1px solid #ffffff12!important;border-radius:0!important;background:#0e0e10!important;color:#f6f6f7!important;position:relative}
+.app.pl-ui #sidebar .sidehead{height:69px;min-height:69px;padding:18px 20px 12px!important;border:0!important;background:transparent!important}
+.app.pl-ui #sidebar .sidehead strong{font-size:24px!important;font-weight:720!important;letter-spacing:-.04em!important;color:white!important}
+.app.pl-ui #sidebar #newSide{position:absolute!important;right:10px;top:13px;width:44px!important;height:44px!important;min-height:44px!important;padding:0!important;margin:0!important;display:grid!important;place-items:center!important;border:0!important;border-radius:11px!important;background:transparent!important;color:#0a84ff!important;z-index:2;font-size:0!important}
+.app.pl-ui #sidebar #newSide svg{width:22px;height:22px}
+.app.pl-ui #sidebar #newSide:hover{background:#ffffff14!important}
+.app.pl-ui #sidebar .chats{flex:1;min-height:0;padding:2px 12px!important;overflow:auto!important}
+.app.pl-ui #sidebar .nx-toolbar{margin:3px 4px 13px!important}
+.app.pl-ui #sidebar .nx-search{height:40px!important;padding:9px 13px 9px 36px!important;border:0!important;background:#222225!important;color:#f5f5f7!important;border-radius:10px!important;font-size:15px!important}
+.app.pl-ui #sidebar .nx-toolbar:before{top:12px!important;left:13px!important}
+.app.pl-ui #sidebar .nx-toolbar:after{top:25px!important;left:26px!important}
+.app.pl-ui #sidebar .chatrow{margin:2px 0!important;border-radius:10px!important}
+.app.pl-ui #sidebar .chatrow button:first-child{min-height:44px;padding:11px 12px!important;font-size:14px!important;font-weight:500;color:#e8e8eb!important}
+.app.pl-ui #sidebar .chatrow.active,.app.pl-ui #sidebar .chatrow:hover{background:#ffffff13!important}
+.app.pl-ui #sidebar .chatrow .del{color:#8e8e93!important}
+.app.pl-ui #sidebar .sidebottom{padding:10px 12px max(12px,env(safe-area-inset-bottom))!important;border-top:1px solid #ffffff14;gap:3px!important}
+.app.pl-ui #sidebar .sidebottom .sidebtn{min-height:45px!important;padding:12px!important;border:0!important;border-radius:10px!important;background:transparent!important;color:#e0e0e3!important;font-size:14px!important}
+.app.pl-ui #sidebar .sidebottom .sidebtn:hover{background:#ffffff12!important}
+@media(max-width:700px){.app.pl-ui #sidebar{position:fixed!important;z-index:1800!important;top:0!important;bottom:0!important;left:0!important;box-shadow:15px 0 40px #0009!important;transition:transform .18s ease!important}.app.pl-ui #sidebar:not(.open){transform:translateX(-102%)!important}.app.pl-ui #sidebar.open{transform:translateX(0)!important}}
+.app.pl-ui .pl-scrim{display:none;position:fixed;inset:0;z-index:1790;background:#0009}
+.app.pl-ui .pl-scrim.active{display:block}
+/* Chat landing identical shape to PrivateLM */
+.app.pl-ui #home{background:#000!important;gap:0!important;padding:16px 20px 20px!important;justify-content:center!important;position:relative;min-height:0}
+.app.pl-ui #home .logo{display:none!important}
+.app.pl-ui #home .pl-model-card{position:absolute;top:12px;left:0;right:0;width:min(100%,580px);margin:0 auto;padding:13px 16px;display:flex;align-items:center;gap:11px;background:#141416;border:1px solid #ffffff13;border-radius:15px;text-align:left}
+.app.pl-ui .pl-model-icon{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:#0a84ff1c;color:#0a84ff;flex:0 0 38px}
+.app.pl-ui .pl-model-icon svg{width:21px;height:21px}
+.app.pl-ui .pl-model-copy{min-width:0;flex:1}
+.app.pl-ui .pl-model-copy strong{display:block;color:#fff;font-weight:630;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.app.pl-ui .pl-model-copy small{display:block;color:#8e8e93;font-size:12px;margin-top:3px}
+.app.pl-ui .pl-model-indicator{width:7px;height:7px;background:#30d158;border-radius:50%;flex:0 0 7px}
+.app.pl-ui #home h1{font-size:clamp(24px,5.2vw,29px)!important;font-weight:400!important;letter-spacing:-.03em!important;line-height:1.28!important;margin:0!important;color:#e8e8eb!important;white-space:pre-line!important;max-width:380px}
+.app.pl-ui #home .suggest{position:absolute;bottom:18px;left:16px;right:16px;display:flex!important;flex-wrap:wrap!important;gap:9px!important;justify-content:center!important;margin:0 auto!important;max-width:620px!important}
+.app.pl-ui #home .suggest button{padding:12px 13px!important;min-height:44px!important;background:transparent!important;border:1px solid #ffffff25!important;border-radius:16px!important;color:#c7c7cc!important;font-size:12px!important;font-weight:530!important;text-align:left}
+.app.pl-ui #home .suggest button:active{background:#1e1e21!important}
+/* Native text messages, user bubble and borderless assistant response */
+.app.pl-ui #messages{background:#000!important;color:#f5f5f7!important;padding:14px max(20px,calc((100% - 720px)/2)) 12px!important;font-size:15.5px!important;line-height:1.6!important}
+.app.pl-ui #messages .bubble{max-width:100%!important;width:auto;border:0!important;box-shadow:none!important;white-space:pre-wrap;margin:8px 0 10px!important;overflow-wrap:anywhere;padding:8px 0!important;font-size:15.5px!important;line-height:1.58!important}
+.app.pl-ui #messages .bubble.user{margin-left:auto!important;max-width:80%!important;width:fit-content!important;background:#1e1e21!important;border:0!important;border-radius:20px!important;padding:11px 16px!important}
+.app.pl-ui #messages .bubble.assistant{background:transparent!important;border:0!important;border-radius:0!important;padding:8px 0!important}
+.app.pl-ui #messages .bubble.assistant .copy,.app.pl-ui #messages .copy{color:#8e8e93!important}
+.app.pl-ui #messages a,.app.pl-ui .nx-work-feed a{color:#0a84ff!important}
+/* Native PrivateLM message composer */
+.app.pl-ui #form.composer{width:min(calc(100% - 24px),740px)!important;margin:6px auto 6px!important;padding:7px 9px!important;border-radius:26px!important;min-height:57px!important;gap:0!important;background:#1c1c1e!important;border:1px solid #38383a!important;box-shadow:none!important}
+.app.pl-ui #form.composer:focus-within{border-color:#48484a!important;box-shadow:none!important}
+.app.pl-ui #form .nx-compose-main{display:flex!important;align-items:center!important;gap:6px!important;min-height:41px!important}
+.app.pl-ui #form #prompt{font-size:16px!important;line-height:1.45!important;color:white!important;padding:9px 6px!important;min-height:42px!important;max-height:154px!important}
+.app.pl-ui #form #prompt::placeholder{color:#8e8e93!important}
+.app.pl-ui #form #nxAttach{width:37px!important;min-width:37px!important;height:39px!important;flex:0 0 37px!important;display:grid!important;place-items:center!important;padding:0!important;color:#c6c6cb!important;border:0!important;border-radius:11px!important;background:transparent!important;box-shadow:none!important}
+.app.pl-ui #form #nxAttach:hover{background:#ffffff10!important}
+.app.pl-ui #form #nxMic{width:37px!important;min-width:37px!important;height:39px!important;flex:0 0 37px!important;color:#c6c6cb!important;border:0!important;border-radius:11px!important;background:transparent!important}
+.app.pl-ui #form #send{width:38px!important;min-width:38px!important;height:38px!important;min-height:38px!important;flex:0 0 38px!important;display:grid!important;place-items:center!important;margin:0!important;border-radius:50%!important;padding:0!important;border:0!important;background:#0a84ff!important;color:#fff!important;box-shadow:none!important;font-size:22px!important}
+.app.pl-ui #form #send:disabled{background:#444448!important;color:#9f9fa5!important;opacity:1!important}
+.app.pl-ui #form .nx-compose-footer{display:none!important}
+.app.pl-ui .main>.notice{display:none!important}
+/* Original HomeView bottom bar: 4 evenly spaced tabs, 54px high */
+.app.pl-ui .pl-bottom-nav{width:100%;height:57px;min-height:57px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));align-items:stretch;flex:0 0 57px;background:#000;border-top:1px solid #ffffff15;z-index:5;padding-bottom:env(safe-area-inset-bottom)}
+.app.pl-ui .pl-nav-item{border:0;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:#7c7c80;min-width:0;cursor:pointer;padding:3px 2px;font-size:10.5px;font-weight:550;letter-spacing:.01em}
+.app.pl-ui .pl-nav-item svg{width:22px;height:22px;stroke-width:1.8}
+.app.pl-ui .pl-nav-item.active{color:#0a84ff}
+.app.pl-ui .pl-nav-item:hover{background:#ffffff07}
+.app.pl-ui .pl-nav-item:focus-visible{outline:2px solid #0a84ff;outline-offset:-2px}
+/* Work remains fully functional, now follows PrivateLM colors & spacing. */
+.app.pl-ui #nxWorkPane{background:#000!important;min-height:0}
+.app.pl-ui .nx-work-scroll{background:#000!important;padding:14px 16px!important}
+.app.pl-ui .nx-work-welcome{padding:14px!important}
+.app.pl-ui .nx-work-welcome h1{font-size:27px!important;font-weight:450!important;letter-spacing:-.035em!important;color:#eeeef0!important}
+.app.pl-ui .nx-work-welcome p{color:#8e8e93!important;font-size:14px!important}
+.app.pl-ui .nx-work-eyebrow{color:#8e8e93!important}
+.app.pl-ui .nx-work-eyebrow span{color:#0a84ff!important}
+.app.pl-ui .nx-work-starters button{background:transparent!important;color:#c7c7cc!important;border:1px solid #38383a!important;border-radius:16px!important;min-height:44px}
+.app.pl-ui .nx-wmessage{border:0!important;background:transparent!important;color:#f5f5f7!important;line-height:1.6!important;padding:8px 0!important}
+.app.pl-ui .nx-wmessage.user{border:0!important;background:#1e1e21!important;border-radius:20px!important;padding:10px 15px!important;max-width:80%}
+.app.pl-ui .nx-wmessage.status{color:#8e8e93!important;border:0!important}
+.app.pl-ui .nx-wmessage.error{color:#ff6961!important}
+.app.pl-ui #nxWorkForm.nx-work-form{width:min(calc(100% - 24px),740px)!important;background:#1c1c1e!important;border:1px solid #38383a!important;border-radius:23px!important;box-shadow:none!important;margin:5px auto!important;padding:11px 12px!important}
+.app.pl-ui #nxWorkForm:focus-within{border-color:#48484a!important;box-shadow:none!important}
+.app.pl-ui #nxWorkForm .nx-wk-heading{display:none!important}
+.app.pl-ui #nxWorkForm #nxWorkPrompt{min-height:48px!important;max-height:160px!important;padding:4px 2px 8px!important;font:400 16px/1.48 Inter,system-ui,sans-serif!important;color:white!important}
+.app.pl-ui #nxWorkForm #nxWorkPrompt::placeholder{color:#8e8e93!important}
+.app.pl-ui #nxWorkForm .nx-work-compose-bottom{padding-top:8px!important;margin:0!important;border-top:1px solid #ffffff16!important;min-height:45px!important}
+.app.pl-ui #nxWorkForm .nx-work-agent>span{color:#8e8e93!important;font-size:10px!important}
+.app.pl-ui #nxWorkForm #nxModeTrigger{min-width:110px!important;height:41px!important;min-height:41px!important;padding:5px 9px!important;border:1px solid #38383a!important;border-radius:13px!important;background:#2c2c2e!important;box-shadow:none!important;color:#f5f5f7!important}
+.app.pl-ui #nxWorkForm #nxModeTrigger .nx-mode-mark{background:#0a84ff16!important;border-color:#0a84ff35!important;color:#0a84ff!important}
+.app.pl-ui #nxWorkForm #nxWorkSend.nx-wk-run-button{min-width:107px!important;height:42px!important;min-height:42px!important;padding:4px 5px 4px 12px!important;border:0!important;border-radius:13px!important;background:#0a84ff!important;color:#fff!important;box-shadow:none!important;font-size:12px!important}
+.app.pl-ui #nxWorkForm .nx-wk-run-icon{height:31px;width:31px;flex-basis:31px;border-radius:10px;background:#ffffff20}
+.app.pl-ui #nxWorkForm .nx-wk-run-label{color:#fff}
+.app.pl-ui .nx-work-disclaimer{color:#77777d!important;font-size:10px!important;line-height:1.45!important;padding:2px 16px 7px!important}
+.app.pl-ui .nx-work-browser{background:#1c1c1e!important;border-color:#38383a!important}
+.app.pl-ui #nxModeMenu{background:#1c1c1e!important;border-color:#38383a!important}
+.app.pl-ui #nxModeMenu .nx-mode-option.active{color:#0a84ff!important}
+@media(max-width:700px){.app.pl-ui .top{height:54px!important;min-height:54px!important;flex-basis:54px!important;padding:0 9px!important}.app.pl-ui #home .pl-model-card{top:8px;width:calc(100% - 16px)}.app.pl-ui #home .suggest{bottom:9px;gap:7px!important}.app.pl-ui #home .suggest button{padding:9px 11px!important;min-height:41px!important}.app.pl-ui #messages{padding:13px 20px!important}.app.pl-ui #form.composer{width:calc(100% - 18px)!important;padding:6px 8px!important}.app.pl-ui #nxWorkForm.nx-work-form{width:calc(100% - 18px)!important;padding:9px 10px!important}.app.pl-ui #nxWorkForm #nxWorkSend.nx-wk-run-button{min-width:98px!important}.app.pl-ui .pl-bottom-nav{height:55px;min-height:55px;flex-basis:55px}}
+@media(max-width:355px){.app.pl-ui #form .nx-compose-main{gap:2px!important}.app.pl-ui #form #nxMic{width:31px!important;min-width:31px!important;flex-basis:31px!important}.app.pl-ui #form #nxAttach{width:32px!important;min-width:32px!important;flex-basis:32px!important}.app.pl-ui #home .suggest button{font-size:11px!important}.app.pl-ui #nxWorkForm .nx-work-agent>span{display:none!important}}
+@media(prefers-reduced-motion:reduce){.app.pl-ui *{transition:none!important;animation-duration:.001ms!important}}
