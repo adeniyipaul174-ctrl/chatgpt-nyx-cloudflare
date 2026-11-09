@@ -2,6 +2,17 @@
 
 > **Source-of-truth warning:** The GitHub root code is a previous prototype, **not** the complete current NyX Worker. Never run the existing Wrangler project against the live Worker until a complete source reconciliation, isolated staging rollout, and authenticated regression test are done. Do not overwrite the live database.
 
+## 9 November 2026 — Remove duplicate PrivateLM interface; one clean mobile UI
+
+- **Current live version:** `b842f7d9-1410-4723-8f8d-5b31ef7df619`; **deployment:** `a4ec90be-ab3b-4210-b814-fe2d313e53d9` (100% traffic). **Rollback version:** `5d255184-49ab-444a-822c-ba0606ee72f9`.
+- **Cause:** Two independent frontend ports had been stacked together: `nxpl-private-port-20261109` / `nxpl-private-shell-20261109` and `plNativePortCss20261109` / `plNativePortJs20261109`. Their CSS and duplicate greeting/navigation/model elements conflicted. One greeting container expanded across most of the empty conversation area.
+- **Fix:** Removed the older `nxpl-` style and script completely, preserving the newer attributed PrivateLM shell. Replaced the welcome with a single compact star mark, correctly sized title, and model card; normalized spacing around Chat's existing composer and the single bottom bar. Added independent PrivateLM MIT attribution into NyX's existing About panel.
+- **Size:** Net Worker source dropped from **1,144,004** to **1,112,836** characters/bytes as measured in the connector's ASCII-oriented count (approximately **31 KB less**). The removed duplicate components accounted for 35,527 source characters before replacement polish.
+- **Live 390px mobile tests:** Exactly one bottom navigation, one model card, one welcome section; no duplicate old stylesheet/script; no horizontal overflow. Chat, Work, Normal Chat default, Settings modal, sidebar open and outside-tap dismissal all worked in the test browser; Work's composer and Agent button remained accessible.
+- **Preserved:** All **13 Cloudflare bindings**, existing chat history, search, image creation, agent teams, Work, AI browser and account backend code. No database content was altered.
+- **Limitations:** Tests were performed on the live page with the unauthenticated gate suppressed inside the test browser; full authenticated AI and browser actions were not re-tested. The upstream project is MIT-licensed; adaptation retains its citation and source link.
+- **Source for subsequent UI changes:** `addons/privatelm-interface/privatelm-ui.css`, `addons/privatelm-interface/privatelm-ui.js`, `addons/privatelm-interface/ATTRIBUTION.md`. GitHub root Worker source remains out of sync and should not be deployed over production.
+
 ## 9 November 2026 — Public search speed and unresolved external limits
 
 - **Production deployed version:** `dd7da766-fa88-4660-b2d3-2eb5392fa329`, deployment `fc48b21d-5651-431d-9279-d175360f1e8e` (100%). **Rollback:** `ddf5d90b-2666-4be1-a089-f90b3c4beeb6`.
