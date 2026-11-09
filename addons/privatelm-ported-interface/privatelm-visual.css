@@ -556,3 +556,38 @@ body.nx-light .app .nxpl-bottomnav{color:#6e6e73!important;background:#fff!impor
 body.nx-light .app .nxpl-bottomnav button[aria-selected=true]{color:#007aff!important}
 @media(max-width:700px){body.nx-light .app .sidebar{position:absolute!important;left:0!important;top:0!important;bottom:0!important;z-index:35!important;transform:translateX(-102%)}body.nx-light .app .sidebar.open{transform:translateX(0)!important}}
 .nxpl-model-symbol svg{width:21px;height:21px;stroke-width:1.9}
+
+/* PrivateLM full-screen Settings destination, retaining the existing NyX controls. */
+@media(max-width:700px){
+ body:not(.nx-light) #nxSettings[open],body.nx-light #nxSettings[open]{
+   width:100vw!important;max-width:none!important;
+   height:100dvh!important;max-height:none!important;
+   margin:0!important;inset:0!important;padding:0!important;
+   border-radius:0!important;border:0!important;box-shadow:none!important;
+   overflow:hidden!important;
+ }
+ #nxSettings[open] .nx-settings-shell{
+   height:100%!important;max-height:none!important;min-height:0!important;
+   grid-template-columns:minmax(0,1fr)!important;
+ }
+ body:not(.nx-light) #nxSettings[open]{
+   background:#000!important;color:#fff!important;
+ }
+ body:not(.nx-light) #nxSettings[open] .nx-settings-nav,
+ body:not(.nx-light) #nxSettings[open] .nx-settings-body,
+ body:not(.nx-light) #nxSettings[open] .nx-settings-head{
+   background:#000!important;border-color:#ffffff14!important;color:#fff!important;
+ }
+ body:not(.nx-light) #nxSettings[open] .nx-tabs button.active{
+   color:#0a84ff!important;background:#0a84ff19!important;
+ }
+ body.nx-light #nxSettings[open],
+ body.nx-light #nxSettings[open] .nx-settings-nav,
+ body.nx-light #nxSettings[open] .nx-settings-body,
+ body.nx-light #nxSettings[open] .nx-settings-head{
+   background:#fff!important;color:#0b0b0c!important;
+ }
+ body.nx-light #nxSettings[open] .nx-tabs button.active{
+   color:#007aff!important;background:#007aff13!important;
+ }
+}
