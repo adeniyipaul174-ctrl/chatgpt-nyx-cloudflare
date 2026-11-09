@@ -27,6 +27,15 @@
   const a=document.createElement("a");a.href="https://github.com/orailnoor/cross-platform-llm-client";
   a.textContent="Source and license";a.target="_blank";a.rel="noopener noreferrer";
   credit.appendChild(a);about.appendChild(credit);
+  const pane=document.querySelector('#nxSettings [data-nx-pane="about"]');
+  if(pane&&!pane.querySelector('#nxpl-provider-credit')){
+   const row=document.createElement('div');row.className='nx-setting stacked';row.id='nxpl-provider-credit';
+   const copy=document.createElement('div');copy.className='copy';
+   const label=document.createElement('label');label.textContent='Interface design credit';
+   const caption=document.createElement('p');caption.textContent='PrivateLM open-source interface (MIT).';
+   const link=document.createElement('a');link.href='https://github.com/orailnoor/cross-platform-llm-client';link.target='_blank';link.rel='noopener noreferrer';link.textContent='PrivateLM source and license';
+   copy.append(label,caption,link);row.appendChild(copy);pane.appendChild(row);
+  }
  }
  const icon={
    chat:'<path d="M21 11.4a8.8 8.8 0 0 1-9.3 8.5 9.8 9.8 0 0 1-3.5-.8L3 21l1.9-5a8.5 8.5 0 1 1 16.1-4.6Z"/>',
@@ -81,6 +90,7 @@
  const observer=new MutationObserver(refresh);observer.observe(document.body,{attributes:true,attributeFilter:["data-nx-stage"]});
  byId("nxTabChat")?.addEventListener("click",refresh);
  byId("settings")?.addEventListener("close",()=>{settingsOpen=false;refresh()});
+ byId("nxSettings")?.addEventListener("close",()=>{settingsOpen=false;refresh()});
  byId("nxTabWork")?.addEventListener("click",refresh);
  refresh();
 })();
