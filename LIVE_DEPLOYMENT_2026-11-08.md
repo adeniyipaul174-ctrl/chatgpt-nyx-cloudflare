@@ -2,6 +2,14 @@
 
 > **Source-of-truth warning:** The GitHub root code is a previous prototype, **not** the complete current NyX Worker. Never run the existing Wrangler project against the live Worker until a complete source reconciliation, isolated staging rollout, and authenticated regression test are done. Do not overwrite the live database.
 
+## 9 November 2026 — NyX header branding; remove model card
+
+- **Live Cloudflare Worker version:** `70796173-746a-4aa2-8932-d3b8a92a1caf`; deployment `925b58db-e6d2-49a8-8475-2b94928074f5`, 100% traffic. **Rollback:** `b842f7d9-1410-4723-8f8d-5b31ef7df619`.
+- Changed the **actual** live NyX frontend, not a screenshot. Removed the default-home model card and visible `Llama 4 Scout` title/subtitle. Replaced the header with a 27px blue NyX sparkle logo immediately to the left of the NyX wordmark. Preserved the center welcome sparkle and bottom navigation.
+- Source files: `addons/privatelm-interface/privatelm-ui.js` and `addons/privatelm-interface/privatelm-ui.css`. Updated embedded equivalents in production Worker; did **not** change model routing, usage accounting, or external API attribution requirements.
+- The responsive header and home were verified in Cloudflare Browser Rendering at 390 × 844px: logo renders blue, header displays NyX without a subtitle, model-card count 0, no horizontal overflow, Chat switches to Work and back, and Settings opens. All 13 Cloudflare bindings inherited. The browser test bypassed the unauthenticated gate for visual inspection only; signed-in inference was not retested.
+- The GitHub root Worker source remains outdated. Do not deploy it over the current live Worker.
+
 ## 9 November 2026 — Remove duplicate PrivateLM interface; one clean mobile UI
 
 - **Current live version:** `b842f7d9-1410-4723-8f8d-5b31ef7df619`; **deployment:** `a4ec90be-ab3b-4210-b814-fe2d313e53d9` (100% traffic). **Rollback version:** `5d255184-49ab-444a-822c-ba0606ee72f9`.
