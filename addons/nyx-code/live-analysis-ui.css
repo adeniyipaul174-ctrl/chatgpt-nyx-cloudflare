@@ -1,0 +1,33 @@
+/* NyX Code: quiet, inline activity similar to modern chat task progress. */
+body[data-nx-product="code"] #messages .bubble.assistant.nx-realtime-bubble{
+ width:100%!important;max-width:100%!important;
+ padding:4px 0 12px!important;margin:8px 0 15px!important;
+ background:transparent!important;border:0!important;box-shadow:none!important;
+ border-radius:0!important
+}
+body[data-nx-product="code"] #messages .nx-realtime-activity{
+ display:block!important;width:100%!important;max-width:100%!important;
+ background:transparent!important;border:0!important;border-radius:0!important;
+ box-shadow:none!important;padding:0!important;color:#e5e9f2!important
+}
+body[data-nx-product="code"] #messages .nx-realtime-heading{
+ display:flex;align-items:center;gap:10px;font-size:13px;line-height:1.5;
+ color:#b7c3d6;margin:0 0 10px
+}
+body[data-nx-product="code"] #messages .nx-realtime-brand{font-size:13px;font-weight:720;color:#eceff7}
+body[data-nx-product="code"] #messages .nx-realtime-label{font-size:12px;color:#a8b4c5}
+body[data-nx-product="code"] #messages .nx-realtime-spinner{
+ width:14px;height:14px;flex:0 0 14px;border:2px solid #384a60;
+ border-top-color:#74b2ff;border-radius:50%;animation:nx-realtime-spin 1.05s linear infinite
+}
+body[data-nx-product="code"] #messages .nx-realtime-lines{
+ display:flex;flex-direction:column;gap:9px;margin-left:7px;padding-left:11px;
+ border-left:1px solid #343b49
+}
+body[data-nx-product="code"] #messages .nx-realtime-line{
+ color:#d7dde8;font-size:13px;line-height:1.55;
+ overflow-wrap:anywhere
+}
+body[data-nx-product="code"] #messages .nx-realtime-detail{color:#a3b0c4;font-size:12.5px}
+@keyframes nx-realtime-spin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){body[data-nx-product="code"] #messages .nx-realtime-spinner{animation:none!important}}
