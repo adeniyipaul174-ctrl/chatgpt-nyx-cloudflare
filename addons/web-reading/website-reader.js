@@ -16,7 +16,7 @@ function nxWebLink(text){
  const absolute=source.match(/https?:\/\/[^\s<>"'\x60]+/i);
  let raw=absolute?.[0]||"";
  if(!raw){
-  const url=source.match(/(?:^|[\s([{"'])((?:www\.)?[a-zA-Z0-9][a-zA-Z0-9.-]{1,140}\.(?:com|org|net|io|dev|ai|app|edu|gov|co|uk|us|ca|au|info|site|me|blog|tech|gg|xyz|tv|fm|store|shop)(?:\/[^\s<>"'\x60]*)?)/i);
+  const url=source.match(/(?:^|[\s([{"'])((?:www\.)?(?:[A-Za-z0-9][A-Za-z0-9-]{0,62}\.)+[A-Za-z]{2,24}(?:[/?#][^\s<>"'\x60]*)?)/i);
   if(url&&!source.slice(Math.max(0,url.index-1),url.index).includes("@"))raw=url[1];
  }
  if(!raw)return null;
@@ -38,7 +38,13 @@ function nxWebRequested(text,history=[]){
  if(link)return null;
  const siteAsk=/\b(?:open|visit|read|browse|check|inspect|review|summari[sz]e|analy[sz]e|look at)\b[\s\S]{0,100}\b(?:website|webpage|site|page)\b/i.test(s)
    ||/^\s*(?:open|visit|read|browse|check)\s+(?:the\s+)?(?:[a-z-]+\s+){0,2}(?:website|webpage|site|page)\b/i.test(s);
- if(!siteAsk)return null;
+ if(!siteAsk){
+  if(!/^\s*(?:please\s+)?(?:open|visit|browse|read|check|inspect|review)\b/i.test(s))return null;
+  for(const [name,url] of NX_WEB_READER_KNOWN){
+   if(new RegExp("(?:^|[^a-z])"+name+"(?:$|[^a-z])","i").test(s))return {url,requested:true,named:true};
+  }
+  return null;
+ }
  for(const [name,url] of NX_WEB_READER_KNOWN){
   if(new RegExp("(?:^|[^a-z])"+name+"(?:$|[^a-z])","i").test(s))return {url,requested:true,named:true};
  }
