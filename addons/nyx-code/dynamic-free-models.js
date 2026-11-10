@@ -79,7 +79,7 @@ async function nxCodeFreeInference(env,messages){
     headers:{"Authorization":"Bearer "+env.OPENROUTER_API_KEY,"Content-Type":"application/json",
      "HTTP-Referer":"https://chatgpt-nyx-v3-test.adeniyipaul174.workers.dev",
      "X-Title":"NyX Code"},
-    body:JSON.stringify({model,messages:accepted,max_tokens:1900,temperature:0.24,stream:false,
+    body:JSON.stringify({model,messages:accepted,max_tokens:3200,temperature:0.24,stream:false,
      provider:{data_collection:"deny"}}),
     signal:AbortSignal.timeout(13500)
    });
@@ -94,7 +94,16 @@ async function nxCodeFreeInference(env,messages){
    const data=await response.json();
    const choice=data?.choices?.[0]?.message?.content;
    const reply=typeof choice==="string"?choice:Array.isArray(choice)?choice.filter(x=>x?.type==="text").map(x=>x.text).join("\n"):"";
-   if(reply.trim())return reply.slice(0,14500);
+   if(reply.trim()){
+    const endState=String(data?.choices?.[0]?.finish_reason||"");
+    const clipped=reply.slice(0,24500);
+    if(endState==="length"||endState==="max_tokens"||endState==="max_output_tokens"){
+     const ticks=String.fromCharCode(96,96,96);
+     const open=(clipped.match(new RegExp(ticks,"g"))||[]).length%2===1;
+     return clipped+"\n"+(open?ticks+"\n":"")+"\n**Output limit reached.** The code above may be incomplete. Ask NyX Code to continue from the last line, or request one file at a time.";
+    }
+    return clipped;
+   }
    last="Empty free model response";
   }catch(e){last=String(e?.message||e).slice(0,90)}
  }
