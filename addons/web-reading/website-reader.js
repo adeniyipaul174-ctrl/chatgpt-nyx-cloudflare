@@ -63,7 +63,16 @@ async function nxWebReadInChat(env,query,history,codeMode,style,instructions){
   return {kind:"text",reply:"I can read public HTTPS websites, but that address is not safe or accessible for public reading. Please use a public link without a login, token, private network address or credentials.",websiteRead:false};
  }
  let page=null;
- try{page=await nxReachRead(env,safe)}catch{}
+ try{
+  const host=new URL(safe).hostname;
+  const special=/^(?:www\.)?github\.com$|(?:^|\.)youtu(?:be\.com|\.be)$/.test(host)
+   ||/\/(?:feed|rss)\/?$|\.rss$|\.xml$|format=rss/i.test(safe);
+  if(special)page=await nxReachRead(env,safe);
+  else page=await Promise.any([
+   nxReachPublicHTML(safe).then(p=>{if(!p?.markdown||p.markdown.length<90)throw Error("No public text");return p}),
+   nxReachRead(env,safe)
+  ]);
+ }catch{}
  if(!page?.markdown?.trim()){
   return {kind:"browse",reply:"I couldn't retrieve readable public content from **"+new URL(safe).hostname+"**. The site may require a login, block automated readers, use a CAPTCHA, or depend on scripts that aren't available. I haven't read the page, so I won't invent its contents.\n\nTry another public page or paste the relevant text here.",websiteRead:false,sources:[],provider:"Reader unavailable"};
  }
