@@ -1,0 +1,51 @@
+/* NyX Code: contextual and truthful generation indicator. */
+body[data-nx-product="code"] #messages .nx-code-activity-bubble{
+ width:min(100%,430px)!important;max-width:100%!important;
+ padding:0!important;margin:9px 0!important;border:none!important;
+ background:transparent!important;box-shadow:none!important
+}
+body[data-nx-product="code"] #messages .nx-code-activity{
+ display:flex;align-items:center;gap:12px;
+ background:#14161b;border:1px solid #303644;
+ border-radius:16px;padding:14px 14px;min-height:74px;
+ color:#f0f3fa;box-sizing:border-box;width:100%;max-width:100%
+}
+body[data-nx-product="code"] #messages .nx-code-activity-signal{
+ display:inline-flex;flex:0 0 32px;width:32px;height:32px;
+ border-radius:11px;align-items:center;justify-content:center;
+ gap:3px;background:#0a84ff17;border:1px solid #0a84ff30
+}
+body[data-nx-product="code"] #messages .nx-code-activity-signal i{
+ display:block;width:4px;height:6px;border-radius:4px;background:#6db4ff;
+ animation:nx-code-activity-pulse 1.15s ease-in-out infinite
+}
+body[data-nx-product="code"] #messages .nx-code-activity-signal i:nth-child(2){animation-delay:.16s}
+body[data-nx-product="code"] #messages .nx-code-activity-signal i:nth-child(3){animation-delay:.32s}
+body[data-nx-product="code"] #messages .nx-code-activity-content{
+ display:flex;flex:1;min-width:0;flex-direction:column;gap:5px
+}
+body[data-nx-product="code"] #messages .nx-code-activity-heading{
+ color:#f0f3fa;font-size:13px;font-weight:650;line-height:1.3;
+ letter-spacing:-.015em;overflow-wrap:anywhere
+}
+body[data-nx-product="code"] #messages .nx-code-activity-sub{
+ color:#969eae;font-size:11px;line-height:1.35;overflow-wrap:anywhere
+}
+body[data-nx-product="code"] #messages .nx-code-activity-time{
+ align-self:flex-start;flex:0 0 auto;
+ font:500 10.5px/1.25 ui-monospace,SFMono-Regular,Consolas,monospace;
+ color:#7b8496;white-space:nowrap;padding-top:2px
+}
+@keyframes nx-code-activity-pulse{
+ 0%,60%,100%{height:6px;opacity:.52}
+ 30%{height:16px;opacity:1}
+}
+@media(max-width:380px){
+ body[data-nx-product="code"] #messages .nx-code-activity{gap:9px;padding:11px;min-height:70px}
+ body[data-nx-product="code"] #messages .nx-code-activity-heading{font-size:12.5px}
+ body[data-nx-product="code"] #messages .nx-code-activity-sub{font-size:10.5px}
+}
+@media(prefers-reduced-motion:reduce){
+ body[data-nx-product="code"] #messages .nx-code-activity-signal i{animation:none}
+ body[data-nx-product="code"] #messages .nx-code-activity-signal i:nth-child(2){height:11px}
+}
