@@ -1,0 +1,60 @@
+/* NyX Code: single contextual request card, no looping "Thinking..." text. */
+.app.pl-ui #messages .bubble.assistant.nx-code-awaiting{
+  max-width:100%!important;width:100%!important;margin:10px 0 16px!important;
+  padding:0!important;background:transparent!important;border:0!important;
+}
+.app.pl-ui #messages .nx-code-request-status{
+  display:flex;align-items:flex-start;gap:12px;width:min(100%,480px);
+  padding:15px 16px;border:1px solid #333e4d;border-radius:17px;
+  background:linear-gradient(125deg,#181b23,#111317);
+  box-shadow:0 4px 16px #0002;box-sizing:border-box;
+}
+.app.pl-ui #messages .nx-code-request-icon{
+  flex:0 0 36px;width:36px;height:36px;display:flex;align-items:center;
+  justify-content:center;color:#63a8ff;background:#0a84ff1c;border:1px solid #0a84ff2d;
+  border-radius:12px;
+}
+.app.pl-ui #messages .nx-code-request-icon svg{width:21px;height:21px}
+.app.pl-ui #messages .nx-code-request-details{flex:1;min-width:0}
+.app.pl-ui #messages .nx-code-request-heading{
+  display:flex;align-items:center;gap:9px;min-height:18px;
+}
+.app.pl-ui #messages .nx-code-request-brand{
+  color:#e5e9f1;font-size:12px;font-weight:700;letter-spacing:.025em;
+}
+.app.pl-ui #messages .nx-code-request-pulse{
+  width:7px;height:7px;border-radius:50%;background:#0a84ff;
+  box-shadow:0 0 0 0 #0a84ff64;animation:nxCodeRequestPulse 1.9s ease-out infinite;
+}
+.app.pl-ui #messages .nx-code-request-action{
+  margin:5px 0;color:#f2f4f8;font-size:15px;font-weight:620;line-height:1.4;
+}
+.app.pl-ui #messages .nx-code-request-note{
+  color:#a0a5b1;font-size:12px;line-height:1.5;font-weight:400;
+  overflow-wrap:anywhere;
+}
+.app.pl-ui #messages .nx-code-request-track{
+  position:relative;height:3px;max-width:230px;margin-top:12px;
+  overflow:hidden;border-radius:10px;background:#303643;
+}
+.app.pl-ui #messages .nx-code-request-track-fill{
+  position:absolute;left:-38%;width:38%;height:100%;border-radius:10px;
+  background:linear-gradient(90deg,#0a84ff14,#51a3ff,#0a84ff50);
+  animation:nxCodeRequestSlide 2s ease-in-out infinite;
+}
+@keyframes nxCodeRequestPulse{
+  0%{box-shadow:0 0 0 0 #0a84ff65}
+  75%,100%{box-shadow:0 0 0 9px #0a84ff00}
+}
+@keyframes nxCodeRequestSlide{
+  0%{left:-38%}100%{left:100%}
+}
+@media(max-width:370px){
+  .app.pl-ui #messages .nx-code-request-status{gap:10px;padding:12px}
+  .app.pl-ui #messages .nx-code-request-action{font-size:14px}
+}
+@media(prefers-reduced-motion:reduce){
+  .app.pl-ui #messages .nx-code-request-pulse,
+  .app.pl-ui #messages .nx-code-request-track-fill{animation:none!important}
+  .app.pl-ui #messages .nx-code-request-track-fill{left:0;width:45%}
+}
