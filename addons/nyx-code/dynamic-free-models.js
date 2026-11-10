@@ -43,7 +43,7 @@ async function nxCodeFreeCandidates(env){
   try{
    const response=await fetch("https://openrouter.ai/api/v1/models",{
     method:"GET",headers:{"Accept":"application/json"},
-    signal:AbortSignal.timeout(6500)
+    signal:AbortSignal.timeout(2200)
    });
    if(!response.ok)throw Error("Model catalog service returned "+response.status);
    const data=await response.json(),rows=Array.isArray(data?.data)?data.data:[];
@@ -63,8 +63,9 @@ async function nxCodeFreeCandidates(env){
  })();
  return await cache.busy;
 }
-async function nxCodeFreeInference(env,messages){
+async function nxCodeFreeInference(env,messages,externalSignal=null){
  if(!env?.OPENROUTER_API_KEY||Date.now()<NX_CODE_FREE_MODELS.pausedUntil)return null;
+ const deadline=Date.now()+14200;
  const catalog=await nxCodeFreeCandidates(env);
  // Up to 2 explicit attempts plus the free auto-router, but cap attempts
  // to 2 in total to avoid consuming an entire per-key daily free quota.
@@ -73,6 +74,9 @@ async function nxCodeFreeInference(env,messages){
   .slice(-15).map(m=>({role:m.role,content:String(m.content||"").slice(0,11500)}));
  let last="";
  for(const model of options){
+  if(externalSignal?.aborted)break;
+  const timeout=Math.min(model===options[0]?10000:4500,deadline-Date.now());
+  if(timeout<950)break;
   try{
    const response=await fetch("https://openrouter.ai/api/v1/chat/completions",{
     method:"POST",
@@ -81,7 +85,7 @@ async function nxCodeFreeInference(env,messages){
      "X-Title":"NyX Code"},
     body:JSON.stringify({model,messages:accepted,max_tokens:3200,temperature:0.24,stream:false,
      provider:{data_collection:"deny"}}),
-    signal:AbortSignal.timeout(13500)
+    signal:externalSignal&&typeof AbortSignal.any==='function'?AbortSignal.any([externalSignal,AbortSignal.timeout(timeout)]):AbortSignal.timeout(timeout)
    });
    if(!response.ok){
     last="Free provider "+response.status;
