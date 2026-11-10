@@ -39,6 +39,11 @@ function mark(modeName){
   el.setAttribute("aria-current",selected?"page":"false");
  }
 }
+function ensureBrand(){
+ const name=mode==="code"?"NyX Code":mode==="browser"?"NyX Browser":"NyX";
+ if(title&&title.textContent!==name)title.textContent=name;
+ if(mode==="code")mark("code");
+}
 function configure(){
  const code=mode==="code";
  document.body.dataset.nxProduct=mode;
@@ -53,7 +58,7 @@ function configure(){
   btns.forEach((btn,i)=>{if(texts[i])btn.textContent=texts[i];btn.hidden=!texts[i]});
  }
  if(oldWork && mode!=="browser")oldWork.hidden=true;
- mark(mode);
+ mark(mode);queueMicrotask(ensureBrand);
 }
 function enter(name,selectedId){
  if(name!=="chat"&&name!=="code")return;
@@ -130,6 +135,10 @@ document.addEventListener("click",event=>{
  if(mode==="code")codeId=null;
  if(mode==="chat")normalId=null;
 },true);
+// The prior PrivateLM theme controller also observes the old Chat/Work stage.
+// Reassert the new Code/Browser title and selected tab after that observer runs.
+new MutationObserver(()=>queueMicrotask(ensureBrand)).observe(document.body,{attributes:true,attributeFilter:["data-nx-stage"]});
+new MutationObserver(()=>{const desired=mode==="code"?"NyX Code":mode==="browser"?"NyX Browser":"NyX";if(title&&title.textContent!==desired)queueMicrotask(ensureBrand)}).observe(title,{childList:true,characterData:true});
 // Preserve historic Work chat records as readable Code conversations.
 window.nxCodeUI={enter,remember,getMode:()=>mode,isCodeId:isCode};
 if(current&&isCode(current))enter("code",current);
