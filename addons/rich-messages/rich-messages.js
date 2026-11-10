@@ -53,7 +53,7 @@ function draftKind(text,prompt){
  const emailRequest=/\b(?:draft|write|compose|rewrite|reply|polish|prepare|send)\b[\s\S]{0,90}\b(?:e-?mail|email reply)\b/i.test(question);
  const greeting=/^(?:dear\s+[^\n,]{2,70}[,:]|hi\s+[^\n,]{2,60}[,:]|hello\s+[^\n,]{2,60}[,:])/im.test(raw);
  const closing=/\b(?:best regards|kind regards|warm regards|sincerely|thank you|many thanks|yours truly)\b/i.test(raw);
- if(emailHeader&&(greeting||emailRequest||closing))return "email";
+ if(emailHeader&&(greeting||emailRequest||closing||/^\s*subject\s*:/i.test(raw)))return "email";
  if(emailRequest&&greeting&&closing)return "email";
  const explicitMessage=/^(?:\s*(?:\*\*)?)?(?:whats?app|sms|text message|direct message|dm|message to send|reply to send)(?:\s+message)?(?:\*\*)?\s*[:—-]/i.test(raw);
  const wantedMessage=/\b(?:draft|write|compose|rewrite|reply|polish|prepare)\b[\s\S]{0,95}\b(?:whats?app|text message|dm|direct message|short message|reply)\b/i.test(question);
@@ -132,38 +132,75 @@ function languageOf(code){
  if(/^\s*(?:body\s*\{|@media\b|\.[\w-]+\s*\{)/m.test(t))return "CSS";
  return "Code";
 }
-function downloadCode(code,label){
+function codeHeading(pre){
+ const holder=pre.closest(".nx-code-section")||pre;
+ const node=holder.previousElementSibling;
+ return String(node?.textContent||"").slice(0,150).trim();
+}
+function codeName(pre){
+ const heading=codeHeading(pre);
+ const match=heading.match(/\b(?:[a-z0-9_-]+\.)+(?:html?|css|jsx?|tsx?|py|json|sql|md|sh|go|rs|java|cpp|c|h|vue|svelte)\b/i);
+ return match?match[0]:null;
+}
+function codeLanguage(pre,code){
+ const recognized=languageOf(code);
+ if(recognized!=="Code")return recognized;
+ const heading=codeHeading(pre);
+ if(/\bhtml\b|\.html?\b/i.test(heading))return "HTML";
+ if(/\bcss\b|\.css\b/i.test(heading))return "CSS";
+ if(/\bjavascript\b|\.js\b/i.test(heading))return "JavaScript";
+ if(/\btypescript\b|\.ts\b/i.test(heading))return "TypeScript";
+ if(/\bpython\b|\.py\b/i.test(heading))return "Python";
+ return "Code";
+}
+function downloadCode(code,label,fileName){
  const name=String(label).toLowerCase();
  const ext=({"python":"py","javascript":"js","typescript":"ts","json":"json","sql":"sql","html":"html","css":"css","c++":"cpp","shell":"sh","bash":"sh","go":"go","rust":"rs"})[name]||"txt";
  const blob=new Blob([String(code.textContent||"")],{type:"text/plain;charset=utf-8"});
  const url=URL.createObjectURL(blob);
- const link=C("a");link.href=url;link.download="nyx-code."+ext;
+ const link=C("a");link.href=url;link.download=fileName||"nyx-code."+ext;
  document.body.append(link);link.click();link.remove();
  setTimeout(()=>URL.revokeObjectURL(url),1200);
 }
 function enhanceCode(bubble){
  for(const pre of bubble.querySelectorAll(".nx-ui4-md pre")){
   const code=pre.querySelector("code");if(!code)continue;
-  if(!pre.closest(".nx-code-section")){
-   const section=C("section","nx-code-section");
+  const section=pre.closest(".nx-code-section"),heading=codeHeading(pre);
+  const name=codeLanguage(pre,code),file=codeName(pre);
+  if(!section){
+   const box=C("section","nx-code-section");
    const head=C("div","nx-code-bar");
-   const name=languageOf(code);
-   head.append(C("span","nx-code-language",name));
+   head.append(C("span","nx-code-language",file||name));
    const actions=C("div","nx-artifact-code-actions");
    const copy=button("Copy","Copy code",()=>copyText(code.textContent,copy),"nx-code-copy");
-   const save=button("Save","Download code as a text file",()=>downloadCode(code,name),"nx-code-save");
-   actions.append(copy,save);head.append(actions);
-   pre.parentNode.insertBefore(section,pre);
-   section.append(head,pre);
+   const save=button("Save","Save code to a file",()=>downloadCode(code,name,file),"nx-code-save");
+   const wrap=button("No wrap","Switch to horizontal code scrolling",()=>{
+    const now=box.classList.toggle("nx-code-nowrap");
+    wrap.textContent=now?"Wrap":"No wrap";
+    pre.scrollLeft=0;
+   },"nx-code-wrap");
+   actions.append(copy,save,wrap);head.append(actions);
+   pre.parentNode.insertBefore(box,pre);box.append(head,pre);
   }else{
-   const section=pre.closest(".nx-code-section"),bar=section.querySelector(".nx-code-bar");
-   if(bar&&!bar.querySelector(".nx-code-save")){
-    const name=languageOf(code);
-    const existing=bar.querySelector("span");if(existing&&existing.textContent==="Code"&&name!=="Code")existing.textContent=name;
-    const save=button("Save","Download code as a text file",()=>downloadCode(code,name),"nx-code-save");
-    bar.append(save);
+   const bar=section.querySelector(".nx-code-bar");
+   if(bar){
+    const nameEl=bar.querySelector("span");
+    if(nameEl&&(nameEl.textContent==="Code"||nameEl.textContent==="Code block"))nameEl.textContent=file||name;
+    if(!bar.querySelector(".nx-code-save")){
+     const save=button("Save","Save code to a file",()=>downloadCode(code,name,file),"nx-code-save");
+     bar.append(save);
+    }
+    if(!bar.querySelector(".nx-code-wrap")){
+     const wrap=button("No wrap","Switch to horizontal code scrolling",()=>{
+      const nowrap=section.classList.toggle("nx-code-nowrap");
+      wrap.textContent=nowrap?"Wrap":"No wrap";
+      pre.scrollLeft=0;
+     },"nx-code-wrap");
+     bar.append(wrap);
+    }
    }
   }
+  pre.scrollLeft=0;
   pre.dataset.nxRichCode="1";
  }
 }
