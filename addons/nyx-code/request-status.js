@@ -57,5 +57,26 @@ function attach(pending,prompt){
  // cancellation, mode changes or thread switches. Its normal lifecycle remains
  // responsible for ending this indicator.
 }
-window.nxCodeRequestStatusV1={attach,actionFor};
+function promptFromCurrentConversation(){
+ try{
+  const item=chats.find(c=>c.id===current);
+  const m=item?.messages?.filter(x=>x?.role==="user").at(-1);
+  return String(m?.content||"");
+ }catch{return ""}
+}
+function enhancePending(){
+ if(document.body.dataset.nxProduct!=="code")return;
+ const messages=document.getElementById("messages");
+ if(!messages)return;
+ for(const item of messages.querySelectorAll('.bubble.assistant[role="status"]:not([data-nx-code-request-status])')){
+  attach(item,promptFromCurrentConversation());
+ }
+}
+const messages=document.getElementById("messages");
+if(messages)new MutationObserver(enhancePending).observe(messages,{
+ childList:true,subtree:true,attributes:true,attributeFilter:["role"]
+});
+new MutationObserver(enhancePending).observe(document.body,{attributes:true,attributeFilter:["data-nx-product"]});
+window.nxCodeRequestStatusV1={attach,actionFor,enhancePending};
+enhancePending();
 })();
