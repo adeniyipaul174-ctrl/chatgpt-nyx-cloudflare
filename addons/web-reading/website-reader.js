@@ -33,7 +33,7 @@ function nxWebRequested(text,history=[]){
    ||/^(?:how do i|how to|explain how)\b[\s\S]{0,95}\b(?:scrape|fetch|open|read)\s+(?:an?|the|any)\s+(?:website|webpage)\b/i.test(s))return null;
  const link=nxWebLink(s);
  const explicit=/\b(?:open|read|visit|browse|check|inspect|summari[sz]e|analy[sz]e|review|look at|take a look at|read through|what does|tell me about|explain|understand|extract|use this page|use this site|use the docs|documentation)\b/i.test(s);
- const isLinkOnly=!!link&&s.replace(link,"").replace(/https?:\/\/|www\./gi,"").trim().length<4;
+ const isLinkOnly=!!link&&(s.replace(link,"").replace(/https?:\/\/|www\./gi,"").trim().length<4||/^(?:www\.)?[a-z0-9.-]+\.[a-z]{2,24}(?:\/\S*)?$/i.test(s));
  if(link&&(explicit||isLinkOnly||s.length<250&&/https?:\/\/|www\./i.test(s)))return {url:link,requested:true};
  if(link)return null;
  const siteAsk=/\b(?:open|visit|read|browse|check|inspect|review|summari[sz]e|analy[sz]e|look at)\b[\s\S]{0,100}\b(?:website|webpage|site|page)\b/i.test(s)
