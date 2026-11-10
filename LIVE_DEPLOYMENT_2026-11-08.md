@@ -51,6 +51,15 @@
 - **QA:** Preview and final production mobile-browser tests at 390px with mocked delayed API responses passed. Code explanations received the right contextual label, Stop was active, the status disappeared on response, Send was restored, and switching to normal Chat worked; no horizontal overflow. Full signed-in model inference was not tested.
 - **Files:** `addons/nyx-code/activity-indicator.js`, `addons/nyx-code/activity-indicator.css`. **Do not deploy stale repository-root Worker code over production.**
 
+## 10 November 2026 — NyX Code contextual response status
+
+- **Current production Worker version:** `192d71d8-26be-4be8-8405-1894411f0c7e`, deployed to 100% of traffic as `c6815116-2d96-4bfd-be1d-f4e20b72b722`. **Rollback:** `4d2cba5a-876b-41c8-a1ec-6c71806f39e1`.
+- **Feature:** NyX Code already contained a single contextual `nxCodeActivityV1` pending-response component, rendering task-specific labels and an actual elapsed-time timer instead of looping "Thinking…". It also changes the subtitle after 8 seconds and warns of slow response after 25 seconds, without fabricating completed work.
+- **Refinement deployed:** Explanation-related questions now take priority over programming language keyword matches. For example, "Explain recursion in Python" now shows **Forming a clear explanation**, app-building prompts show **Putting the solution together**, and debugging prompts show **Finding a way to fix it**. This only changes presentation, not model selection or any stored data.
+- **Live QA:** Using simulated HTTP responses on the real mobile site at 390px, all three labels appeared, none included looping "Thinking", the status cleared after replies, Normal Chat remained separate, and there was no horizontal overflow. A separate test confirmed the status also clears when the model request fails. No signed-in real-model generation was tested in this QA.
+- **No extra overlay installed:** Two experimental `addons/nyx-code/request-status.*` files created while investigating were deleted after discovering the existing live status component, avoiding duplicate UI. The live source of truth is the already embedded `nxCodeActivityV1` script and CSS near the end of the primary HTML template.
+- **Preserved:** All **13** Cloudflare Worker bindings, original Chat and Code, chat history, account data, search, image features, and website branding. Never deploy the stale GitHub root Worker over production.
+
 > **Source-of-truth warning:** The GitHub root code is a previous prototype, **not** the complete current NyX Worker. Never run the existing Wrangler project against the live Worker until a complete source reconciliation, isolated staging rollout, and authenticated regression test are done. Do not overwrite the live database.
 
 ## 9 November 2026 — NyX header branding; remove model card
