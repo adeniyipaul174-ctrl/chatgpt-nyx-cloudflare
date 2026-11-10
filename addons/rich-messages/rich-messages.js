@@ -208,10 +208,17 @@ function enhanceTable(bubble){
  for(const wrap of bubble.querySelectorAll(".nx-ui4-table-wrap")){
   if(wrap.dataset.nxTableEnhanced)continue;
   const table=wrap.querySelector("table");if(!table)continue;
+  const headings=[...table.querySelectorAll("thead th")]
+   .map(th=>String(th.textContent||"").trim().slice(0,55));
+  for(const row of table.querySelectorAll("tbody tr")){
+   [...row.querySelectorAll(":scope > td")].forEach((cell,i)=>{
+    if(headings[i])cell.dataset.nxHeading=headings[i];
+   });
+  }
   wrap.dataset.nxTableEnhanced="1";
   const shell=C("div","nx-artifact-table");
   const head=C("div","nx-artifact-table-head");
-  head.append(C("span",null,"Table"));
+  head.append(C("span",null,headings.some(h=>/^file(?:name|s)?$/i.test(h))?"Files":"Table"));
   const copy=button("Copy table","Copy table as tab-separated values",()=>{
    const rows=[...table.querySelectorAll("tr")].map(row=>[...row.querySelectorAll("th,td")]
     .map(cell=>String(cell.textContent||"").replace(/\s+/g," ").trim().replace(/\t/g," ")));
