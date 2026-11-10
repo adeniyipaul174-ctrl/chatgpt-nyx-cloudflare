@@ -206,7 +206,7 @@ function enhanceCode(bubble){
 }
 function enhanceTable(bubble){
  for(const wrap of bubble.querySelectorAll(".nx-ui4-table-wrap")){
-  if(wrap.dataset.nxTableEnhanced)return;
+  if(wrap.dataset.nxTableEnhanced)continue;
   const table=wrap.querySelector("table");if(!table)continue;
   wrap.dataset.nxTableEnhanced="1";
   const shell=C("div","nx-artifact-table");
@@ -230,7 +230,7 @@ function enhance(){
   enhanceCode(bubble);
   enhanceTable(bubble);
   const md=bubble.querySelector(":scope > .nx-ui4-md");
-  if(!md||bubble.dataset.nxDraftFormatted)return;
+  if(!md||bubble.dataset.nxDraftFormatted)continue;
   if(md.querySelector("pre,table,.nx-ui4-table-wrap,.nx-code-section"))continue;
   const text=plaintext(md),kind=draftKind(text,previousUser(bubble));
   if(kind)makeDraft(bubble,md,kind);
