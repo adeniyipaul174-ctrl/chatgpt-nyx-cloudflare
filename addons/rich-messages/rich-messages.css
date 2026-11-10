@@ -1,0 +1,98 @@
+/* NyX rich messages: compact, editable writing drafts, formatted code and data. */
+.app.pl-ui #messages .bubble.assistant .nx-artifact-draft{
+ max-width:100%;border:1px solid #393b43;background:#16171b;border-radius:17px;
+ overflow:hidden;margin:7px 0 15px;color:#e6e7eb;box-shadow:0 3px 18px #0000001b;
+}
+.app.pl-ui #messages .nx-artifact-head{
+ display:flex;align-items:center;justify-content:space-between;gap:8px;
+ padding:10px 12px;background:#222328;border-bottom:1px solid #353640;
+}
+.app.pl-ui #messages .nx-artifact-title{display:flex;align-items:center;gap:9px;min-width:0}
+.app.pl-ui #messages .nx-artifact-glyph{
+ display:grid;place-items:center;flex:0 0 29px;width:29px;height:29px;
+ border-radius:9px;background:#0a84ff1b;border:1px solid #0a84ff2d;color:#7ab6ff;font-size:16px
+}
+.app.pl-ui #messages .nx-artifact-name{font-size:12px;font-weight:720;letter-spacing:.015em;color:#e7e8f0}
+.app.pl-ui #messages .nx-artifact-actions{display:flex;gap:5px;flex-shrink:0;align-items:center}
+.app.pl-ui #messages .nx-artifact-action,.app.pl-ui #messages .nx-artifact-table-head button{
+ background:#30323a;border:1px solid #434650;border-radius:9px;color:#d7e3ff;
+ font:600 12px/1.2 Inter,system-ui,sans-serif;padding:7px 9px;min-height:31px;
+ cursor:pointer;white-space:nowrap
+}
+.app.pl-ui #messages .nx-artifact-action:hover,.app.pl-ui #messages .nx-artifact-table-head button:hover{background:#41434d}
+.app.pl-ui #messages .nx-artifact-action:focus-visible,.app.pl-ui #messages .nx-code-save:focus-visible,.app.pl-ui #messages .nx-code-copy:focus-visible{outline:2px solid #5fa9ff;outline-offset:2px}
+.app.pl-ui #messages .nx-artifact-details{
+ display:flex;flex-direction:column;gap:6px;padding:11px 13px;
+ border-bottom:1px solid #303139;background:#17181c
+}
+.app.pl-ui #messages .nx-artifact-detail{
+ display:grid;grid-template-columns:61px minmax(0,1fr);gap:10px;
+ font-size:12px;line-height:1.55;overflow-wrap:anywhere
+}
+.app.pl-ui #messages .nx-artifact-detail>span:first-child{color:#8e92a1}
+.app.pl-ui #messages .nx-artifact-detail>strong{font-weight:650;color:#f0f1f5}
+.app.pl-ui #messages .nx-artifact-body{padding:15px 14px;font-size:14px;line-height:1.7;overflow-wrap:anywhere}
+.app.pl-ui #messages .nx-artifact-body[hidden],.app.pl-ui #messages .nx-artifact-editor[hidden]{display:none!important}
+.app.pl-ui #messages .nx-artifact-body>.nx-ui4-md>*:last-child{margin-bottom:0}
+.app.pl-ui #messages .nx-artifact-edited{white-space:pre-wrap;line-height:1.7;color:#ecedf2}
+.app.pl-ui #messages .nx-artifact-editor{
+ display:block;width:calc(100% - 24px);margin:12px;min-height:160px;max-height:450px;
+ resize:vertical;box-sizing:border-box;border:1px solid #505564;border-radius:12px;
+ padding:12px;background:#101115;color:#f4f5f7;font:14px/1.65 Inter,system-ui,sans-serif;
+}
+.app.pl-ui #messages .nx-artifact-editor:focus{outline:1px solid #0a84ff;border-color:#0a84ff}
+.app.pl-ui #messages .nx-artifact-table{
+ border:1px solid #363943;border-radius:14px;overflow:hidden;
+ background:#16181c;margin:12px 0 16px;max-width:100%
+}
+.app.pl-ui #messages .nx-artifact-table-head{
+ display:flex;justify-content:space-between;align-items:center;gap:12px;
+ padding:7px 12px;background:#22242a;border-bottom:1px solid #383b43
+}
+.app.pl-ui #messages .nx-artifact-table-head>span{font-size:12px;font-weight:680;color:#d5d8e4}
+.app.pl-ui #messages .nx-artifact-table-head button{padding:6px 9px;min-height:29px}
+.app.pl-ui #messages .nx-artifact-table>.nx-ui4-table-wrap{margin:0;overflow-x:auto;max-width:100%}
+.app.pl-ui #messages .nx-artifact-table th{background:#252932}
+.app.pl-ui #messages .nx-artifact-table td{background:transparent}
+.app.pl-ui #messages .nx-code-section{
+ border:1px solid #32363f;background:#111318;border-radius:14px;overflow:hidden;
+ margin:11px 0 16px;max-width:100%
+}
+.app.pl-ui #messages .nx-code-section .nx-code-bar{
+ display:flex;align-items:center;justify-content:space-between;gap:10px;
+ padding:6px 10px;min-height:39px;background:#21242b;border-bottom:1px solid #363942
+}
+.app.pl-ui #messages .nx-code-section .nx-code-bar>span{
+ font:650 11px/1.2 ui-monospace,SFMono-Regular,Consolas,monospace;color:#aebfdb
+}
+.app.pl-ui #messages .nx-artifact-code-actions{display:flex;gap:5px;align-items:center}
+.app.pl-ui #messages .nx-code-copy,.app.pl-ui #messages .nx-code-save{
+ border:1px solid #414754;background:#2b303a;border-radius:8px;color:#dce8ff;
+ font-size:12px;font-weight:600;line-height:1;padding:7px 10px;min-height:29px;cursor:pointer
+}
+.app.pl-ui #messages .nx-code-section pre{
+ padding:13px 14px;margin:0!important;border:0!important;border-radius:0!important;
+ overflow-x:auto!important;max-width:100%;background:#111318!important;
+ white-space:pre!important;tab-size:2
+}
+.app.pl-ui #messages .nx-code-section code{
+ white-space:pre!important;overflow-wrap:normal!important;word-break:normal!important;
+ color:#edf1f8;font:13px/1.57 ui-monospace,SFMono-Regular,Consolas,monospace;
+ border:0!important;background:transparent!important;padding:0!important
+}
+.app.pl-ui #messages .nx-ui4-md blockquote{border-left:3px solid #4f96e8;color:#c5cada;padding:7px 0 7px 14px;margin:14px 0}
+.app.pl-ui #messages .nx-ui4-md h2{font-size:1.16em;font-weight:750;margin:19px 0 9px}
+.app.pl-ui #messages .nx-ui4-md h3{font-size:1.06em;font-weight:700;margin:16px 0 8px}
+.app.pl-ui #messages .nx-ui4-md li{margin:6px 0}
+.app.pl-ui #messages .nx-ui4-md hr{border-top-color:#34363c;margin:18px 0}
+@media(max-width:390px){
+ .app.pl-ui #messages .nx-artifact-head{padding:8px}
+ .app.pl-ui #messages .nx-artifact-name{font-size:11.5px}
+ .app.pl-ui #messages .nx-artifact-action{padding:7px;font-size:11px}
+ .app.pl-ui #messages .nx-artifact-body{padding:12px}
+ .app.pl-ui #messages .nx-artifact-detail{grid-template-columns:49px minmax(0,1fr);gap:7px}
+ .app.pl-ui #messages .nx-code-section pre{padding:11px}
+}
+@media(prefers-reduced-motion:reduce){
+ .app.pl-ui #messages .nx-artifact-action,.app.pl-ui #messages .nx-code-copy{transition:none!important}
+}
