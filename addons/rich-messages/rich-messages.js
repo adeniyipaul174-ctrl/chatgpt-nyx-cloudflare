@@ -111,12 +111,12 @@ function makeDraft(bubble,md,kind){
    if(/^(?:To|Subject|Cc|Bcc)\s*:/i.test(p.textContent.trim())&&p.textContent.trim().length<210)p.remove();
   }
  }
+ bubble.replaceChild(card,md);
  body.append(md);
  card.append(head);
  if(details.childElementCount)card.append(details);
  card.append(body,edit);
  bubble.dataset.nxDraftFormatted="1";
- bubble.replaceChild(card,md);
 }
 function languageOf(code){
  const klass=String(code.className||"");
