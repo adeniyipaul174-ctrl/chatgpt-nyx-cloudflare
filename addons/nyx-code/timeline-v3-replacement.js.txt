@@ -1,0 +1,91 @@
+ const content=el("div","nx-code-activity-content");
+ const title=el("strong","nx-code-activity-heading","NyX Code");
+ const subtitle=el("span","nx-code-activity-sub","Reviewing your request");
+ const timeline=el("div","nx-code-timeline");
+ const prompt=latestUser(bubble);
+ const task=topic.title;
+ const codeSupplied=/(?:\x60{3}[\s\S]{4,}|<html|<!doctype|<manifest|(?:^|\n)\s*(?:const|let|var|function|def|class|import)\s+\w+|[{};]\s*(?:\n|$))/i.test(prompt);
+ const firstText=/fix|debug/i.test(task)?(codeSupplied?"Identified the code you shared":"Identified the problem you described"):
+  /explan/i.test(task)?"Identified your programming question":
+  /website/i.test(task)?"Identified the website to read":
+  /review/i.test(task)?"Identified what needs reviewing":
+  "Identified the task and requested features";
+ const step=(message,kind)=>{
+  const row=el("div","nx-code-step nx-code-step-"+kind);
+  const dot=el("span","nx-code-step-dot",kind==="done"?"✓":"");
+  dot.setAttribute("aria-hidden","true");
+  row.append(dot,el("span","nx-code-step-text",message));
+  timeline.append(row);
+  return row;
+ };
+ let current=step(firstText,"done");
+ current=step("Preparing the coding request","active");
+ const finish=()=>{
+  if(!current)return;
+  current.classList.remove("nx-code-step-active");
+  current.classList.add("nx-code-step-done");
+  current.querySelector(".nx-code-step-dot").textContent="✓";
+  current=null;
+ };
+ const elapsed=el("span","nx-code-activity-time","0s");
+ elapsed.setAttribute("aria-label","Elapsed time");
+ elapsed.setAttribute("aria-live","off");
+ const header=el("div","nx-code-progress-header");
+ header.append(title,subtitle,elapsed);
+ const note=el("div","nx-code-progress-note","These updates show request progress, not completed code tests.");
+ content.append(header,timeline,note);
+ card.classList.add("nx-code-activity-timeline");
+ card.replaceChildren(content);
+ bubble.replaceChildren(card);
+ const record={interval:0,step,finish,subtitle,note,getCurrent:()=>current,
+  setCurrent:row=>{current=row},sent:false,received:false,slow:false,verySlow:false};
+ const start=Date.now();
+ const tick=()=>{
+  if(!bubble.isConnected||!card.isConnected){cleanup(bubble);return}
+  const seconds=Math.floor((Date.now()-start)/1000);
+  elapsed.textContent=seconds+"s";
+  if(record.received)return;
+  if(record.sent&&seconds>=8&&!record.slow){
+   record.slow=true;
+   subtitle.textContent="Still waiting for the coding model";
+   step("The model response is still pending","info");
+  }
+  if(record.sent&&seconds>=25&&!record.verySlow){
+   record.verySlow=true;
+   note.textContent="Taking longer than usual. You can stop the request anytime.";
+   step("Waiting for the provider or its fallback","info");
+  }
+ };
+ const interval=setInterval(tick,1000);
+ record.interval=interval;
+ active.set(bubble,record);
+ tick();
+
+/* Event handler: */
+document.addEventListener("nx-code-progress",event=>{
+ const detail=event?.detail||{},bubble=detail.bubble;
+ if(!bubble||!isCode())return;
+ if(!active.has(bubble))mount(bubble);
+ const record=active.get(bubble);
+ if(!record)return;
+ if(detail.phase==="sent"&&!record.sent){
+  record.sent=true;
+  record.finish();
+  record.step("Coding request sent","done");
+  const kind=taskType(latestUser(bubble)).title;
+  const waiting=/fix|debug/i.test(kind)?"Waiting for suggested code changes":
+   /explan/i.test(kind)?"Waiting for an explanation":
+   /website/i.test(kind)?"Waiting for public page content":
+   /review/i.test(kind)?"Waiting for code review suggestions":
+   "Waiting for the generated code";
+  record.setCurrent(record.step(waiting,"active"));
+  record.subtitle.textContent="Awaiting a response";
+  record.note.textContent="Your response will replace this progress panel when ready.";
+ }else if(detail.phase==="received"&&!record.received){
+  record.received=true;
+  record.finish();
+  record.step("Response received","done");
+  record.setCurrent(record.step("Preparing the reply for display","active"));
+  record.subtitle.textContent="Displaying the result";
+ }
+});
