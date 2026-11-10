@@ -96,3 +96,32 @@
 @media(prefers-reduced-motion:reduce){
  .app.pl-ui #messages .nx-artifact-action,.app.pl-ui #messages .nx-code-copy{transition:none!important}
 }
+/* Make code legible immediately on a narrow screen instead of starting offscreen. */
+.app.pl-ui #messages .nx-code-section pre,
+.app.pl-ui #messages .nx-code-section pre code{
+ white-space:pre-wrap!important;
+ overflow-wrap:anywhere!important;
+ word-break:break-word!important;
+ max-width:100%!important;
+}
+.app.pl-ui #messages .nx-code-section.nx-code-nowrap pre,
+.app.pl-ui #messages .nx-code-section.nx-code-nowrap pre code{
+ white-space:pre!important;
+ overflow-wrap:normal!important;
+ word-break:normal!important;
+}
+.app.pl-ui #messages .nx-code-section .nx-code-bar{gap:7px!important}
+.app.pl-ui #messages .nx-code-section .nx-code-bar>span{
+ flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap
+}
+.app.pl-ui #messages .nx-code-wrap{
+ border:1px solid #414754;background:#2b303a;border-radius:8px;
+ color:#dce8ff;font-size:11px;font-weight:600;padding:7px 9px;
+ min-height:29px;cursor:pointer
+}
+@media(max-width:390px){
+ .app.pl-ui #messages .nx-code-section .nx-code-bar{padding:6px!important}
+ .app.pl-ui #messages .nx-code-copy,
+ .app.pl-ui #messages .nx-code-save,
+ .app.pl-ui #messages .nx-code-wrap{font-size:10.5px!important;padding:6px 7px!important}
+}
