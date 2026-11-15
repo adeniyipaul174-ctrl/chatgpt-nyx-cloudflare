@@ -1,0 +1,8 @@
+{
+  "name": "nyx-rea-runner",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@vercel/sandbox": "4.0.0"
+  }
+}

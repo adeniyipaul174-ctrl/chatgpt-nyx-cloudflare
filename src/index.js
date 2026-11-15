@@ -1,3 +1,4 @@
+import { handleReaWorkRoute } from "../addons/rea-work/worker-adapter.js";
 const MAX_BODY_BYTES = 12 * 1024 * 1024;
 const MAX_TEXT = 12_000;
 const JWKS_CACHE = new Map();
@@ -294,6 +295,14 @@ async function routeCore(request, env) {
   const auth=await authenticate(request,env); if(!auth.ok) return fail(401,"UNAUTHORIZED","A valid Cloudflare Access session is required.");
   const origin=checkOrigin(request,env); if(!origin.ok) return fail(403,"ORIGIN_DENIED","This request origin is not allowed.");
   const headers=corsHeaders(origin.origin,env);
+  // REA Work is a direct CLI tool route, not a prompt or model call.
+  // Only the authenticated owner may send artifacts to the isolated runner.
+  if(path==="/api/work/rea-upload"||path==="/api/work/rea-analyze"){
+    const owner=String(env.REA_OWNER_EMAIL||"").trim().toLowerCase();
+    const isOwner=owner.length>0&&String(auth.user.email||"").toLowerCase()===owner;
+    const handled=await handleReaWorkRoute(request,env,{userId:auth.user.userId,isOwner});
+    if(handled)return new Response(handled.body,{status:handled.status,headers:{...Object.fromEntries(handled.headers),...headers}});
+  }
   if(path==="/api/ai-status" && request.method==="GET") return response({configured:!!env.GEMINI_API_KEY,textModel:env.NYX_TEXT_MODEL||"gemini-2.5-flash",imageModel:env.NYX_IMAGE_MODEL||"gemini-2.5-flash-image",databaseConfigured:!!env.DB,auth:"Cloudflare Access JWT verified",liveProviderAccess:"not checked by this status endpoint"},200,headers);
   if(path==="/api/state" && request.method==="GET" || path==="/api/history" && request.method==="GET" || path==="/api/export" && request.method==="GET") {
     if(!env.DB)return fail(503,"DATABASE_UNAVAILABLE","The secure data database is not configured.");

@@ -1,0 +1,68 @@
+<style id="nxReaCodeOnlyCss">
+body[data-nx-product="code"] .app .main #home,
+body[data-nx-product="code"] .app .main #messages,
+body[data-nx-product="code"] .app .main #form,
+body[data-nx-product="code"] .app .main > .notice,
+body[data-nx-product="code"] #nxModePicker,
+body[data-nx-product="code"] .nx-mode-picker {display:none!important}
+#nxReaCodePanel{display:none;box-sizing:border-box;min-height:0;flex:1;overflow-y:auto;padding:24px 16px 80px;color:#f6f6fa}
+body[data-nx-product="code"] #nxReaCodePanel{display:block!important}
+#nxReaCodePanel .nx-rea-box{max-width:720px;margin:0 auto;padding:20px;border:1px solid #34343d;border-radius:16px;background:#111116}
+#nxReaCodePanel h2{margin:0 0 10px;font-size:23px}
+#nxReaCodePanel p{font-size:14px;color:#c7c7d0;line-height:1.5}
+#nxReaCodePanel label{display:flex;flex-direction:column;gap:7px;margin:15px 0}
+#nxReaCodePanel input,#nxReaCodePanel select{width:100%;padding:12px;border-radius:11px;background:#1c1c24;color:#fff;border:1px solid #42424c;font-size:15px}
+#nxReaCodePanel button{padding:12px 16px;border-radius:11px;border:0;background:#1595f4;color:#fff;font-weight:700;font-size:15px}
+#nxReaCodePanel button:disabled{opacity:.55}
+#nxReaCodePanel pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:430px;overflow:auto;padding:14px;background:#06060a;border-radius:12px;font-size:12px}
+</style>
+<script id="nxReaCodeOnlyScript">
+(function(){
+"use strict";
+if(window.nxReaCodeOnlyLoaded)return;
+window.nxReaCodeOnlyLoaded=true;
+function init(){
+ const main=document.querySelector(".app .main");
+ if(!main)return;
+ if(document.getElementById("nxReaCodePanel"))return;
+ const panel=document.createElement("section");
+ panel.id="nxReaCodePanel";
+ panel.setAttribute("aria-label","REA standalone reverse engineering");
+ panel.innerHTML='<div class="nx-rea-box"><h2>NyX · REA</h2><p>Direct reverse-engineering tools. This mode does not use an AI model or filter REA results through chatbot inference.</p><label for="nxReaCodeFile">APK or Electron ASAR<input id="nxReaCodeFile" type="file" accept=".apk,.asar"></label><label for="nxReaCodeAction">Analysis task<select id="nxReaCodeAction"><option value="apk">Inspect Android APK</option><option value="apk_signature">Inspect APK signature</option><option value="javascript">Analyze JavaScript / Electron ASAR</option></select></label><button type="button" id="nxReaCodeRun">Analyze with REA</button><p id="nxReaCodeStatus" role="status" aria-live="polite"></p><details id="nxReaCodeEvidence" hidden><summary>Raw REA evidence</summary><pre id="nxReaCodeResults"></pre></details></div>';
+ main.appendChild(panel);
+ const fileInput=document.getElementById("nxReaCodeFile");
+ const task=document.getElementById("nxReaCodeAction");
+ const button=document.getElementById("nxReaCodeRun");
+ const status=document.getElementById("nxReaCodeStatus");
+ const evidence=document.getElementById("nxReaCodeEvidence");
+ const output=document.getElementById("nxReaCodeResults");
+ fileInput.addEventListener("change",()=>{
+   const name=String(fileInput.files?.[0]?.name||"").toLowerCase();
+   if(name.endsWith(".asar"))task.value="javascript";
+   if(name.endsWith(".apk")&&task.value==="javascript")task.value="apk";
+ });
+ button.addEventListener("click",async()=>{
+   const file=fileInput.files?.[0];
+   if(!file){status.textContent="Choose an APK or ASAR file.";return;}
+   const name=file.name.toLowerCase();
+   const ext=name.endsWith(".apk")?".apk":name.endsWith(".asar")?".asar":"";
+   if(!ext||!file.size||file.size>24*1024*1024){status.textContent="Choose a non-empty APK or ASAR under 24 MiB.";return;}
+   if((ext===".asar"&&task.value!=="javascript")||(ext===".apk"&&task.value==="javascript")){status.textContent="The analysis type does not match this file.";return;}
+   button.disabled=true;evidence.hidden=true;output.textContent="";
+   try{
+     status.textContent="Uploading to REA…";
+     const upload=await fetch("/api/work/rea-upload",{method:"POST",credentials:"same-origin",cache:"no-store",headers:{"Content-Type":"application/octet-stream","X-REA-Extension":ext,"X-NyX-Client":"web"},body:file});
+     const uploaded=await upload.json();
+     if(!upload.ok||!uploaded.ok||typeof uploaded.target!=="string")throw Error(uploaded.error||"REA upload unavailable");
+     status.textContent="REA is analyzing the file…";
+     const analyzed=await fetch("/api/work/rea-analyze",{method:"POST",credentials:"same-origin",cache:"no-store",headers:{"Content-Type":"application/json","X-NyX-Client":"web"},body:JSON.stringify({action:task.value,target:uploaded.target})});
+     const report=await analyzed.json();output.textContent=JSON.stringify(report,null,2);
+     evidence.hidden=false;evidence.open=true;
+     status.textContent=analyzed.ok&&report.ok?"REA analysis completed.":report.error||"REA analysis failed.";
+   }catch(e){status.textContent=String(e?.message||"REA runner unavailable")}
+   finally{button.disabled=false;}
+ });
+}
+if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init,{once:true});else init();
+})();
+</script>
