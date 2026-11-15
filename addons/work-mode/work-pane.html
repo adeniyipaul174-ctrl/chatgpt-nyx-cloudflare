@@ -1,6 +1,15 @@
 <section id="nxWorkPane" class="nx-work-pane" aria-label="NyX Work workspace" hidden>
  <div class="nx-work-scroll" id="nxWorkScroll">
-  <div class="nx-work-welcome" id="nxWorkWelcome"><div class="nx-work-eyebrow">NyX <span>✦</span> Work</div><h1>What should we get done?</h1><p>Use AI agents to research, plan, write, build, or work directly in a real browser. You can watch and take control.</p><div class="nx-work-starters"><button type="button" data-nx-work="browser">Open browser</button><button type="button" data-nx-work="agents">Use agent team</button><button type="button" data-nx-work="code">Build or analyze code</button></div></div>
+  <div class="nx-work-welcome" id="nxWorkWelcome"><div class="nx-work-eyebrow">NyX <span>✦</span> Work</div><h1>What should we get done?</h1><p>Use AI agents to research, plan, write, build, or work directly in a real browser. You can watch and take control.</p><div class="nx-work-starters"><button type="button" data-nx-work="browser">Open browser</button><button type="button" data-nx-work="agents">Use agent team</button><button type="button" data-nx-work="code">Build or analyze code</button><button type="button" id="nxReaOpen">Reverse-engineer with REA</button></div></div>
+  <details id="nxReaTool" class="nx-work-browser" style="padding:14px;margin:0 0 14px;border:1px solid rgba(235,235,242,.15);border-radius:14px">
+   <summary style="font-weight:750;cursor:pointer">REA Analysis · Direct tool output</summary>
+   <p style="font-size:13px;opacity:.8">Analyze an APK or Electron ASAR without sending its findings to any AI model. Requires your private REA runner.</p>
+   <label for="nxReaFile">Artifact</label><input id="nxReaFile" type="file" accept=".apk,.asar">
+   <label for="nxReaAction">Analysis</label><select id="nxReaAction"><option value="apk">Inspect Android APK</option><option value="apk_signature">Check APK signature</option><option value="javascript">Analyze Electron / JavaScript ASAR</option></select>
+   <button id="nxReaRun" type="button">Analyze with REA</button>
+   <p id="nxReaStatus" role="status" aria-live="polite"></p>
+   <pre id="nxReaResult" style="white-space:pre-wrap;overflow-wrap:anywhere;max-height:420px;overflow:auto"></pre>
+  </details>
   <div id="nxWorkFeed" class="nx-work-feed" aria-live="polite"></div>
   <div id="nxWorkBrowser" class="nx-work-browser" hidden>
    <div class="nx-wb-head"><div><strong>Browser in Work</strong><small id="nxWorkBrowserStatus">Connecting…</small></div><a href="#" target="_blank" rel="noopener noreferrer" id="nxWorkLiveLink" hidden>Open live browser</a></div>
