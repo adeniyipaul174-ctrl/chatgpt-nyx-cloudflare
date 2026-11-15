@@ -40,14 +40,27 @@ export async function handleReaWorkRoute(request, env, { userId, isOwner } = {})
   if (!userId || !isOwner) return json(403, {error:"REA Work tools require an authenticated owner account"});
   const origin = request.headers.get("Origin");
   if (origin && origin !== new URL(request.url).origin) return json(403, {error:"Cross-origin REA requests are not permitted"});
-  const upstream = validGateway(env.REA_GATEWAY_URL);
   const token = env.REA_GATEWAY_TOKEN;
-  if (!upstream || typeof token !== "string" || token.length < 24) {
+  const wakeUrl = validGateway(env.REA_GATEWAY_WAKE_URL);
+  const staticGateway = validGateway(env.REA_GATEWAY_URL);
+  if ((!wakeUrl && !staticGateway) || typeof token !== "string" || token.length < 24) {
     return json(503, {error:"REA analysis runner is not configured"});
   }
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 125000);
   try {
+    let upstream = staticGateway;
+    if (wakeUrl) {
+      const wake = await fetch(wakeUrl + "/api/wake", {
+        method:"GET",
+        headers:{Authorization:"Bearer " + token},
+        signal:controller.signal
+      });
+      if (!wake.ok) return json(503, {error:"REA sandbox could not be started"});
+      const w = await wake.json();
+      upstream = validGateway(w.url);
+      if (!upstream) return json(502, {error:"REA sandbox returned an invalid HTTPS URL"});
+    }
     let response;
     if (path.endsWith("rea-upload")) {
       const type = request.headers.get("content-type") || "";
