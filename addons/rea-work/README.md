@@ -1,33 +1,26 @@
-# NYX Work: REA-only (not live yet)
+# NYX REA-only Code — live deployment
 
-The branch changes the NYX Work-mode source to show only REA and no AI model, model picker, agent picker, free browser or chat-task composer. Chat and Code remain unchanged.
+## Live state (2026-11-15)
 
-REA is a reverse-engineering toolkit and CLI, not an AI language model. It returns raw data without a chatbot prompt or model call.
+- Production Cloudflare Worker `chatgpt-nyx-v3-test` is serving version `60177e6d-e87e-4682-a050-d51057bd8ceb` at 100%. This version contains `nxReaCodeOnlyScript`, `nxReaOnlyRoute`, and a guard that blocks `nyxCode:true` calls to the prior coding model.
+- The existing Cloudflare bindings were preserved. There are now 14 bindings, including the new secret `REA_GATEWAY_TOKEN`. The live UI uses REA only in Code, while normal Chat retains its existing AI models.
+- The Vercel `nyx-rea-runner` production wake endpoint is deployed and authenticated. The persistent `nyx-rea` Sandbox runs REA 6.9.0 and an authenticated gateway.
+- End-to-end analysis test against the isolated backend passed: a 624-byte valid Electron `.asar` upload returned HTTP 200, and `analyze-javascript-application` returned HTTP 200 with structured REA evidence.
+- The signed-in end-user Code UI was not independently tested from a browser session. Verify with a signed-in owner account.
 
-## Work tool
+## Roles of files
 
-- APK package inspection
-- APK signature inspection
-- JavaScript/Electron ASAR static analysis
-- Upload limit 24 MiB; raw REA responses are limited to 2 MiB by the gateway.
+- `live-code-ui.html`: code injected into a fresh snapshot of the *already deployed* production Worker to replace its Code chatbot with a direct APK/ASAR analysis interface.
+- `live-code-route.js`: protected Worker upload/analysis endpoints. Requires authenticated, verified NYX owner and server-only shared bearer token. No language-model calls.
+- `gateway.mjs`: isolated Linux gateway with allowlisted REA commands, file size limits, bounded results, and workspace confinement.
+- `vercel/`: authenticated Vercel Sandbox resume service and runtime source.
+- `../work-mode/`: modular older-layout REA-only Work implementation retained on this branch; it does not represent the exact currently deployed UI.
 
-Previous Work chat history is retained for compatibility, but is not rendered in the REA-only Work UI.
+## Important operational notes
 
-## Files
+- **Do not deploy the older repository-root `src/index.js` over the live Worker**; it lacks newer production features. The actual live deployment was patched directly from its then-active production source, preserving existing bindings.
+- The Vercel Sandbox is a metered resource with a finite session timeout. The resume endpoint uses the Vercel SDK to restart the gateway when the Sandbox is stopped. A cold start after a later automatic stop was not yet independently tested.
+- The live Code panel supports `.apk` and `.asar` files up to 24 MiB. The raw REA response limit is 2 MiB. Some Android analysis functions may require additional tools such as JADX and JDK; the successful end-to-end test was for Electron ASAR.
+- REA is **not** a conversational AI model; it does not respond to general chat messages. Its raw evidence is not sent to any Chat or Code language model.
 
-- addons/work-mode/work-pane.html: REA-only Work layout.
-- addons/work-mode/work-controller.js: REA-only Work controller with direct authenticated REA calls.
-- addons/rea-work/worker-adapter.js: authenticated and owner-gated Cloudflare Worker endpoints.
-- addons/rea-work/gateway.mjs: remote Linux REA command runner with restricted actions.
-- addons/rea-work/vercel/: separate Vercel Sandbox wake-up service.
-- addons/rea-work/work-only.test.mjs: checks Work contains no AI model calls or AI agent controls.
-
-## Current status
-
-Standalone REA 6.9.0 was installed on a Vercel Sandbox named nyx-rea, and the authenticated gateway health check passed locally. The Sandbox was stopped and snapshotted to conserve usage. The Vercel wake service was deployed, but end-to-end authenticated wake and REA analysis have not been verified.
-
-The Cloudflare production Worker still uses its prior source and does not have the matching REA gateway secret. An automated credential update was blocked. This branch is therefore NOT live and Work cannot yet execute REA.
-
-Do not deploy the GitHub repository root over the newer production Worker. Obtain a fresh production source snapshot; merge the Work-only UI and gated routes while preserving the original bindings, Chat, Code, history, and account authentication. Configure matching protected gateway credentials on Cloudflare and Vercel; verify the Sandbox resumes; test uploads and analysis in a preview before deploying.
-
-Chat and Code continue using their configured models. Work itself invokes only REA.
+See Vercel project `nyx-rea-runner` and Cloudflare Worker `chatgpt-nyx-v3-test` for production state. Never expose or commit the shared gateway token.
