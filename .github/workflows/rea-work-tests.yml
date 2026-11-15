@@ -26,5 +26,5 @@ jobs:
           node --check addons/rea-work/work-panel.js
           node --check addons/work-mode/work-controller.js
           node --check src/index.js
-      - name: Test REA gateway auth and confinement
-        run: node --test addons/rea-work/gateway.test.mjs
+      - name: Verify standalone REA and Work-only routing
+        run: node --test addons/rea-work/gateway.test.mjs addons/rea-work/work-only.test.mjs
