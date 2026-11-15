@@ -1,6 +1,6 @@
 import { Sandbox } from "@vercel/sandbox";
 function allow(req) {
-  const value = String(req.headers.authorization || "").replace(/^Bearer\\s+/i, "");
+  const value = String(req.headers.authorization || "").replace(/^Bearer\s+/i, "");
   const expected = process.env.REA_GATEWAY_TOKEN;
   return Boolean(expected && value.length >= 24 && value === expected);
 }
