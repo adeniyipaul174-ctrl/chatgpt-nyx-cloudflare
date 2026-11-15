@@ -154,4 +154,29 @@ document.querySelectorAll("[data-nx-work]").forEach(button=>button.addEventListe
  else{chatAgent("coder");input.value="Use the coding agent to ";input.focus()}
 }));
 const params=new URLSearchParams(location.search);if(params.get("work")==="1")setStage("work");
+/* REA Work tool: raw REA evidence, no AI request or AI post-processing. */
+const reaOpen=$("nxReaOpen"),reaTool=$("nxReaTool"),reaFile=$("nxReaFile"),reaAction=$("nxReaAction"),reaRun=$("nxReaRun"),reaStatus=$("nxReaStatus"),reaResult=$("nxReaResult");
+if(reaOpen&&reaTool)reaOpen.addEventListener("click",()=>{setStage("work");reaTool.open=true;reaTool.scrollIntoView({behavior:"smooth",block:"nearest"});reaFile?.focus()});
+if(reaRun&&reaFile&&reaAction&&reaResult){
+  reaRun.addEventListener("click",async()=>{
+    const file=reaFile.files?.[0];if(!file){reaStatus.textContent="Select an APK or ASAR file first.";return;}
+    const ext=file.name.toLowerCase().endsWith(".apk")?".apk":file.name.toLowerCase().endsWith(".asar")?".asar":"";
+    if(!ext||file.size>24*1024*1024){reaStatus.textContent="Choose an APK or ASAR under 24 MiB.";return;}
+    const action=reaAction.value;
+    if((ext===".apk"&&action==="javascript")||(ext===".asar"&&action!=="javascript")){reaStatus.textContent="Choose an analysis type matching the file.";return;}
+    reaRun.disabled=true;reaResult.textContent="";
+    try{
+      reaStatus.textContent="Uploading to private REA runner…";
+      const up=await fetch("/api/work/rea-upload",{method:"POST",credentials:"same-origin",cache:"no-store",headers:{"Content-Type":"application/octet-stream","X-REA-Extension":ext,"X-NyX-Client":"web"},body:file});
+      const uploaded=await up.json();if(!up.ok||!uploaded.ok||typeof uploaded.target!=="string")throw Error(uploaded.error||"REA upload unavailable");
+      reaStatus.textContent="REA is inspecting the artifact…";
+      const response=await fetch("/api/work/rea-analyze",{method:"POST",credentials:"same-origin",cache:"no-store",headers:{"Content-Type":"application/json","X-NyX-Client":"web"},body:JSON.stringify({action,target:uploaded.target})});
+      const report=await response.json();
+      reaResult.textContent=JSON.stringify(report,null,2);
+      reaStatus.textContent=response.ok&&report.ok?"REA analysis complete. Raw findings shown below.":"REA returned an error; check the result.";
+    }catch(e){reaStatus.textContent=e?.message||"The REA runner is unavailable."}
+    finally{reaRun.disabled=false}
+  });
+}
+
 })();
