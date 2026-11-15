@@ -1,0 +1,30 @@
+name: REA Work integration tests
+on:
+  pull_request:
+    paths:
+      - 'addons/rea-work/**'
+      - 'addons/work-mode/work-controller.js'
+      - 'addons/work-mode/work-pane.html'
+      - 'src/index.js'
+      - '.github/workflows/rea-work-tests.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  rea-gateway:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Check syntax
+        run: |
+          node --check addons/rea-work/gateway.mjs
+          node --check addons/rea-work/worker-adapter.js
+          node --check addons/rea-work/work-panel.js
+          node --check addons/work-mode/work-controller.js
+          node --check src/index.js
+      - name: Test REA gateway auth and confinement
+        run: node --test addons/rea-work/gateway.test.mjs
