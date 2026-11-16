@@ -1,0 +1,27 @@
+name: NyX Site Studio regression checks
+on:
+  push:
+    branches:
+      - feature/openmausbot-integration
+    paths:
+      - "workers/nyx-site-studio.mjs"
+      - "workers/nyx-site-studio.test.mjs"
+      - "ui/nyx-site-studio-client.js"
+      - "ui/nyx-site-studio.css"
+      - ".github/workflows/nyx-site-studio-ci.yml"
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: Verify website generation and security
+        run: |
+          node --check workers/nyx-site-studio.mjs
+          node --check ui/nyx-site-studio-client.js
+          node --test workers/nyx-site-studio.test.mjs

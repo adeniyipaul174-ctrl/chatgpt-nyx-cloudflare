@@ -1,0 +1,29 @@
+name: NyX real multipage website project regression
+on:
+  push:
+    branches: [feature/openmausbot-integration]
+    paths:
+      - "workers/nyx-site-project-v3.mjs"
+      - "workers/nyx-site-project-v3.test.mjs"
+      - "workers/nyx-site-rescue-v4.mjs"
+      - "workers/nyx-site-rescue-v4.test.mjs"
+      - "ui/nyx-site-project-v3.js"
+      - "ui/nyx-site-project-v3.css"
+      - ".github/workflows/nyx-site-project-v3-ci.yml"
+permissions:
+  contents: read
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: Verify multi-page build, edit, navigation, file integrity and safe HTML
+        run: |
+          node --check workers/nyx-site-project-v3.mjs
+          node --check workers/nyx-site-rescue-v4.mjs
+          node --check ui/nyx-site-project-v3.js
+          node --test workers/nyx-site-project-v3.test.mjs workers/nyx-site-rescue-v4.test.mjs

@@ -1,0 +1,102 @@
+name: NyX GitHub-hosted agents (on demand)
+on:
+  # Manual input works when this workflow is placed on the repository default branch.
+  workflow_dispatch:
+    inputs:
+      task:
+        description: "Short task. Leave blank to use tasks/nyx-task.md."
+        required: false
+        type: string
+      mode:
+        description: "Choose which NyX agent to use."
+        required: false
+        type: choice
+        default: team
+        options:
+          - team
+          - planner
+          - writer
+          - coder
+          - reviewer
+  # This feature-branch path trigger proves execution without merging outdated
+  # NyX application code or modifying the production Worker.
+  push:
+    branches:
+      - feature/openmausbot-integration
+    paths:
+      - ".github/workflows/github-agents-on-demand.yml"
+      - "scripts/nyx-github-agents.mjs"
+      - "scripts/nyx-github-agents.test.mjs"
+      - "tasks/nyx-task.md"
+      - "scripts/nyx-bespoke-live-test.mjs"
+      - "scripts/nyx-site-project-v3-live-test.mjs"
+      - "scripts/nyx-site-rescue-v4-real-test.mjs"
+      - "scripts/nyx-provider-check.mjs"
+      - "ui/nyx-site-project-v3-real-visual.mjs"
+      - "ui/nyx-bespoke-visual-audit.mjs"
+permissions:
+  contents: read
+  id-token: write
+concurrency:
+  group: nyx-github-agent-runner
+  cancel-in-progress: false
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: Test serverless agent port and cryptographic OIDC verifier
+        run: node --test scripts/nyx-github-agents.test.mjs workers/nyx-github-oidc.test.mjs
+  run-agents:
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: Run NyX agents with short-lived OIDC and existing NyX Workers AI
+        if: github.event_name != 'push' || (!contains(github.event.head_commit.message, '[site-v4-test]') && !contains(github.event.head_commit.message, '[site-v3-test]') && !contains(github.event.head_commit.message, '[site-v2-test]') && !contains(github.event.head_commit.message, '[provider-probe]'))
+        env:
+          NYX_ACTIONS_URL: https://chatgpt-nyx-v3-test.adeniyipaul174.workers.dev/api/nyx/github-agents/infer
+          NYX_TASK: ${{ inputs.task }}
+          NYX_AGENT_MODE: ${{ inputs.mode }}
+        run: node scripts/nyx-github-agents.mjs
+      # Only runs for an explicit one-time test commit, not ordinary user tasks.
+      - name: Verify real AI multipage build and create-page edit using the existing free provider
+        if: github.event_name == 'push' && contains(github.event.head_commit.message, '[site-v3-test]')
+        env:
+          NYX_SITE_TEST_URL: https://chatgpt-nyx-v3-test.adeniyipaul174.workers.dev/__nyx/project-v3-verified-test
+        run: node scripts/nyx-site-project-v3-live-test.mjs
+      - name: Audit actual multi-page HTML in Chrome at four viewport sizes
+        if: github.event_name == 'push' && contains(github.event.head_commit.message, '[site-v3-test]')
+        run: |
+          npm install --no-save --ignore-scripts --no-package-lock playwright-core@1.57.0
+          node ui/nyx-site-project-v3-real-visual.mjs
+      - name: Test real bespoke website build on isolated Cloudflare Worker
+        if: github.event_name == 'push' && contains(github.event.head_commit.message, '[site-v2-test]')
+        run: node scripts/nyx-bespoke-live-test.mjs
+      - name: Check real generated website at phone, tablet and desktop sizes
+        if: github.event_name == 'push' && contains(github.event.head_commit.message, '[site-v2-test]')
+        run: |
+          npm install --no-save --ignore-scripts --no-package-lock playwright-core@1.57.0
+          node ui/nyx-bespoke-visual-audit.mjs
+      - name: Check the existing OpenRouter free model without charging paid models
+        if: github.event_name == 'push' && contains(github.event.head_commit.message, '[provider-probe]')
+        run: node scripts/nyx-provider-check.mjs
+      - name: Verify real Cloudflare quota exhaustion website project recovery
+        if: github.event_name == 'push' && contains(github.event.head_commit.message, '[site-v4-test]')
+        run: node scripts/nyx-site-rescue-v4-real-test.mjs
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nyx-github-agents-results
+          path: nyx-agent-results/
+          if-no-files-found: ignore
+          retention-days: 7

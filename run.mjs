@@ -4,6 +4,7 @@ import path from 'node:path';
 import { generateKeyPairSync, sign } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 import worker, { __test } from './src/index.js';
+import { handleOpenMausbot, validatedMausUrl } from './src/openmausbot.js';
 
 let passed = 0;
 function test(name, fn) { try { fn(); passed++; console.log(`✓ ${name}`); } catch (e) { console.error(`✗ ${name}\n`, e); process.exitCode = 1; } }
@@ -96,4 +97,59 @@ await atest('current-information chats search the web, persist safe sources, and
 const sql = spawnSync('python3',['sqlite_test.py'],{cwd:new URL('.',import.meta.url).pathname,encoding:'utf8'});
 if(sql.status===0){ passed += Number((sql.stdout.match(/SQLITE_TESTS=(\d+)/)||[])[1]||0); console.log(sql.stdout.trim()); }
 else { console.error(sql.stdout,sql.stderr); process.exitCode=1; }
+
+test('OpenMausBot remote URL accepts only a secure pinned HTTPS origin',()=>{
+  assert.equal(validatedMausUrl('https://agents.example.com'),'https://agents.example.com');
+  for(const bad of ['http://agents.example.com','https://localhost','https://127.0.0.1',
+    'https://[::1]','https://user:pass@agents.example.com','https://agents.example.com/path',
+    'https://agents.example.com?redirect=evil','https://agents.example.com:8443'])
+    assert.equal(validatedMausUrl(bad),null);
+});
+await atest('OpenMausBot bridge stays disabled without server credentials and explicit email allowlist',async()=>{
+  const request=new Request('https://nyx.test/api/openmausbot/bots');
+  const noConfig=await handleOpenMausbot({path:'/api/openmausbot/bots',request,env:{},user:{email:'owner@example.com'}});
+  assert.equal(noConfig.status,503);
+  const settings={OPENMAUSBOT_URL:'https://agents.example.com',OPENMAUSBOT_TOKEN:'secret'};
+  const forbidden=await handleOpenMausbot({path:'/api/openmausbot/bots',request,env:settings,user:{email:'owner@example.com'}});
+  assert.equal(forbidden.status,403);
+  const status=await handleOpenMausbot({path:'/api/openmausbot/status',request,env:settings,user:{email:'owner@example.com'}});
+  assert.equal((await status.json()).allowed,false);
+});
+await atest('OpenMausBot lists scoped bots, never returning the upstream secret fields',async()=>{
+  const env={OPENMAUSBOT_URL:'https://agents.example.com',OPENMAUSBOT_TOKEN:'test-secret',OPENMAUSBOT_ALLOWED_EMAILS:'owner@example.com'};
+  const request=new Request('https://nyx.test/api/openmausbot/bots');
+  const stub=async(url,options)=>{
+    assert.equal(url,'https://agents.example.com/api/bots?messages=0');
+    assert.equal(options.headers.Authorization,'Bearer test-secret');
+    assert.equal(options.redirect,'manual');
+    return new Response(JSON.stringify({bots:[{id:'bot_001',name:'Writer',threadId:'thread_1',secret:'NEVER RETURN THIS'}]}),{status:200});
+  };
+  const resp=await handleOpenMausbot({path:'/api/openmausbot/bots',request,env,user:{email:'owner@example.com'},fetchImpl:stub});
+  assert.equal(resp.status,200);
+  const value=await resp.json();
+  assert.deepEqual(value.bots,[{id:'bot_001',name:'Writer',threadId:'thread_1'}]);
+  assert.equal(JSON.stringify(value).includes('NEVER RETURN THIS'),false);
+});
+await atest('OpenMausBot sends only explicit bounded instructions and refuses redirects',async()=>{
+  const env={OPENMAUSBOT_URL:'https://agents.example.com',OPENMAUSBOT_TOKEN:'test-secret',OPENMAUSBOT_ALLOWED_EMAILS:'owner@example.com'};
+  const request=new Request('https://nyx.test/api/openmausbot/send',{method:'POST'});
+  const body={botId:'bot_001',text:'Draft a plan'};
+  const success=await handleOpenMausbot({path:'/api/openmausbot/send',request,env,user:{email:'owner@example.com'},body,fetchImpl:async(url,opt)=>{
+    assert.equal(url,'https://agents.example.com/api/bots/bot_001/messages');
+    assert.deepEqual(JSON.parse(opt.body),{text:'Draft a plan'});
+    return new Response(JSON.stringify({queued:true}),{status:200});
+  }});
+  assert.equal((await success.json()).queued,true);
+  const invalid=await handleOpenMausbot({path:'/api/openmausbot/send',request,env,user:{email:'owner@example.com'},body:{botId:'../admin',text:'hi'},fetchImpl:()=>{throw Error('should not fetch')}});
+  assert.equal(invalid.status,400);
+  const redirected=await handleOpenMausbot({path:'/api/openmausbot/send',request,env,user:{email:'owner@example.com'},body,fetchImpl:async()=>new Response('',{status:302,headers:{Location:'https://evil.example/'}})});
+  assert.equal(redirected.status,502);
+});
+await atest('OpenMausBot message reader excludes non-text tool and approval cards',async()=>{
+  const env={OPENMAUSBOT_URL:'https://agents.example.com',OPENMAUSBOT_TOKEN:'test-secret',OPENMAUSBOT_ALLOWED_EMAILS:'owner@example.com'};
+  const request=new Request('https://nyx.test/api/openmausbot/messages?threadId=thread_1');
+  const resp=await handleOpenMausbot({path:'/api/openmausbot/messages',request,env,user:{email:'owner@example.com'},fetchImpl:async()=>new Response(JSON.stringify({messages:[
+    {kind:'text',role:'bot',text:'Finished.'},{kind:'activity',role:'bot',text:'secret internal activity'},{kind:'text',role:'user',text:'Start'}]}),{status:200})});
+  assert.deepEqual((await resp.json()).messages,[{role:'bot',text:'Finished.'},{role:'user',text:'Start'}]);
+});
 console.log(`\nPASS_TOTAL=${passed}`);

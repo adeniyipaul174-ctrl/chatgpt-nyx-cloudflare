@@ -1,0 +1,26 @@
+name: NyX bespoke website codegen checks
+on:
+  push:
+    branches:
+      - feature/openmausbot-integration
+    paths:
+      - "workers/nyx-bespoke-site-v2.mjs"
+      - "workers/nyx-bespoke-site-v2.test.mjs"
+      - "workers/nyx-bespoke-polish.mjs"
+      - ".github/workflows/nyx-bespoke-site-ci.yml"
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: Check output validation and unique responsive design planning
+        run: |
+          node --check workers/nyx-bespoke-site-v2.mjs
+          node --check workers/nyx-bespoke-polish.mjs
+          node --test workers/nyx-bespoke-site-v2.test.mjs

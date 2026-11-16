@@ -1,0 +1,29 @@
+name: NyX multipage live production acceptance
+# Post-release check: confirm the 2026-11-07 quota recovery release, multipage navigation and ZIP exports.
+on:
+  push:
+    branches: [feature/openmausbot-integration]
+    paths:
+      - "ui/nyx-site-project-v3-browser.mjs"
+      - "ui/nyx-site-project-v3-served-script.mjs"
+      - ".github/workflows/nyx-site-project-v3-production.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  production:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: Install browser dependency only
+        run: npm install --no-save --ignore-scripts --no-package-lock playwright-core@1.57.0
+      - name: Verify actual NyX live HTML, project preview, navigation, exports and revisions
+        env:
+          NYX_SITE_PROJECT_URL: https://chatgpt-nyx-v3-test.adeniyipaul174.workers.dev
+        run: |
+          node ui/nyx-site-project-v3-served-script.mjs
+          node ui/nyx-site-project-v3-browser.mjs

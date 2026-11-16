@@ -1,0 +1,27 @@
+name: NyX live chat and mobile agent acceptance
+on:
+  push:
+    branches:
+      - feature/openmausbot-integration
+    paths:
+      - ".github/workflows/nyx-live-acceptance.yml"
+      - "ui/nyx-live-acceptance.mjs"
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: nyx-live-acceptance
+  cancel-in-progress: false
+jobs:
+  acceptance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: Install test-only browser library
+        run: npm install --no-save --ignore-scripts --no-package-lock playwright-core@1.57.0
+      - name: Check real deployed NyX and all chat agent modes
+        run: node ui/nyx-live-acceptance.mjs

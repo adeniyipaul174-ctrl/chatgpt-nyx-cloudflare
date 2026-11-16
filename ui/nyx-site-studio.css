@@ -1,0 +1,20 @@
+
+.nx-site-card{margin:16px 0 4px;padding:15px;border-radius:18px;border:1px solid #43454e;background:linear-gradient(140deg,#25262e,#14151a);box-shadow:0 8px 24px #0003}
+.nx-site-card-head{display:flex;align-items:center;gap:12px}
+.nx-site-card-icon{display:grid;place-items:center;width:43px;height:43px;flex:none;border:1px solid #6e75806a;background:#ffffff0b;color:#f28bba;border-radius:13px;font-size:23px}
+.nx-site-card-text{min-width:0;flex:1}.nx-site-card-text strong{display:block;font-size:14px;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.nx-site-card-text small{font-size:11px;color:#b5b4bd}
+.nx-site-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:17px}
+.nx-site-action{font:700 12px system-ui;background:#f26cab;color:#23151b;border:0;padding:11px 16px;border-radius:11px;cursor:pointer;min-height:39px}
+.nx-site-action.secondary{background:#34363f;color:#f0eaf1;border:1px solid #535660}.nx-site-action:focus-visible{outline:2px solid #f9b4d3;outline-offset:3px}
+.nx-site-overlay{position:fixed;inset:0;z-index:100000;background:#090a0f;color:#fff;display:flex;flex-direction:column;font-family:system-ui,-apple-system,sans-serif}
+.nx-site-toolbar{min-height:67px;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px clamp(12px,2.4vw,30px);background:#191b22;border-bottom:1px solid #34353d;flex-wrap:wrap}
+.nx-site-toolbar-left{display:flex;align-items:center;gap:12px;min-width:0}.nx-site-toolbar-left strong{font-size:13px;letter-spacing:-.025em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.nx-site-toolbar-left small{display:block;color:#adaab5;font-size:10px}
+.nx-site-toolbar-right{display:flex;align-items:center;flex-wrap:wrap;gap:7px}
+.nx-site-toolbar button{border:1px solid #50525c;background:#2c2f37;color:#fafafa;padding:9px 12px;border-radius:10px;font:700 12px system-ui;cursor:pointer}
+.nx-site-toolbar button[aria-pressed=true]{background:#f26cab;color:#23151b;border-color:#f26cab}
+.nx-site-toolbar .nx-site-close{border-color:#5c606c;font-size:17px;line-height:1}
+.nx-site-canvas{flex:1;min-height:0;display:flex;justify-content:center;overflow:auto;background:repeating-linear-gradient(45deg,#16181e,#16181e 12px,#191b21 12px,#191b21 24px);padding:16px}
+.nx-site-frame{height:100%;width:100%;max-width:1300px;min-height:360px;background:#fff;border:1px solid #373944;border-radius:9px;box-shadow:0 20px 58px #0008}
+.nx-site-canvas[data-device=phone] .nx-site-frame{width:min(390px,100%);flex:0 0 min(390px,100%);max-width:390px}
+.nx-site-note{padding:8px 16px;border-top:1px solid #33343b;background:#171820;color:#b3b1ba;text-align:center;font:11px/1.4 system-ui}
+@media(max-width:600px){.nx-site-toolbar{padding:9px 12px;gap:7px}.nx-site-toolbar-right{gap:5px}.nx-site-toolbar button{padding:8px 9px;font-size:11px}.nx-site-toolbar-left strong{max-width:115px}.nx-site-canvas{padding:8px}.nx-site-frame{min-height:330px}.nx-site-note{font-size:10px}}

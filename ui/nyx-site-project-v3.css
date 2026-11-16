@@ -1,0 +1,23 @@
+
+/* V3 project controls: shared NyX graphite/pink UI, site design remains unconstrained. */
+.nx-project-card .nx-site-card-text small{font-size:11px;line-height:1.5}
+.nx-project-card .nx-site-actions{gap:8px}
+.nx-project-toolbar{position:relative;z-index:1}
+.nx-project-pages{background:#292b34;border:1px solid #575965;color:#fbf9fe;min-width:116px;max-width:190px;min-height:38px;padding:8px 12px;border-radius:11px;font:700 12px system-ui;cursor:pointer}
+.nx-project-pages:focus-visible{outline:2px solid #f280b5;outline-offset:2px}
+.nx-project-toolbar button[aria-pressed=true]{background:#ee71a7;border-color:#ee71a7;color:#261621}
+.nx-project-overlay .nx-site-note{white-space:normal}
+.nx-project-overlay .nx-site-frame{border-radius:12px;min-width:0}
+.nx-project-overlay .nx-site-canvas[data-device=phone] .nx-site-frame{flex:0 0 min(390px,100%);width:min(390px,100%)}
+@media(max-width:680px){
+ .nx-project-toolbar{padding:8px 11px;gap:8px}
+ .nx-project-toolbar .nx-site-toolbar-left{width:100%;flex:1 1 100%}
+ .nx-project-toolbar .nx-site-toolbar-right{width:100%;display:flex;justify-content:space-between;flex-wrap:wrap;gap:5px}
+ .nx-project-pages{max-width:145px;flex:1 1 120px;padding:8px}
+ .nx-project-toolbar button{min-height:36px;white-space:nowrap;font-size:11px;padding:8px}
+ .nx-project-overlay .nx-site-canvas{padding:7px}
+}
+@media(max-width:360px){
+ .nx-project-pages{flex:1 1 100%;max-width:none}
+ .nx-project-toolbar .nx-site-toolbar-right{justify-content:flex-start}
+}
